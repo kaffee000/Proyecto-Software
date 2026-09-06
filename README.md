@@ -1,8 +1,7 @@
-# Proyecto-Software
-Proyecto 5to año segundo semestre
-
+--------------------------
+npm install
 npx nodemon src/index.js
-
+--------------------------
 express para servidor
 modulo Morgan para ver solicitudes recibidas en la consola
 ejs para incrustar html
