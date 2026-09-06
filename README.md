@@ -1,5 +1,6 @@
 
 -npm install
+
 -npx nodemon src/index.js
 
 express para servidor
