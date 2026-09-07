@@ -38,7 +38,7 @@ El filtrado se realiza sobre los datos simulados y conserva al usuario dentro de
 
 ### PBI-03 - Inscripción simulada
 
-**Ruta:** `/inscripcion`
+**Ruta:** `/pagos`
 
 Al seleccionar una actividad y presionar **Inscribirse**, el usuario llega a una vista estática que informa que la inscripción se encuentra en construcción.
 
