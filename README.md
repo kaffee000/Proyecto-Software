@@ -124,7 +124,7 @@ npm install
 Iniciar el servidor en modo desarrollo:
 
 ```bash
-npm run dev
+npx nodemon src/index.js
 ```
 
 Abrir la aplicación en:
