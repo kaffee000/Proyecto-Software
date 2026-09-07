@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,21 +7,54 @@
     <%- include('partials/head') %>
 </head>
 <body>
-
     <%- include('partials/navigation') %>
-
     <h1>Personal</h1>
+    <!-- Botones de profesiones -->
+    <div id="filtros">
+        <button onclick="filtrarProfesionales('todos')">
+            Todos
+        </button>
+        <% 
+            const profesiones = [...new Set(
+                profesionales.map(profesional => profesional.profesion)
+            )];
+            %>
+        <% profesiones.forEach(profesion => { %>
+            <button onclick="filtrarProfesionales('<%= profesion %>')">
+                <%= profesion %>
+            </button>
+        <% }) %>
+    </div>
+    <!-- Lista de profesionales -->
+    <div id="lista-profesionales">
+        <% profesionales.forEach(profesional => { %>
+            <div class="profesional" data-profesion="<%= profesional.profesion %>">
+                <h3>
+                    <%= profesional.nombre %>
+                </h3>
+                <p>
+                    <%= profesional.profesion %>
+                </p>
+            </div>
+        <% }) %>
+    </div>
 
-    <!--<h2>Profesionales disponibles</h2>-->
-
-    <% profesionales.forEach(profesional => { %>
-
-        <div>
-            <h3><%= profesional.nombre %></h3>
-            <p><%= profesional.profesion %></p>
-        </div>
-
-    <% }) %>
-
+    <!-- JavaScript para filtrar -->
+    <script>
+        function filtrarProfesionales(profesion) {
+            const profesionales = document.querySelectorAll(".profesional");
+            profesionales.forEach(profesional => {
+                if (
+                    profesion === "todos" ||
+                    profesional.dataset.profesion === profesion
+                ) {
+                    profesional.style.display = "block";
+                } else {
+                    profesional.style.display = "none";
+                }
+            });
+        }
+    </script>
 </body>
+
 </html>
