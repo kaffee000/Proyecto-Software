@@ -144,6 +144,54 @@
     color: #ffffff;
 }
 
+
+/* FILTRO PAGINA PRINCIPAL */
+.actividades {
+    width: 90%;
+    margin: 40px auto;
+    text-align: center;
+}
+
+.actividades h2 {
+    margin-bottom: 25px;
+}
+
+.contenedor-actividades {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    flex-wrap: wrap;
+}
+
+.actividad {
+    width: 280px;
+    padding: 25px;
+    border-radius: 10px;
+    background-color: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+}
+
+.actividad h3 {
+    margin-bottom: 15px;
+}
+
+.actividad p {
+    margin-bottom: 20px;
+}
+
+.boton-inscripcion {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #fe1739;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.boton-inscripcion:hover {
+    background-color: #d9102d;
+}
+
 /*
 * {
     padding: 0;
