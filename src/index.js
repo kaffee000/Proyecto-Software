@@ -24,16 +24,19 @@ async function main() {
         // Perform database operations here
         //mi base de datos
         const db = client.db(dbName);
+
+        // Hacemos disponible la base de datos para las rutas
+        app.locals.db = db;
+        // Rutas
+        app.use(indexRoutes);
+
         //coleccion de la base de datos
-        const coleccion = db.collection("profesionales");
-        const usuarios = await coleccion.find({}).toArray();
-        console.log('Usuarios encontrados:', usuarios);
+        //const coleccion = db.collection("profesionales");
+        //const usuarios = await coleccion.find({}).toArray();
+        //console.log('Usuarios encontrados:', usuarios);
 
     } catch (err) {
         console.error("Error connecting to MongoDB:", err);
-    } finally {
-        await client.close();
-        console.log("Disconnected from MongoDB");
     }
 }
 main();
