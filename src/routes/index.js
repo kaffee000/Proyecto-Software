@@ -3,8 +3,10 @@
 import { Router } from "express";
 const router = Router();
 
-//router.get("/", (req, res) => res.render("index.ejs", {title: "Bienvenido"}));
-router.get("/", (req, res) => {
+router.get("/", (req, res) => res.render("index.ejs", {title: "Bienvenido"}));
+
+//router.get("/event", (req, res) => res.render("event.ejs", {title: "Eventos disponibles"}));
+router.get("/event", (req, res) => {
     const categoria = req.query.categoria;
     // Por ahora, actividades de ejemplo
     const actividades = [
@@ -31,14 +33,13 @@ router.get("/", (req, res) => {
             actividad => actividad.categoria === categoria
         );
     }
-    res.render("index.ejs", {
+    res.render("event.ejs", {
         title: "Bienvenido",
         actividades: actividadesFiltradas,
         categoria: categoria
     });
 });
 
-router.get("/event", (req, res) => res.render("event.ejs", {title: "Eventos disponibles"}));
 
 router.get("/contact", (req, res) => res.render("contact.ejs", {title: "Contacto"}));
 
