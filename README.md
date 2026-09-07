@@ -2,77 +2,87 @@
 
 Muni Sport es una aplicación web orientada a centralizar y facilitar el descubrimiento de actividades deportivas, recreativas y de salud en Talca.
 
-Este README describe la versión correspondiente al incremento de la Semana 3. El código debe mantener este alcance y este flujo como referencia principal de implementación y demostración.
+Este README describe el incremento definido para la Semana 3: un producto construible, verificable y defendible que permite consultar un catálogo de actividades, filtrarlo por categoría y recorrer una inscripción simulada sin integrar pagos reales.
 
-## Incremento actual
+## Objetivo del incremento
 
-El incremento presenta un recorrido simple para que una persona pueda explorar actividades y simular una inscripción:
+La página principal presenta una oferta de actividades ficticias y permite recorrer el siguiente flujo:
 
 ```text
 Catálogo de actividades → Filtro por categoría → Selección de actividad → Inscripción simulada
 ```
 
-Las actividades se muestran con información ficticia, por lo que el flujo funciona sin pagos, autenticación ni una base de datos real.
+El producto utiliza datos estáticos y se ejecuta sin depender de una base de datos, una pasarela de pagos, autenticación ni servicios externos.
 
-## Funcionalidades
+## Funcionalidades del MVP
 
-### PBI-01 - Catálogo de actividades simuladas
+### PBI-01 - Mostrar catálogo de actividades simuladas
+
+**Rutas:** `/` y `/event`
+
+La página principal muestra un catálogo de actividades deportivas, recreativas y de salud disponibles en Talca. La vista contiene una grilla con actividades ficticias e información suficiente para consultarlas, incluyendo título, categoría, fecha, imagen y estado.
+
+El catálogo se alimenta con datos estáticos definidos dentro del proyecto. La carga inicial debe ser fluida y completarse en un máximo de 3 segundos en el entorno local.
+
+**Trazabilidad:** RF-01, RNF-PERF-01, AC-01, R-01 y T-01.
+
+### PBI-02 - Filtrar actividades por categoría
 
 **Ruta:** `/event`
 
-La vista muestra una grilla de actividades ficticias disponibles en Talca. Cada actividad incluye nombre, categoría, fecha, imagen y una acción para conocerla o iniciar el proceso de inscripción.
+La vista del catálogo incluye una barra superior de filtros con las categorías `Deportes`, `Sociales` y `Salud`. También permite seleccionar `Todas las actividades`, opción que se muestra por defecto al ingresar sin filtros.
 
-El catálogo utiliza datos simulados definidos dentro del proyecto, de manera que pueda visualizarse sin conexión a MongoDB ni a servicios externos.
+Al seleccionar una categoría, la grilla muestra únicamente las actividades correspondientes. Si la categoría no tiene actividades, la grilla oculta los resultados anteriores y muestra un mensaje amigable, manteniendo visible la barra de filtros.
 
-**Relacionado con:** RF-01, AC-01 y RNF-PERF-01.
+**Trazabilidad:** RF-02, AC-02, AC-04, R-01 y T-02.
 
-### PBI-02 - Filtros por categoría
+### PBI-03 - Redirigir a una inscripción simulada
 
-**Ruta:** `/event`
+**Ruta de destino:** `/pagos`
 
-El catálogo permite filtrar las actividades por las categorías `Deportes`, `Sociales` y `Salud`. También incluye la opción `Todas`, que vuelve a mostrar el catálogo completo.
+Cada actividad incluye un botón **Inscribirse** o **Pagar**. Al seleccionarlo, la aplicación redirige a una vista estática con el mensaje **En construcción**.
 
-El filtrado se realiza sobre los datos simulados y conserva al usuario dentro de la vista del catálogo. Cuando una categoría no tiene actividades, se muestra un mensaje informativo.
+Esta vista únicamente demuestra la navegación del flujo. No contiene formularios funcionales, no solicita datos personales, credenciales o información bancaria, y no envía solicitudes de pago a terceros.
 
-**Relacionado con:** RF-02, AC-02 y R-01.
+**Trazabilidad:** RF-03, RNF-SEC-01, RES-01, AC-03, R-02 y T-03.
 
-### PBI-03 - Inscripción simulada
+## Criterios de aceptación
 
-**Ruta:** `/pagos`
+| ID | Escenario | Resultado esperado |
+|---|---|---|
+| AC-01 | La persona ingresa a la página principal. | Se visualiza el catálogo de actividades simuladas junto con la navegación. |
+| AC-02 | La persona selecciona la categoría `Salud`. | El catálogo muestra únicamente actividades etiquetadas como `Salud`. |
+| AC-03 | La persona presiona `Inscribirse` o `Pagar`. | La aplicación redirige a una pantalla `En construcción` sin solicitar ni enviar datos. |
+| AC-04 | La persona selecciona una categoría sin actividades. | La grilla oculta los resultados anteriores y muestra un mensaje informativo, manteniendo los filtros visibles. |
 
-Al seleccionar una actividad y presionar **Inscribirse**, el usuario llega a una vista estática que informa que la inscripción se encuentra en construcción.
+## Reglas y restricciones
 
-Esta vista representa el siguiente paso del producto, pero no solicita ni procesa datos personales, contraseñas, información bancaria ni pagos reales.
+| ID | Definición |
+|---|---|
+| R-01 | Al ingresar sin filtros, el catálogo muestra `Todas las actividades`. |
+| R-02 | El flujo de inscripción o pago no captura datos reales ni permite interacción con formularios de pago. |
+| RES-01 | El catálogo y la inscripción simulada utilizan exclusivamente información ficticia. |
+| RNF-SEC-01 | La navegación hacia la inscripción simulada no procesa datos ni realiza peticiones a terceros. |
+| RNF-PERF-01 | La lista de actividades simuladas se muestra en un máximo de 3 segundos en el entorno local. |
 
-**Relacionado con:** RF-03, AC-03, RNF-SEC-01, RES-01 y R-02.
+## Flujo de demostración
 
-## Flujo de uso
+1. Abrir `http://localhost:3000/`.
+2. Visualizar el catálogo inicial con `Todas las actividades`.
+3. Seleccionar `Deportes`, `Sociales` o `Salud` desde la barra de filtros.
+4. Comprobar que la grilla muestra solo la categoría seleccionada.
+5. Seleccionar una categoría sin resultados y comprobar el mensaje informativo.
+6. Presionar **Inscribirse** o **Pagar** en una actividad.
+7. Comprobar la redirección a `/pagos` y el mensaje **En construcción**.
+8. Confirmar que no se solicitaron ni enviaron datos reales.
 
-1. Desde la página principal, ingresar al catálogo de actividades.
-2. Revisar las actividades disponibles en `/event`.
-3. Seleccionar una categoría para filtrar el catálogo.
-4. Elegir una actividad.
-5. Presionar **Inscribirse**.
-6. Visualizar la pantalla `/pagos` con el mensaje de funcionalidad en construcción.
-7. Regresar al catálogo.
+## Alcance y exclusiones
 
-Este recorrido constituye el corte vertical de la entrega y permite demostrar la integración entre catálogo, filtros, navegación e inscripción simulada.
+El MVP incluye una vista principal estática, un catálogo de actividades ficticias, filtros por categoría, navegación hacia una vista de inscripción simulada y un diseño responsivo básico.
 
-## Funcionalidades fuera de este incremento
+La integración con Transbank o Webpay, el procesamiento de pagos, la base de datos real, las inscripciones persistentes, la gestión real de cupos, el panel de administración y el registro de usuarios con contraseña pertenecen a iteraciones posteriores.
 
-La visión completa de Muni Sport contempla funcionalidades que se desarrollarán en iteraciones posteriores:
-
-- Integración con Transbank o Webpay.
-- Procesamiento de pagos.
-- Base de datos real para las actividades.
-- Inscripciones persistentes.
-- Gestión real de cupos.
-- Registro de usuarios con contraseña.
-- Inicio de sesión funcional.
-- Panel de administración.
-- Creación y edición de actividades por administradores.
-
-Las vistas `/login`, `/register`, `/personal`, `/sport` y `/contact` pueden formar parte de la base general del proyecto, pero no pertenecen al flujo evaluado en este incremento.
+Las rutas `/login`, `/register`, `/personal`, `/sport` y `/contact` pueden formar parte de la aplicación general, pero no participan en el flujo evaluado de este MVP.
 
 ## Tecnologías
 
@@ -84,17 +94,15 @@ Las vistas `/login`, `/register`, `/personal`, `/sport` y `/contact` pueden form
 - CSS
 - Nodemon
 
-MongoDB corresponde a una integración posterior. El catálogo, los filtros y la inscripción simulada no dependen de una base de datos real.
+MongoDB no forma parte de la ejecución del MVP. El catálogo y sus filtros se construyen con datos estáticos para mantener el incremento simple, reproducible y verificable.
 
 ## Requisitos
 
-Para ejecutar el proyecto se necesita:
+- Node.js instalado.
+- npm instalado junto con Node.js.
+- Navegador web actualizado.
 
-- Node.js.
-- npm.
-- Un navegador web actualizado.
-
-El incremento se ejecuta con datos ficticios y no requiere credenciales privadas ni servicios externos.
+No se requieren credenciales privadas, una cuenta de MongoDB, una pasarela de pagos ni servicios externos para ejecutar este incremento.
 
 ## Instalación
 
@@ -119,28 +127,11 @@ Iniciar el servidor en modo desarrollo:
 npm run dev
 ```
 
-Abrir la aplicación en el navegador:
+Abrir la aplicación en:
 
 ```text
 http://localhost:3000
 ```
-
-El puerto predeterminado es `3000`.
-
-## Verificación rápida
-
-Con la aplicación ejecutándose, el flujo se comprueba de la siguiente manera:
-
-| Acción | Resultado |
-|---|---|
-| Abrir `/event` | Se visualiza el catálogo de actividades simuladas. |
-| Elegir `Deportes` | Se muestran únicamente actividades deportivas. |
-| Elegir `Sociales` | Se muestran únicamente actividades sociales. |
-| Elegir `Salud` | Se muestran únicamente actividades de salud. |
-| Elegir `Todas` | Se visualizan nuevamente todas las actividades. |
-| Presionar **Inscribirse** | La aplicación navega a `/inscripcion`. |
-| Revisar `/inscripcion` | Se informa que la inscripción está en construcción. |
-| Volver al catálogo | El usuario regresa a `/event` sin ingresar datos reales. |
 
 ## Estructura del proyecto
 
@@ -155,17 +146,17 @@ src/
 └── views/
     ├── index.ejs
     ├── event.ejs
-    ├── inscripcion.ejs
+    ├── pagos.ejs
     └── partials/
 ```
 
-Los datos simulados deben mantenerse en una estructura clara y separada de la lógica de presentación. Las rutas deben encargarse de la navegación y las vistas de representar la información al usuario.
+Los datos ficticios pueden definirse en un módulo o archivo JSON separado. Las rutas controlan la navegación, las vistas representan la información y los recursos públicos contienen los estilos e imágenes de la interfaz.
 
 ## Seguridad y privacidad
 
-El incremento utiliza exclusivamente información ficticia y no procesa pagos ni datos personales reales.
+El MVP no recopila datos personales, contraseñas, credenciales ni información bancaria. La vista `/pagos` solo representa una pantalla de navegación simulada y no realiza pagos.
 
-Las credenciales, tokens, contraseñas y URI de conexión no deben escribirse en el código ni en la documentación. Cuando una futura integración necesite configuración privada, esta debe manejarse mediante variables de entorno y un archivo `.env` excluido del repositorio.
+Las URI de conexión, contraseñas, tokens y claves privadas no deben escribirse en el código, en `README.md`, en `mongo.txt` ni en ningún archivo versionado. Si una iteración futura requiere configuración privada, debe utilizar variables de entorno y un archivo `.env` excluido del repositorio.
 
 Ejemplo de configuración local para una integración futura:
 
@@ -174,11 +165,11 @@ PORT=3000
 MONGODB_URI=<URI_DE_MONGODB>
 ```
 
-No se deben incorporar valores reales en este archivo.
+Este ejemplo no contiene credenciales reales.
 
 ## Definition of Done
 
-El incremento cumple su objetivo cuando la aplicación permite recorrer el flujo completo de catálogo, filtros, selección e inscripción simulada; puede ejecutarse en otro equipo siguiendo estas instrucciones; utiliza datos ficticios; no depende de MongoDB, pagos ni autenticación; y no expone credenciales ni solicita información sensible.
+El incremento se considera terminado cuando la página principal muestra el catálogo ficticio, los filtros por Deportes, Sociales y Salud funcionan junto con la opción Todas, el estado sin resultados es comprensible, el botón de inscripción o pago redirige a `/pagos` sin capturar ni enviar datos, la carga del catálogo se mantiene dentro de 3 segundos, la aplicación puede ejecutarse en otro equipo siguiendo este README y el repositorio no expone información sensible.
 
 ## Equipo
 
