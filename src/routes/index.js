@@ -3,7 +3,40 @@
 import { Router } from "express";
 const router = Router();
 
-router.get("/", (req, res) => res.render("index.ejs", {title: "Bienvenido"}));
+//router.get("/", (req, res) => res.render("index.ejs", {title: "Bienvenido"}));
+router.get("/", (req, res) => {
+    const categoria = req.query.categoria;
+    // Por ahora, actividades de ejemplo
+    const actividades = [
+        {
+            nombre: "Actividad deportiva",
+            descripcion: "Actividad relacionada con el deporte",
+            categoria: "Deportes"
+        },
+        {
+            nombre: "Taller de salud",
+            descripcion: "Taller relacionado con la salud",
+            categoria: "Salud"
+        },
+        {
+            nombre: "Taller comunitario",
+            descripcion: "Actividad para la comunidad",
+            categoria: "Comunidad"
+        }
+    ];
+    let actividadesFiltradas = actividades;
+    // Si se seleccionó una categoría
+    if (categoria && categoria !== "todas") {
+        actividadesFiltradas = actividades.filter(
+            actividad => actividad.categoria === categoria
+        );
+    }
+    res.render("index.ejs", {
+        title: "Bienvenido",
+        actividades: actividadesFiltradas,
+        categoria: categoria
+    });
+});
 
 router.get("/event", (req, res) => res.render("event.ejs", {title: "Eventos disponibles"}));
 
@@ -35,5 +68,8 @@ router.get("/sport", (req, res) => res.render("sport.ejs", {title: "Deportes"}))
 router.get("/login", (req, res) => res.render("login.ejs", {title: "Iniciar sesión"}));
 
 router.get("/register", (req, res) => res.render("register.ejs", {title: "Registrate"}));
+
+router.get("/pagos", (req, res) => res.render("pagos.ejs", {title: "Pago"}));
+
 
 export default router;
