@@ -13,17 +13,23 @@ router.get("/event", (req, res) => {
         {
             nombre: "Actividad deportiva",
             descripcion: "Actividad relacionada con el deporte",
-            categoria: "Deportes"
+            categoria: "Deportes",
+            fecha: "2026-09-13T15:00:00",
+            estado: "activo"
         },
         {
             nombre: "Taller de salud",
             descripcion: "Taller relacionado con la salud",
-            categoria: "Salud"
+            categoria: "Salud",
+            fecha: "2026-09-13T15:00:00",
+            estado: "activo"
         },
         {
             nombre: "Taller comunitario",
             descripcion: "Actividad para la comunidad",
-            categoria: "Comunidad"
+            categoria: "Comunidad",
+            fecha: "2026-09-13T15:00:00",
+            estado: "activo"
         }
     ];
     let actividadesFiltradas = actividades;
