@@ -27,7 +27,7 @@ router.get("/event", (req, res) => {
         {
             nombre: "Taller comunitario",
             descripcion: "Actividad para la comunidad",
-            categoria: "Comunidad",
+            categoria: "Sociales",
             fecha: "2026-09-13T15:00:00",
             estado: "activo"
         }
