@@ -51,6 +51,14 @@
                     Categoría:
                     <%= actividad.categoria %>
                 </p>
+                <p>
+                    <strong>Fecha:</strong>
+                    <%= new Date(actividad.fecha).toLocaleString("es-CL") %>
+                </p>
+                <p>
+                    Estado:
+                    <%= actividad.estado %>
+                </p>
                 <a href="/pagos" class="boton-inscripcion">
                     Inscribirse
                 </a>
