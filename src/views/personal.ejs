@@ -7,9 +7,21 @@
     <%- include('partials/head') %>
 </head>
 <body>
-    <!-- Como header para todos los que tengan este include (como en php)-->
+
     <%- include('partials/navigation') %>
 
     <h1>Personal</h1>
+
+    <!--<h2>Profesionales disponibles</h2>-->
+
+    <% profesionales.forEach(profesional => { %>
+
+        <div>
+            <h3><%= profesional.nombre %></h3>
+            <p><%= profesional.profesion %></p>
+        </div>
+
+    <% }) %>
+
 </body>
 </html>
