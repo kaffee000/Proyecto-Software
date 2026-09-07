@@ -31,6 +31,9 @@
             <option value="Sociales">
                 Sociales
             </option>
+            <option value="Cultura">
+                Cultura
+            </option>
         </select>
         <button type="submit">
             Filtrar
@@ -38,7 +41,12 @@
     </form>
 
 
-    <div class="contenedor-actividades">
+<div class="contenedor-actividades">
+    <% if (actividades.length === 0) { %>
+        <p class="sin-actividades">
+            No hay eventos disponibles para esta categoría.
+        </p>
+    <% } else { %>
         <% actividades.forEach(actividad => { %>
             <div class="actividad">
                 <h3>
@@ -64,6 +72,7 @@
                 </a>
             </div>
         <% }) %>
+    <% } %>
     </div>
 </section>
 </body>
