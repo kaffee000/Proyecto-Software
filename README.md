@@ -53,7 +53,7 @@ Esta vista representa el siguiente paso del producto, pero no solicita ni proces
 3. Seleccionar una categoría para filtrar el catálogo.
 4. Elegir una actividad.
 5. Presionar **Inscribirse**.
-6. Visualizar la pantalla `/event` con el mensaje de funcionalidad en construcción.
+6. Visualizar la pantalla `/pagos` con el mensaje de funcionalidad en construcción.
 7. Regresar al catálogo.
 
 Este recorrido constituye el corte vertical de la entrega y permite demostrar la integración entre catálogo, filtros, navegación e inscripción simulada.
