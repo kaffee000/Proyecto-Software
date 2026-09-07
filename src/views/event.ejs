@@ -11,5 +11,52 @@
     <%- include('partials/navigation') %>
 
     <h1>Eventos disponibles</h1>
+
+<section class="actividades">
+    <h2>Actividades disponibles</h2>
+    <form action="/" method="GET">
+        <label for="categoria">
+            Filtrar por categoría:
+        </label>
+        <select name="categoria" id="categoria">
+            <option value="todas">
+                Todas
+            </option>
+            <option value="Deportes">
+                Deportes
+            </option>
+            <option value="Salud">
+                Salud
+            </option>
+            <option value="Comunidad">
+                Comunidad
+            </option>
+        </select>
+        <button type="submit">
+            Filtrar
+        </button>
+    </form>
+
+
+    <div class="contenedor-actividades">
+        <% actividades.forEach(actividad => { %>
+            <div class="actividad">
+                <h3>
+                    <%= actividad.nombre %>
+                </h3>
+                <p>
+                    <%= actividad.descripcion %>
+                </p>
+                <p>
+                    Categoría:
+                    <%= actividad.categoria %>
+                </p>
+                <a href="/pagos" class="boton-inscripcion">
+                    Inscribirse
+                </a>
+            </div>
+        <% }) %>
+    </div>
+</section>
 </body>
 </html>
