@@ -1,22 +1,117 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
     <%- include('partials/head') %>
+    <title><%= title %></title>
 </head>
-<body class="login-body">
-    <div class="form-body">
-        <a href="/">
-        <img src="/images/muni.png" alt="Logo" class="navbar-brand" style="width: 50px; aspect-ratio: 1 / 1;">
-        </a>
-        <p class="text">Inicia sesión</p>
-        <form class="login-form">
-            <input type="text" placeholder="R.U.N." required>
-            <input type="password" placeholder="Contraseña" required>
-            <button type="submit">Iniciar sesión</button>
-        <a class="text_2" href="/register">Registrate</a>
+<body class="bg-white text-slate-900 font-sans antialiased min-h-screen">
+    <div class="min-h-screen grid grid-cols-1 lg:grid-cols-12">
+        <!-- Columna Visual Editorial (5 cols en desktop con foto real de Talca) -->
+        <div class="hidden lg:flex lg:col-span-5 relative overflow-hidden bg-slate-950 flex-col justify-between p-12 text-white">
+            <img src="/images/actividad de deporte.jpg" alt="Actividades deportivas comunitarias de Talca" class="absolute inset-0 w-full h-full object-cover opacity-40">
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/65 to-slate-950/30"></div>
+
+            <!-- Marca Superior con Logo Prominente -->
+            <div class="relative z-10">
+                <a href="/" class="flex items-center gap-4 group">
+                    <img src="/images/logo-muni.png" alt="Emblema Municipalidad de Talca" class="w-14 h-14 object-contain shrink-0" width="56" height="56">
+                    <div>
+                        <span class="block text-xl font-black text-white tracking-tight leading-tight">Muni Sport</span>
+                        <span class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Municipalidad de Talca</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Mensaje Cívico Inferior -->
+            <div class="relative z-10 max-w-md">
+                <blockquote class="text-lg font-medium text-slate-200 leading-relaxed mb-4">
+                    “El deporte y la recreación comunitaria son un derecho formativo y de acceso libre para todos los vecinos de Talca.”
+                </blockquote>
+                <p class="text-xs font-semibold text-slate-400">
+                    Corporación Municipal de Deportes • Talca
+                </p>
+            </div>
+        </div>
+
+        <!-- Columna del Formulario (7 cols en desktop) -->
+        <div class="lg:col-span-7 flex flex-col justify-between p-6 sm:p-12 lg:p-16 max-w-xl mx-auto w-full min-h-screen">
+            <!-- Enlace Volver -->
+            <div class="flex items-center justify-between mb-8">
+                <a href="/" class="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-slate-900 transition">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    <span>Volver a la cartelera</span>
+                </a>
+
+                <!-- Logo visible en móvil -->
+                <div class="lg:hidden flex items-center gap-2">
+                    <img src="/images/logo-muni.png" alt="Emblema Municipalidad de Talca" class="w-10 h-10 object-contain">
+                </div>
+            </div>
+
+            <!-- Formulario Central -->
+            <div class="my-auto">
+                <div class="mb-8">
+                    <!-- Logo grande visible en desktop -->
+                    <div class="hidden lg:block mb-4">
+                        <img src="/images/logo-muni.png" alt="Emblema Municipalidad de Talca" class="w-16 h-16 object-contain" width="64" height="64">
+                    </div>
+                    <!-- Título limpio sin píldoras/eyebrows -->
+                    <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-2">
+                        Acceso Vecinal
+                    </h1>
+                    <p class="text-sm text-slate-600 leading-relaxed">
+                        Ingresa con tu R.U.N. o correo electrónico para consultar tus inscripciones y talleres deportivos.
+                    </p>
+                </div>
+
+                <form class="space-y-5" onsubmit="event.preventDefault(); document.getElementById('authNotice').classList.remove('hidden');">
+                    <div>
+                        <label for="loginRun" class="block text-xs font-bold text-slate-800 mb-1.5 uppercase tracking-wide">
+                            R.U.N. o Correo Electrónico
+                        </label>
+                        <input type="text" id="loginRun" class="w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-900 text-sm focus:outline-none focus:border-red-600 focus:ring-4 focus:ring-red-600/15 transition shadow-sm" placeholder="12.345.678-9 o correo@ejemplo.cl" required autocomplete="username">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-1.5">
+                            <label for="loginPassword" class="text-xs font-bold text-slate-800 uppercase tracking-wide">
+                                Contraseña
+                            </label>
+                            <a href="#" class="text-xs font-semibold text-red-600 hover:underline" onclick="event.preventDefault(); alert('En la fase de producción podrás recuperar tu contraseña mediante tu correo.');">
+                                ¿Olvidaste tu contraseña?
+                            </a>
+                        </div>
+                        <input type="password" id="loginPassword" class="w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-900 text-sm focus:outline-none focus:border-red-600 focus:ring-4 focus:ring-red-600/15 transition shadow-sm" placeholder="••••••••" required autocomplete="current-password">
+                    </div>
+
+                    <button type="submit" class="w-full py-3.5 px-6 rounded-xl bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold text-base shadow-sm transition flex items-center justify-center gap-2">
+                        <span>Ingresar a mi cuenta</span>
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </button>
+
+                    <div id="authNotice" class="hidden p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-medium leading-relaxed" role="status">
+                        Módulo de autenticación en fase de integración. No se requiere inicio de sesión para explorar y participar en las actividades comunitarias.
+                    </div>
+                </form>
+
+                <div class="mt-8 pt-6 border-t border-slate-200 text-center">
+                    <p class="text-sm text-slate-600">
+                        ¿Aún no tienes registro? 
+                        <a href="/register" class="text-red-600 font-bold hover:underline">Crear cuenta ciudadana</a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Footer Cívico Inferior -->
+            <div class="pt-8 text-xs text-slate-400 text-center">
+                Muni Sport Talca • Ilustre Municipalidad de Talca
+            </div>
+        </div>
     </div>
 </body>
 </html>

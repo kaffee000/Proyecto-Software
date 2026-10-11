@@ -1,79 +1,57 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
     <%- include('partials/head') %>
+    <title><%= title %></title>
 </head>
-<body>
-    <!-- Como header para todos los que tengan este include (como en php)-->
+<body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen flex flex-col">
     <%- include('partials/navigation') %>
 
-    <h1>Eventos disponibles</h1>
+    <main id="contenido-principal" class="flex-grow">
+        <!-- Encabezado de Página -->
+        <header class="bg-white border-b border-slate-200 py-10 px-4">
+            <div class="max-w-7xl mx-auto">
+                <nav class="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-3" aria-label="Ruta de navegación">
+                    <a href="/" class="hover:text-red-600 transition">Inicio</a>
+                    <span>/</span>
+                    <span class="text-slate-900">Catálogo de Actividades</span>
+                </nav>
 
-<section class="actividades">
-    <h2>Actividades disponibles</h2>
-    <form action="/event" method="GET">
-        <label for="categoria">
-            Filtrar por categoría:
-        </label>
-        <select name="categoria" id="categoria">
-            <option value="todas">
-                Todas
-            </option>
-            <option value="Deportes">
-                Deportes
-            </option>
-            <option value="Salud">
-                Salud
-            </option>
-            <option value="Sociales">
-                Sociales
-            </option>
-            <option value="Cultura">
-                Cultura
-            </option>
-        </select>
-        <button type="submit">
-            Filtrar
-        </button>
-    </form>
-
-
-<div class="contenedor-actividades">
-    <% if (actividades.length === 0) { %>
-        <p class="sin-actividades">
-            No hay eventos disponibles para esta categoría.
-        </p>
-    <% } else { %>
-        <% actividades.forEach(actividad => { %>
-            <div class="actividad">
-                <h3>
-                    <%= actividad.nombre %>
-                </h3>
-                <p>
-                    <%= actividad.descripcion %>
+                <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight mb-2">
+                    Catálogo de Actividades en Talca
+                </h1>
+                <p class="text-sm sm:text-base text-slate-600 max-w-2xl">
+                    Encuentra y filtra talleres deportivos, recreativos y formativos abiertos para la comunidad. Selecciona tu categoría de preferencia y asegura tu lugar en los recintos locales.
                 </p>
-                <p>
-                    Categoría:
-                    <%= actividad.categoria %>
-                </p>
-                <p>
-                    <strong>Fecha:</strong>
-                    <%= new Date(actividad.fecha).toLocaleString("es-CL") %>
-                </p>
-                <p>
-                    Estado:
-                    <%= actividad.estado %>
-                </p>
-                <a href="/pagos" class="boton-inscripcion">
-                    Inscribirse
-                </a>
             </div>
-        <% }) %>
-    <% } %>
-    </div>
-</section>
+        </header>
+
+        <!-- Componente Principal del Catálogo -->
+        <%- include('partials/catalogo') %>
+
+        <!-- Orientación Ciudadana -->
+        <section class="max-w-7xl mx-auto px-4 pb-16">
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 flex flex-col sm:flex-row items-start gap-6 shadow-sm">
+                <div class="w-12 h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center shrink-0">
+                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                </div>
+                <div class="flex-grow">
+                    <h3 class="text-lg font-bold text-slate-900 mb-1">¿No encuentras el taller que buscas?</h3>
+                    <p class="text-sm text-slate-600 mb-4 max-w-2xl leading-relaxed">
+                        Nuestra cartelera comunitaria se actualiza periódicamente según la temporada deportiva y la apertura de nuevos ciclos en juntas vecinales y polideportivos.
+                    </p>
+                    <a href="/contact" class="inline-flex px-4 py-2 rounded-xl text-sm font-bold bg-white text-slate-800 border border-slate-200 hover:bg-slate-50 transition shadow-sm">
+                        Contactar a la coordinación municipal
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <%- include('partials/footer') %>
 </body>
 </html>

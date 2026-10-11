@@ -1,18 +1,308 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
     <%- include('partials/head') %>
+    <title><%= title %></title>
 </head>
-<body>
-    
+<body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen flex flex-col">
     <%- include('partials/navigation') %>
 
-    <h1></h1>
+    <main id="contenido-principal" class="flex-grow">
+        <!-- Hero Section con Mosaico Fotográfico de Talca -->
+        <section class="max-w-7xl mx-auto px-4 py-12 md:py-16" aria-labelledby="hero-heading">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+                <!-- Columna Textual -->
+                <div class="lg:col-span-7 flex flex-col items-start">
+                    <h1 id="hero-heading" class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.15] mb-5">
+                        El deporte y la vida sana se viven en los barrios de Talca
+                    </h1>
 
-    <%- include('partials/slider') %>
+                    <p class="text-base sm:text-lg text-slate-600 leading-relaxed mb-8 max-w-2xl">
+                        Cartelera comunal de talleres formativos, recreación familiar y acondicionamiento físico de acceso 100% gratuito en polideportivos, parques urbanos y sedes vecinales.
+                    </p>
 
-</body> 
+                    <div class="flex flex-wrap gap-3.5 w-full sm:w-auto">
+                        <a href="#catalogo-actividades" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold text-sm sm:text-base shadow-sm transition w-full sm:w-auto">
+                            <span>Explorar cartelera oficial</span>
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <polyline points="19 12 12 19 5 12"></polyline>
+                            </svg>
+                        </a>
+                        <a href="#recintos-deportivos" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 font-bold text-sm sm:text-base shadow-sm transition w-full sm:w-auto">
+                            <span>Ver recintos habilitados</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Columna Mosaico Fotográfico -->
+                <div class="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4" aria-label="Fotografías de actividades deportivas en Talca">
+                    <!-- Foto Principal: Polideportivo -->
+                    <div class="relative h-64 sm:h-72 rounded-2xl overflow-hidden shadow-md border border-slate-200 bg-slate-200">
+                        <img src="/images/actividad de deporte.jpg" alt="Taller de básquetbol en Polideportivo de Talca" class="w-full h-full object-cover">
+                        <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/90 via-slate-900/50 to-transparent p-4 text-white">
+                            <strong class="block text-sm font-bold text-white">Polideportivo Municipal de Talca</strong>
+                            <span class="text-xs text-slate-200">Básquetbol formativo y vóleibol techado</span>
+                        </div>
+                    </div>
+
+                    <!-- Dos Fotos Secundarias en Fila -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="relative h-36 rounded-xl overflow-hidden shadow-sm border border-slate-200 bg-slate-200">
+                            <img src="/images/actividad baile en piscina.jpeg" alt="Piscina municipal temperada" class="w-full h-full object-cover">
+                            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/90 via-slate-900/40 to-transparent p-2.5 text-white">
+                                <strong class="block text-xs font-bold leading-tight">Piscina Temperada</strong>
+                                <span class="text-[11px] text-slate-200">Hidrogimnasia vecinal</span>
+                            </div>
+                        </div>
+
+                        <div class="relative h-36 rounded-xl overflow-hidden shadow-sm border border-slate-200 bg-slate-200">
+                            <img src="/images/actividad baile entretenido.jpg" alt="Baile entretenido en Río Claro" class="w-full h-full object-cover">
+                            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/90 via-slate-900/40 to-transparent p-2.5 text-white">
+                                <strong class="block text-xs font-bold leading-tight">Costanera Río Claro</strong>
+                                <span class="text-[11px] text-slate-200">Baile y vida activa</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Catálogo de Actividades Directo en Home (RF-01, AC-01) -->
+        <%- include('partials/catalogo') %>
+
+        <!-- Recintos Deportivos de Talca (Directorio Municipal) -->
+        <section class="bg-white border-y border-slate-200 py-16 px-4" id="recintos-deportivos" aria-labelledby="recintos-heading">
+            <div class="max-w-7xl mx-auto">
+                <div class="text-center max-w-2xl mx-auto mb-12">
+                    <h2 id="recintos-heading" class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight mb-3">
+                        Recintos y espacios deportivos municipales
+                    </h2>
+                    <p class="text-sm md:text-base text-slate-600">
+                        Conoce la infraestructura deportiva de Talca donde se desarrollan las clases presenciales, talleres de formación y actividades comunitarias.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Recinto 1: Polideportivo -->
+                    <article class="bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+                        <div>
+                            <div class="relative h-44 w-full overflow-hidden bg-slate-200">
+                                <img src="/images/actividad de deporte.jpg" alt="Polideportivo Municipal de Talca" class="w-full h-full object-cover" loading="lazy">
+                                <span class="absolute bottom-2 left-2 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-900/85 text-white backdrop-blur-sm">
+                                    Techado • Central
+                                </span>
+                            </div>
+                            <div class="p-5">
+                                <h3 class="text-base font-extrabold text-slate-900 mb-1">Polideportivo Municipal</h3>
+                                <p class="text-xs text-slate-500 flex items-center gap-1 mb-2">
+                                    <svg class="w-3.5 h-3.5 text-red-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                        <circle cx="12" cy="10" r="3"></circle>
+                                    </svg>
+                                    <span>Calle 4 Norte con 16 Oriente</span>
+                                </p>
+                                <p class="text-xs text-slate-600 leading-relaxed mb-4">
+                                    Canchas reglamentarias techadas de parquet, graderías y camarines para básquetbol y vóleibol.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="px-5 pb-5 pt-3 border-t border-slate-200/60 flex flex-wrap gap-1.5">
+                            <span class="text-[11px] font-semibold bg-white border border-slate-200 text-slate-600 px-2 py-0.5 rounded-md">Básquetbol</span>
+                            <span class="text-[11px] font-semibold bg-white border border-slate-200 text-slate-600 px-2 py-0.5 rounded-md">Vóleibol</span>
+                        </div>
+                    </article>
+
+                    <!-- Recinto 2: Costanera Río Claro -->
+                    <article class="bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+                        <div>
+                            <div class="relative h-44 w-full overflow-hidden bg-slate-200">
+                                <img src="/images/actividad baile entretenido.jpg" alt="Parque Costanera Río Claro" class="w-full h-full object-cover" loading="lazy">
+                                <span class="absolute bottom-2 left-2 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-900/85 text-white backdrop-blur-sm">
+                                    Parque Urbano
+                                </span>
+                            </div>
+                            <div class="p-5">
+                                <h3 class="text-base font-extrabold text-slate-900 mb-1">Parque Costanera Río Claro</h3>
+                                <p class="text-xs text-slate-500 flex items-center gap-1 mb-2">
+                                    <svg class="w-3.5 h-3.5 text-red-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                        <circle cx="12" cy="10" r="3"></circle>
+                                    </svg>
+                                    <span>Ribera Poniente, Alameda</span>
+                                </p>
+                                <p class="text-xs text-slate-600 leading-relaxed mb-4">
+                                    Explanadas naturales junto al río para baile entretenido, yoga matinal, calistenia y trote guiado.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="px-5 pb-5 pt-3 border-t border-slate-200/60 flex flex-wrap gap-1.5">
+                            <span class="text-[11px] font-semibold bg-white border border-slate-200 text-slate-600 px-2 py-0.5 rounded-md">Baile</span>
+                            <span class="text-[11px] font-semibold bg-white border border-slate-200 text-slate-600 px-2 py-0.5 rounded-md">Yoga</span>
+                        </div>
+                    </article>
+
+                    <!-- Recinto 3: Piscina Temperada -->
+                    <article class="bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+                        <div>
+                            <div class="relative h-44 w-full overflow-hidden bg-slate-200">
+                                <img src="/images/actividad baile en piscina.jpeg" alt="Piscina Municipal Temperada" class="w-full h-full object-cover" loading="lazy">
+                                <span class="absolute bottom-2 left-2 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-900/85 text-white backdrop-blur-sm">
+                                    Climatizado
+                                </span>
+                            </div>
+                            <div class="p-5">
+                                <h3 class="text-base font-extrabold text-slate-900 mb-1">Piscina Temperada Municipal</h3>
+                                <p class="text-xs text-slate-500 flex items-center gap-1 mb-2">
+                                    <svg class="w-3.5 h-3.5 text-red-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                        <circle cx="12" cy="10" r="3"></circle>
+                                    </svg>
+                                    <span>Complejo Deportivo Fiscal</span>
+                                </p>
+                                <p class="text-xs text-slate-600 leading-relaxed mb-4">
+                                    Vaso temperado adaptado para personas mayores, clases de natación e hidrogimnasia suave.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="px-5 pb-5 pt-3 border-t border-slate-200/60 flex flex-wrap gap-1.5">
+                            <span class="text-[11px] font-semibold bg-white border border-slate-200 text-slate-600 px-2 py-0.5 rounded-md">Hidrogimnasia</span>
+                            <span class="text-[11px] font-semibold bg-white border border-slate-200 text-slate-600 px-2 py-0.5 rounded-md">Natación</span>
+                        </div>
+                    </article>
+
+                    <!-- Recinto 4: Centros Comunitarios -->
+                    <article class="bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+                        <div>
+                            <div class="relative h-44 w-full overflow-hidden bg-slate-200">
+                                <img src="/images/actividades adulto mayor.jpeg" alt="Centros Comunitarios de Talca" class="w-full h-full object-cover" loading="lazy">
+                                <span class="absolute bottom-2 left-2 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-900/85 text-white backdrop-blur-sm">
+                                    Red Barrial
+                                </span>
+                            </div>
+                            <div class="p-5">
+                                <h3 class="text-base font-extrabold text-slate-900 mb-1">Centros Comunitarios</h3>
+                                <p class="text-xs text-slate-500 flex items-center gap-1 mb-2">
+                                    <svg class="w-3.5 h-3.5 text-red-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                        <circle cx="12" cy="10" r="3"></circle>
+                                    </svg>
+                                    <span>Las Américas, Trupp, Florida</span>
+                                </p>
+                                <p class="text-xs text-slate-600 leading-relaxed mb-4">
+                                    Sedes vecinales equipadas para talleres de acondicionamiento de adultos mayores y pausas activas.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="px-5 pb-5 pt-3 border-t border-slate-200/60 flex flex-wrap gap-1.5">
+                            <span class="text-[11px] font-semibold bg-white border border-slate-200 text-slate-600 px-2 py-0.5 rounded-md">Adulto Mayor</span>
+                            <span class="text-[11px] font-semibold bg-white border border-slate-200 text-slate-600 px-2 py-0.5 rounded-md">Pausas Activas</span>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- Guía de Participación y Mesa de Ayuda -->
+        <section class="max-w-7xl mx-auto px-4 py-16" aria-labelledby="guia-heading">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                <!-- Columna Pasos -->
+                <div class="lg:col-span-7">
+                    <h2 id="guia-heading" class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight mb-3">
+                        ¿Cómo participar en las actividades municipales?
+                    </h2>
+                    <p class="text-sm md:text-base text-slate-600 mb-8">
+                        Tres pasos directos para incorporarte a cualquiera de los talleres comunitarios en Talca.
+                    </p>
+
+                    <div class="space-y-4">
+                        <div class="flex items-start gap-4 p-5 bg-white rounded-2xl border border-slate-200 shadow-sm">
+                            <div class="w-10 h-10 rounded-full bg-red-600 text-white font-extrabold text-base flex items-center justify-center shrink-0">
+                                1
+                            </div>
+                            <div>
+                                <h3 class="text-base font-bold text-slate-900 mb-1">Elige tu taller en la cartelera</h3>
+                                <p class="text-xs md:text-sm text-slate-600 leading-relaxed">
+                                    Revisa los horarios, el recinto asignado y los cupos libres según tu área de interés (Deportes, Salud o Sociales).
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4 p-5 bg-white rounded-2xl border border-slate-200 shadow-sm">
+                            <div class="w-10 h-10 rounded-full bg-red-600 text-white font-extrabold text-base flex items-center justify-center shrink-0">
+                                2
+                            </div>
+                            <div>
+                                <h3 class="text-base font-bold text-slate-900 mb-1">Asiste con ropa deportiva cómoda</h3>
+                                <p class="text-xs md:text-sm text-slate-600 leading-relaxed">
+                                    Todos los talleres son 100% gratuitos para los vecinos de Talca. Lleva tu botella de agua, toalla y ganas de participar.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4 p-5 bg-white rounded-2xl border border-slate-200 shadow-sm">
+                            <div class="w-10 h-10 rounded-full bg-red-600 text-white font-extrabold text-base flex items-center justify-center shrink-0">
+                                3
+                            </div>
+                            <div>
+                                <h3 class="text-base font-bold text-slate-900 mb-1">Confirma tu asistencia en cancha</h3>
+                                <p class="text-xs md:text-sm text-slate-600 leading-relaxed">
+                                    El monitor o profesor registrará tu asistencia presencial con tu R.U.N. para asegurar tu vacante regular en las sesiones.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna Mesa Municipal -->
+                <aside class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                    <h3 class="text-xl font-extrabold text-slate-900 mb-2">¿Dudas sobre talleres o recintos?</h3>
+                    <p class="text-xs md:text-sm text-slate-600 mb-6 leading-relaxed">
+                        La Oficina Municipal de Deportes orienta a vecinos, familias y dirigentes barriales de lunes a viernes.
+                    </p>
+
+                    <div class="space-y-4 mb-6 text-xs text-slate-600">
+                        <div class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-red-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                            <div>
+                                <strong class="block text-slate-900 text-sm font-bold">Oficina de Deportes</strong>
+                                <span>1 Oriente 1199, Edificio Consistorial, Talca</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-red-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            <div>
+                                <strong class="block text-slate-900 text-sm font-bold">Horario de atención</strong>
+                                <span>Lunes a Viernes de 08:30 a 17:30 hrs</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-red-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                            </svg>
+                            <div>
+                                <strong class="block text-slate-900 text-sm font-bold">Mesa Telefónica</strong>
+                                <span>(+56 71) 220 3800</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a href="/contact" class="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm rounded-xl text-center transition block">
+                        Enviar consulta online
+                    </a>
+                </aside>
+            </div>
+        </section>
+    </main>
+
+    <%- include('partials/footer') %>
+</body>
 </html>
