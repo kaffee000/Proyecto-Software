@@ -12,25 +12,25 @@
 
         <!-- Filtros Táctiles -->
         <div class="flex flex-wrap gap-2" role="tablist" aria-label="Filtro de categorías">
-            <a href="?categoria=todas#catalogo-actividades" 
+            <a href="?categoria=todas" 
                class="px-4 py-2 rounded-xl text-sm font-bold transition shadow-sm <%= (!categoria || categoria.toLowerCase() === 'todas') ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50' %>"
                role="tab"
                aria-selected="<%= (!categoria || categoria.toLowerCase() === 'todas') %>">
                Todas
             </a>
-            <a href="?categoria=Deportes#catalogo-actividades" 
+            <a href="?categoria=Deportes" 
                class="px-4 py-2 rounded-xl text-sm font-bold transition shadow-sm <%= (categoria && categoria.toLowerCase() === 'deportes') ? 'bg-red-600 text-white' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50' %>"
                role="tab"
                aria-selected="<%= (categoria && categoria.toLowerCase() === 'deportes') %>">
                Deportes
             </a>
-            <a href="?categoria=Salud#catalogo-actividades" 
+            <a href="?categoria=Salud" 
                class="px-4 py-2 rounded-xl text-sm font-bold transition shadow-sm <%= (categoria && categoria.toLowerCase() === 'salud') ? 'bg-emerald-600 text-white' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50' %>"
                role="tab"
                aria-selected="<%= (categoria && categoria.toLowerCase() === 'salud') %>">
                Salud
             </a>
-            <a href="?categoria=Sociales#catalogo-actividades" 
+            <a href="?categoria=Sociales" 
                class="px-4 py-2 rounded-xl text-sm font-bold transition shadow-sm <%= (categoria && categoria.toLowerCase() === 'sociales') ? 'bg-sky-600 text-white' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50' %>"
                role="tab"
                aria-selected="<%= (categoria && categoria.toLowerCase() === 'sociales') %>">
@@ -66,7 +66,7 @@
                 <p class="text-sm text-slate-600 mb-6">
                     No registramos convocatorias abiertas en la categoría seleccionada por el momento. Puedes consultar las demás alternativas de la comuna.
                 </p>
-                <a href="?categoria=todas#catalogo-actividades" class="inline-flex px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-red-600 hover:bg-red-700 transition">
+                <a href="?categoria=todas" class="inline-flex px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-red-600 hover:bg-red-700 transition">
                     Mostrar todas las actividades
                 </a>
             </div>
@@ -169,3 +169,73 @@
         <% } %>
     </div>
 </section>
+
+<script>
+(function() {
+    const catalogoSection = document.getElementById('catalogo-actividades');
+    if (!catalogoSection) return;
+
+    // Delegación de eventos para capturar los clics en los botones de filtro de categorías
+    catalogoSection.addEventListener('click', async (e) => {
+        const link = e.target.closest('a[role="tab"], a[href*="categoria="]');
+        if (!link || !catalogoSection.contains(link)) return;
+
+        const href = link.getAttribute('href');
+        if (!href || href.startsWith('#') || href.startsWith('/pagos') || href.startsWith('/contact')) return;
+
+        e.preventDefault();
+
+        // Evitar recargar si ya está seleccionada la categoría actual
+        if (link.getAttribute('aria-selected') === 'true') return;
+
+        try {
+            const lista = document.getElementById('listaActividades');
+            if (lista) {
+                lista.style.transition = 'opacity 0.15s ease';
+                lista.style.opacity = '0.4';
+            }
+
+            const response = await fetch(href, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            if (!response.ok) throw new Error('Respuesta no exitosa al cargar categoría');
+
+            const html = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const nuevoCatalogo = doc.getElementById('catalogo-actividades');
+
+            if (nuevoCatalogo) {
+                catalogoSection.innerHTML = nuevoCatalogo.innerHTML;
+            }
+
+            window.history.pushState({ path: href }, '', href);
+        } catch (error) {
+            console.error('Error al filtrar dinámicamente:', error);
+            window.location.href = href;
+        }
+    });
+
+    if (!window.__catalogoPopstateAttached) {
+        window.__catalogoPopstateAttached = true;
+        window.addEventListener('popstate', async () => {
+            try {
+                const response = await fetch(window.location.href, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                if (!response.ok) return window.location.reload();
+
+                const html = await response.text();
+                const doc = new DOMParser().parseFromString(html, 'text/html');
+                const nuevoCatalogo = doc.getElementById('catalogo-actividades');
+                const currentCatalogo = document.getElementById('catalogo-actividades');
+                if (nuevoCatalogo && currentCatalogo) {
+                    currentCatalogo.innerHTML = nuevoCatalogo.innerHTML;
+                }
+            } catch (e) {
+                window.location.reload();
+            }
+        });
+    }
+})();
+</script>
