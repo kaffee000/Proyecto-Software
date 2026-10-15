@@ -1,241 +1,216 @@
-<section class="max-w-7xl mx-auto px-4 py-12" id="catalogo-actividades" aria-labelledby="catalogo-heading">
-    <!-- Encabezado y Filtros de Categorías -->
-    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
-        <div>
-            <h2 id="catalogo-heading" class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight mb-2">
-                Cartelera de actividades disponibles
-            </h2>
-            <p class="text-sm md:text-base text-slate-600 max-w-2xl">
-                Explora las convocatorias deportivas y formativas abiertas en Talca. Filtra por tu área de preferencia y asegura tu lugar.
-            </p>
-        </div>
+<%
+    const esInicio = catalogoMode === "home";
+    const esFavoritos = catalogoMode === "favorites";
+    const rutaCatalogo = esInicio ? "/" : "/event";
+    const filtroActivo = typeof categoria === "string" ? categoria.toLowerCase() : "todas";
+    const actividadesDisponibles = Array.isArray(actividades) ? actividades : [];
+    const actividadesVisibles = esInicio ? actividadesDisponibles.slice(0, 4) : actividadesDisponibles;
+    const idsFavoritos = Array.isArray(favoriteIds) ? favoriteIds : [];
+    const filtrosCatalogo = [
+        { id: "todas", label: "Todas" },
+        { id: "deportes", label: "Deportes" },
+        { id: "salud", label: "Salud" },
+        { id: "sociales", label: "Sociales" }
+    ];
+    const nombreEstado = {
+        activo: "Activa",
+        pausado: "Pausada",
+        finalizado: "Finalizada",
+        cancelado: "Cancelada"
+    };
+    const claseEstado = {
+        activo: "bg-red-50 text-red-800",
+        pausado: "bg-amber-50 text-amber-900",
+        finalizado: "bg-stone-100 text-stone-700",
+        cancelado: "bg-stone-100 text-stone-700"
+    };
+%>
 
-        <!-- Filtros Táctiles -->
-        <div class="flex flex-wrap gap-2" role="tablist" aria-label="Filtro de categorías">
-            <a href="?categoria=todas" 
-               class="px-4 py-2 rounded-xl text-sm font-bold transition shadow-sm <%= (!categoria || categoria.toLowerCase() === 'todas') ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50' %>"
-               role="tab"
-               aria-selected="<%= (!categoria || categoria.toLowerCase() === 'todas') %>">
-               Todas
-            </a>
-            <a href="?categoria=Deportes" 
-               class="px-4 py-2 rounded-xl text-sm font-bold transition shadow-sm <%= (categoria && categoria.toLowerCase() === 'deportes') ? 'bg-red-600 text-white' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50' %>"
-               role="tab"
-               aria-selected="<%= (categoria && categoria.toLowerCase() === 'deportes') %>">
-               Deportes
-            </a>
-            <a href="?categoria=Salud" 
-               class="px-4 py-2 rounded-xl text-sm font-bold transition shadow-sm <%= (categoria && categoria.toLowerCase() === 'salud') ? 'bg-emerald-600 text-white' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50' %>"
-               role="tab"
-               aria-selected="<%= (categoria && categoria.toLowerCase() === 'salud') %>">
-               Salud
-            </a>
-            <a href="?categoria=Sociales" 
-               class="px-4 py-2 rounded-xl text-sm font-bold transition shadow-sm <%= (categoria && categoria.toLowerCase() === 'sociales') ? 'bg-sky-600 text-white' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50' %>"
-               role="tab"
-               aria-selected="<%= (categoria && categoria.toLowerCase() === 'sociales') %>">
-               Sociales
-            </a>
-        </div>
-    </div>
-
-    <!-- Formulario Fallback (Accesibilidad y Testing) -->
-    <form action="" method="GET" class="hidden">
-        <label for="categoria" class="sr-only">Seleccionar categoría:</label>
-        <select name="categoria" id="categoria" onchange="this.form.submit()">
-            <option value="todas" <%= (!categoria || categoria.toLowerCase() === 'todas') ? 'selected' : '' %>>Todas las actividades</option>
-            <option value="Deportes" <%= (categoria && categoria.toLowerCase() === 'deportes') ? 'selected' : '' %>>Deportes</option>
-            <option value="Salud" <%= (categoria && categoria.toLowerCase() === 'salud') ? 'selected' : '' %>>Salud</option>
-            <option value="Sociales" <%= (categoria && categoria.toLowerCase() === 'sociales') ? 'selected' : '' %>>Sociales</option>
-        </select>
-        <button type="submit">Filtrar</button>
-    </form>
-
-    <!-- Grilla de Actividades -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="listaActividades">
-        <% if (!actividades || actividades.length === 0) { %>
-            <!-- Estado vacío amigable (AC-04) -->
-            <div class="col-span-full bg-white rounded-2xl border border-dashed border-slate-300 p-12 text-center max-w-lg mx-auto" role="status" aria-live="polite">
-                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center">
-                    <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
+<section id="catalogo-actividades" class="scroll-mt-8 px-4 md:px-7 <%= esInicio ? 'py-16 md:py-24' : 'pb-16 pt-8 md:pb-24 md:pt-10' %>" aria-labelledby="catalogo-heading">
+    <div class="mx-auto max-w-[1280px]">
+        <% if (esInicio) { %>
+            <div class="mb-9 flex flex-col gap-5 sm:mb-12 sm:flex-row sm:items-end sm:justify-between">
+                <div class="max-w-2xl">
+                    <h2 id="catalogo-heading" class="text-3xl font-semibold leading-tight tracking-[-0.04em] text-muni-ink sm:text-4xl">Lo que viene en Talca</h2>
+                    <p class="mt-3 max-w-xl text-base leading-7 text-muni-muted">Fechas, lugares y actividades para encontrar tu próximo espacio de movimiento.</p>
                 </div>
-                <h3 class="text-lg font-bold text-slate-900 mb-2">No hay actividades para esta categoría</h3>
-                <p class="text-sm text-slate-600 mb-6">
-                    No registramos convocatorias abiertas en la categoría seleccionada por el momento. Puedes consultar las demás alternativas de la comuna.
-                </p>
-                <a href="?categoria=todas" class="inline-flex px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-red-600 hover:bg-red-700 transition">
-                    Mostrar todas las actividades
+                <a href="/event" class="inline-flex w-fit items-center gap-2 border-b border-muni-red pb-1 text-sm font-semibold text-muni-ink transition-colors hover:text-muni-red-dark">
+                    Ver toda la cartelera
+                    <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14M13 6l6 6-6 6"></path>
+                    </svg>
                 </a>
             </div>
+        <% } %>
+
+        <% if (!esFavoritos) { %>
+            <div class="mb-6 flex flex-wrap gap-2" aria-label="Filtrar actividades por categoría">
+                <% filtrosCatalogo.forEach((filtro) => { %>
+                    <%
+                        const seleccionado = filtroActivo === filtro.id || (filtro.id === "todas" && filtroActivo === "todas");
+                        const parametrosFiltro = new URLSearchParams();
+                        if (filtro.id !== "todas") parametrosFiltro.set("categoria", filtro.id);
+                        if (buscar) parametrosFiltro.set("buscar", buscar);
+                        const destinoFiltro = `${rutaCatalogo}${parametrosFiltro.size ? `?${parametrosFiltro.toString()}` : ""}`;
+                    %>
+                    <a href="<%= destinoFiltro %>" data-catalog-filter class="rounded-full border px-4 py-2 text-[13px] font-medium transition-colors <%= seleccionado ? 'border-muni-ink bg-muni-ink text-white' : 'border-black/15 bg-white text-muni-ink hover:border-muni-red hover:text-muni-red-dark' %>" <% if (seleccionado) { %>aria-current="page"<% } %>>
+                        <%= filtro.label %>
+                    </a>
+                <% }) %>
+            </div>
+        <% } %>
+
+        <% if (typeof favoritoError !== "undefined" && favoritoError) { %>
+            <div class="mb-5 border-y border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900" role="alert">No se pudo actualizar el favorito. Revisa que la migración de favoritos esté aplicada en Supabase e inténtalo otra vez.</div>
+        <% } %>
+
+        <% if (catalogoError) { %>
+            <div class="border-y border-red-200 bg-red-50 px-5 py-5 text-sm text-red-900" role="alert">
+                <p class="font-semibold">No pudimos consultar la cartelera ahora.</p>
+                <p class="mt-1"><%= esFavoritos ? "Comprueba que la migración de favoritos esté aplicada en Supabase y vuelve a intentarlo." : "Revisa la conexión con Supabase y que estén aplicadas las migraciones del proyecto." %></p>
+                <a href="<%= reintentarUrl %>" class="mt-3 inline-flex font-semibold underline underline-offset-4">Reintentar</a>
+            </div>
+        <% } else if (actividadesVisibles.length === 0) { %>
+            <div class="border-y border-black/10 py-12">
+                <h3 class="text-xl font-semibold tracking-[-0.03em] text-muni-ink"><%= esFavoritos ? "Todavía no guardas actividades" : buscar ? "No encontramos actividades con esa búsqueda" : "Todavía no hay actividades en esta categoría" %></h3>
+                <p class="mt-2 max-w-xl text-sm leading-6 text-muni-muted"><%= esFavoritos ? "Marca el corazón de una actividad para tenerla a mano aquí." : "Prueba con otra palabra o categoría, o vuelve a revisar la cartelera más adelante." %></p>
+                <% if (!esFavoritos && (filtroActivo !== "todas" || buscar)) { %>
+                    <a href="<%= rutaCatalogo %>" data-catalog-filter class="mt-5 inline-flex border-b border-muni-red pb-1 text-sm font-semibold text-muni-ink hover:text-muni-red-dark">Ver todas las actividades</a>
+                <% } %>
+            </div>
         <% } else { %>
-            <% actividades.forEach((actividad) => { 
-                let badgeBg = "bg-red-600 text-white";
-                if (actividad.categoria && actividad.categoria.toLowerCase() === "salud") badgeBg = "bg-emerald-600 text-white";
-                if (actividad.categoria && actividad.categoria.toLowerCase() === "sociales") badgeBg = "bg-sky-600 text-white";
+            <div class="border-t border-black/15">
+                <% actividadesVisibles.forEach((actividad, index) => { %>
+                    <%
+                        const fechaActividad = new Date(actividad.fecha);
+                        const fechaValida = !Number.isNaN(fechaActividad.getTime());
+                        const partesFecha = fechaValida ? new Intl.DateTimeFormat("es-CL", {
+                            weekday: "short", day: "2-digit", month: "short", timeZone: "America/Santiago"
+                        }).formatToParts(fechaActividad) : [];
+                        const parteFecha = (tipo) => partesFecha.find((parte) => parte.type === tipo)?.value || "";
+                        const fechaHora = fechaValida ? new Intl.DateTimeFormat("es-CL", {
+                            hour: "2-digit", minute: "2-digit", timeZone: "America/Santiago", hourCycle: "h23"
+                        }).format(fechaActividad) : "Hora por confirmar";
+                        const estado = actividad.estado || "activo";
+                        const imagenActividad = typeof actividad.imagen === "string" ? actividad.imagen.trim() : "";
+                        const esFavorita = idsFavoritos.includes(actividad.id);
+                        const cuposDisponibles = Math.max(0, Number(actividad.cupos_totales || 0) - Number(actividad.cupos_ocupados || 0));
+                        const inscripcionAbierta = estado === "activo" && cuposDisponibles > 0;
+                    %>
+                    <article class="grid gap-4 border-b border-black/10 py-6 sm:grid-cols-[5.75rem_minmax(0,1.45fr)_minmax(10rem,0.85fr)_8rem_5.5rem] sm:items-center sm:gap-6 sm:py-7" data-categoria="<%= actividad.categoria %>">
+                        <time class="flex items-baseline gap-2 tabular-nums sm:block" datetime="<%= fechaValida ? fechaActividad.toISOString() : '' %>">
+                            <span class="text-3xl font-semibold leading-none tracking-[-0.04em] text-muni-ink"><%= fechaValida ? parteFecha("day") : "—" %></span>
+                            <span class="text-xs font-semibold uppercase tracking-[0.08em] text-muni-red-dark"><%= fechaValida ? parteFecha("month").replace(".", "") : "Por definir" %></span>
+                            <span class="sm:mt-1 sm:block sm:text-[11px] sm:font-medium sm:uppercase sm:tracking-[0.08em] sm:text-muni-muted"><%= fechaValida ? parteFecha("weekday").replace(".", "") : "" %></span>
+                        </time>
 
-                let fechaFormateada = "";
-                try {
-                    const f = new Date(actividad.fecha);
-                    fechaFormateada = f.toLocaleDateString("es-CL", { 
-                        weekday: 'short', 
-                        day: 'numeric', 
-                        month: 'short',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-                } catch(e) {
-                    fechaFormateada = actividad.fecha || "Fecha por confirmar";
-                }
-            %>
-                <article class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col justify-between" data-categoria="<%= actividad.categoria %>">
-                    <% if (actividad.imagen) { %>
-                        <div class="relative h-48 w-full bg-slate-100 overflow-hidden">
-                            <img src="<%= actividad.imagen %>" alt="<%= actividad.nombre %>" class="w-full h-full object-cover" loading="lazy" width="380" height="200">
-                            <span class="absolute top-3 left-3 px-3 py-1 text-xs font-bold rounded-full uppercase tracking-wider <%= badgeBg %> shadow-sm">
-                                <%= actividad.categoria %>
-                            </span>
-                        </div>
-                    <% } %>
-
-                    <div class="p-5 flex flex-col flex-grow justify-between gap-4">
-                        <div>
-                            <div class="flex items-center justify-between gap-2 mb-2">
-                                <% if (!actividad.imagen) { %>
-                                    <span class="px-2.5 py-0.5 text-xs font-bold rounded-full uppercase tracking-wide <%= badgeBg %>">
-                                        <%= actividad.categoria %>
-                                    </span>
-                                <% } %>
-                                <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 ml-auto">
-                                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                    <%= actividad.estado === 'activo' ? 'Cupos disponibles' : actividad.estado %>
-                                </span>
-                            </div>
-
-                            <h3 class="text-base font-extrabold text-slate-900 leading-snug mb-1.5 line-clamp-2">
-                                <%= actividad.nombre %>
-                            </h3>
-                            <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed">
-                                <%= actividad.descripcion %>
-                            </p>
-                        </div>
-
-                        <div class="space-y-2 pt-3 border-t border-slate-100 text-xs text-slate-600">
-                            <div class="flex items-center gap-2 text-slate-700 font-medium">
-                                <svg class="w-4 h-4 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                                    <line x1="3" y1="10" x2="21" y2="10"></line>
-                                </svg>
-                                <span><%= fechaFormateada %></span>
-                            </div>
-
-                            <% if (actividad.lugar) { %>
-                            <div class="flex items-center gap-2 text-slate-600">
-                                <svg class="w-4 h-4 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                                    <circle cx="12" cy="10" r="3"></circle>
-                                </svg>
-                                <span class="truncate"><%= actividad.lugar %></span>
-                            </div>
+                        <div class="grid min-w-0 grid-cols-[5rem_minmax(0,1fr)] items-center gap-3 sm:items-start sm:gap-4">
+                            <% if (imagenActividad) { %>
+                                <img src="<%= imagenActividad %>" alt="" class="h-16 w-20 rounded-lg object-cover sm:h-20 sm:w-24" width="96" height="80" loading="lazy">
+                            <% } else { %>
+                                <div aria-hidden="true" class="flex h-16 w-20 items-center justify-center rounded-lg bg-muni-soft text-muni-red-dark sm:h-20 sm:w-24">
+                                    <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M3 12h4l2.5-7L14 19l2.5-7H21"></path>
+                                    </svg>
+                                </div>
                             <% } %>
-
-                            <% if (actividad.cupos) { %>
-                            <div class="flex items-center gap-2 font-bold text-emerald-700">
-                                <svg class="w-4 h-4 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                    <circle cx="9" cy="7" r="4"></circle>
-                                </svg>
-                                <span><%= actividad.cupos %></span>
+                            <div class="min-w-0">
+                                <div class="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-semibold uppercase tracking-[0.11em] text-muni-muted">
+                                    <span><%= actividad.categoria %></span>
+                                    <span aria-hidden="true" class="h-1 w-1 rounded-full bg-muni-red-dark"></span>
+                                    <span class="tabular-nums"><%= fechaHora %></span>
+                                </div>
+                                <h3 class="text-lg font-semibold leading-snug tracking-[-0.025em] text-muni-ink sm:text-xl"><%= actividad.nombre %></h3>
+                                <p class="mt-1.5 max-w-[62ch] text-sm leading-6 text-muni-muted"><%= actividad.descripcion %></p>
                             </div>
+                        </div>
+
+                        <div class="min-w-0 text-sm leading-6 text-muni-muted">
+                            <div class="flex items-start gap-2">
+                                <svg aria-hidden="true" class="mt-1 h-4 w-4 shrink-0 text-muni-red-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"></path><circle cx="12" cy="10" r="2.5"></circle>
+                                </svg>
+                                <span><%= actividad.lugar || "Recinto por confirmar" %></span>
+                            </div>
+                            <p class="mt-1 pl-6 text-xs <%= cuposDisponibles > 0 ? 'text-muni-muted' : 'font-medium text-red-800' %>"><%= cuposDisponibles === 1 ? "1 cupo disponible" : `${cuposDisponibles} cupos disponibles` %></p>
+                        </div>
+
+                        <span class="inline-flex w-fit items-center rounded-full px-3 py-1.5 text-xs font-semibold <%= claseEstado[estado] || 'bg-stone-100 text-stone-700' %>">
+                            <%= nombreEstado[estado] || "Estado por confirmar" %>
+                        </span>
+
+                        <div class="flex items-center gap-2">
+                            <% if (isResident) { %>
+                                <form action="/favoritos/<%= actividad.id %>" method="post">
+                                    <input type="hidden" name="csrfToken" value="<%= csrfToken || '' %>">
+                                    <input type="hidden" name="action" value="<%= esFavorita ? 'remove' : 'add' %>">
+                                    <input type="hidden" name="returnTo" value="<%= currentPath || '/event' %>">
+                                    <button type="submit" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/15 text-muni-ink transition-colors hover:border-muni-red hover:bg-red-50 hover:text-muni-red-dark" aria-label="<%= esFavorita ? 'Quitar de favoritos' : 'Guardar en favoritos' %>: <%= actividad.nombre %>" title="<%= esFavorita ? 'Quitar de favoritos' : 'Guardar en favoritos' %>">
+                                        <svg aria-hidden="true" class="h-5 w-5 <%= esFavorita ? 'fill-muni-red-dark text-muni-red-dark' : '' %>" viewBox="0 0 24 24" fill="<%= esFavorita ? 'currentColor' : 'none' %>" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.8c0 5.4-8.8 10.2-8.8 10.2S3.2 14.2 3.2 8.8a4.3 4.3 0 0 1 8.8-1 4.3 4.3 0 0 1 8.8 1Z"></path></svg>
+                                    </button>
+                                </form>
+                            <% } else { %>
+                                <a href="/login?next=<%= encodeURIComponent(currentPath || '/event') %>" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/15 text-muni-ink transition-colors hover:border-muni-red hover:bg-red-50 hover:text-muni-red-dark" aria-label="Inicia sesión para guardar: <%= actividad.nombre %>" title="Guardar en favoritos">
+                                    <svg aria-hidden="true" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.8c0 5.4-8.8 10.2-8.8 10.2S3.2 14.2 3.2 8.8a4.3 4.3 0 0 1 8.8-1 4.3 4.3 0 0 1 8.8 1Z"></path></svg>
+                                </a>
+                            <% } %>
+                            <% if (inscripcionAbierta) { %>
+                                <a href="/inscripciones/<%= actividad.id %>" class="inline-flex h-10 items-center justify-center rounded-full bg-muni-red-dark px-4 text-xs font-semibold text-white transition-colors hover:bg-red-800" aria-label="Inscribirse: <%= actividad.nombre %>">Inscribirme</a>
+                            <% } else { %>
+                                <span class="inline-flex h-10 items-center justify-center rounded-full border border-black/10 px-3 text-xs font-medium text-muni-muted" aria-label="Inscripción cerrada para <%= actividad.nombre %>"><%= estado === "activo" ? "Sin cupos" : "Cerrada" %></span>
                             <% } %>
                         </div>
-
-                        <div class="pt-2">
-                            <a href="/pagos" class="w-full py-2.5 px-4 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold text-sm rounded-xl text-center transition flex items-center justify-center gap-2 shadow-sm">
-                                <span>Inscribirme al taller</span>
-                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                                    <polyline points="12 5 19 12 12 19"></polyline>
-                                </svg>
-                            </a>
-                        </div>
-                    </div>
-                </article>
-            <% }) %>
+                    </article>
+                <% }) %>
+            </div>
+            <p class="mt-4 text-xs text-muni-muted">Las fechas, los estados y la disponibilidad se consultan desde la base de datos municipal; cada reserva actualiza los cupos.</p>
         <% } %>
     </div>
 </section>
 
 <script>
-(function() {
-    const catalogoSection = document.getElementById('catalogo-actividades');
-    if (!catalogoSection) return;
+(() => {
+    const catalogoSection = document.getElementById("catalogo-actividades");
+    if (!catalogoSection || catalogoSection.dataset.filtersBound === "true") return;
+    catalogoSection.dataset.filtersBound = "true";
 
-    // Delegación de eventos para capturar los clics en los botones de filtro de categorías
-    catalogoSection.addEventListener('click', async (e) => {
-        const link = e.target.closest('a[role="tab"], a[href*="categoria="]');
-        if (!link || !catalogoSection.contains(link)) return;
+    async function actualizarCatalogo(url) {
+        const response = await fetch(url, {
+            headers: { "X-Requested-With": "XMLHttpRequest" }
+        });
+        if (!response.ok) throw new Error("No se pudo actualizar la cartelera.");
 
-        const href = link.getAttribute('href');
-        if (!href || href.startsWith('#') || href.startsWith('/pagos') || href.startsWith('/contact')) return;
+        const html = await response.text();
+        const documento = new DOMParser().parseFromString(html, "text/html");
+        const catalogoActualizado = documento.getElementById("catalogo-actividades");
+        if (!catalogoActualizado) throw new Error("La respuesta no contiene la cartelera.");
 
-        e.preventDefault();
+        catalogoSection.innerHTML = catalogoActualizado.innerHTML;
+    }
 
-        // Evitar recargar si ya está seleccionada la categoría actual
-        if (link.getAttribute('aria-selected') === 'true') return;
+    catalogoSection.addEventListener("click", async (event) => {
+        const enlace = event.target.closest("a[data-catalog-filter]");
+        if (!enlace || !catalogoSection.contains(enlace)) return;
+
+        const destino = new URL(enlace.href, window.location.href);
+        if (destino.origin !== window.location.origin) return;
+        event.preventDefault();
+        if (destino.pathname === window.location.pathname && destino.search === window.location.search) return;
 
         try {
-            const lista = document.getElementById('listaActividades');
-            if (lista) {
-                lista.style.transition = 'opacity 0.15s ease';
-                lista.style.opacity = '0.4';
-            }
-
-            const response = await fetch(href, {
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            });
-            if (!response.ok) throw new Error('Respuesta no exitosa al cargar categoría');
-
-            const html = await response.text();
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const nuevoCatalogo = doc.getElementById('catalogo-actividades');
-
-            if (nuevoCatalogo) {
-                catalogoSection.innerHTML = nuevoCatalogo.innerHTML;
-            }
-
-            window.history.pushState({ path: href }, '', href);
+            await actualizarCatalogo(destino.href);
+            window.history.pushState({}, "", `${destino.pathname}${destino.search}`);
         } catch (error) {
-            console.error('Error al filtrar dinámicamente:', error);
-            window.location.href = href;
+            window.location.assign(destino.href);
         }
     });
 
-    if (!window.__catalogoPopstateAttached) {
-        window.__catalogoPopstateAttached = true;
-        window.addEventListener('popstate', async () => {
-            try {
-                const response = await fetch(window.location.href, {
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                });
-                if (!response.ok) return window.location.reload();
-
-                const html = await response.text();
-                const doc = new DOMParser().parseFromString(html, 'text/html');
-                const nuevoCatalogo = doc.getElementById('catalogo-actividades');
-                const currentCatalogo = document.getElementById('catalogo-actividades');
-                if (nuevoCatalogo && currentCatalogo) {
-                    currentCatalogo.innerHTML = nuevoCatalogo.innerHTML;
-                }
-            } catch (e) {
-                window.location.reload();
-            }
-        });
-    }
+    window.addEventListener("popstate", async () => {
+        try {
+            await actualizarCatalogo(window.location.href);
+        } catch (error) {
+            window.location.reload();
+        }
+    });
 })();
 </script>

@@ -1,61 +1,48 @@
-<footer class="bg-white border-t border-slate-200 mt-auto pt-14 pb-8 px-4">
-    <div class="max-w-7xl mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 mb-12">
-            <!-- Columna Marca (5 cols) -->
-            <div class="lg:col-span-5 flex flex-col items-start">
-                <a href="/" class="flex items-center gap-3 mb-4 group">
-                    <img src="/images/logo-muni.png" alt="Emblema Municipalidad de Talca" class="w-10 h-10 object-contain" width="40" height="40">
-                    <div>
-                        <span class="block text-lg font-extrabold text-slate-900 tracking-tight group-hover:text-red-600 transition">Muni Sport</span>
-                        <span class="block text-xs font-semibold text-slate-500">Comuna de Talca</span>
-                    </div>
-                </a>
-                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-sm">
-                    Plataforma comunitaria orientada a centralizar el descubrimiento de actividades deportivas, formativas y de salud para todos los vecinos de Talca.
-                </p>
-            </div>
-
-            <!-- Columna Navegación (2 cols) -->
-            <div class="lg:col-span-2">
-                <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-4">Navegación</h4>
-                <ul class="space-y-2.5 text-xs sm:text-sm text-slate-600">
-                    <li><a href="/" class="hover:text-red-600 transition">Inicio</a></li>
-                    <li><a href="/event" class="hover:text-red-600 transition">Catálogo de Actividades</a></li>
-                    <li><a href="/sport" class="hover:text-red-600 transition">Disciplinas Deportivas</a></li>
-                    <li><a href="/personal" class="hover:text-red-600 transition">Equipo Profesional</a></li>
-                </ul>
-            </div>
-
-            <!-- Columna Participación (2 cols) -->
-            <div class="lg:col-span-2">
-                <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-4">Participación</h4>
-                <ul class="space-y-2.5 text-xs sm:text-sm text-slate-600">
-                    <li><a href="/contact" class="hover:text-red-600 transition">Atención Ciudadana</a></li>
-                    <li><a href="/login" class="hover:text-red-600 transition">Acceso Vecinal</a></li>
-                    <li><a href="/register" class="hover:text-red-600 transition">Registro de Usuario</a></li>
-                    <li><a href="/pagos" class="hover:text-red-600 transition">Estado de Inscripciones</a></li>
-                </ul>
-            </div>
-
-            <!-- Columna Contacto (3 cols) -->
-            <div class="lg:col-span-3">
-                <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-4">Punto de Contacto</h4>
-                <div class="space-y-2.5 text-xs text-slate-600">
-                    <p><strong class="text-slate-800">Ubicación:</strong> 1 Oriente 1199, Talca, Región del Maule</p>
-                    <p><strong class="text-slate-800">Horario:</strong> Lunes a Viernes de 08:30 a 17:30 hrs</p>
-                    <p><strong class="text-slate-800">Mesa Central:</strong> (+56 71) 220 3800</p>
-                </div>
-            </div>
+<footer class="mt-auto border-t border-black/10 bg-white px-4 py-12 md:px-7">
+    <div class="mx-auto grid max-w-[1440px] gap-10 sm:grid-cols-2 lg:grid-cols-12">
+        <div class="lg:col-span-5">
+            <a href="/" class="inline-flex items-center gap-3" aria-label="Muni Sport, inicio">
+                <img src="/images/logo-muni.png" alt="" class="h-10 w-10 object-contain" width="40" height="40">
+                <span>
+                    <span class="block text-lg font-semibold tracking-[-0.04em] text-muni-ink">Muni Sport</span>
+                    <span class="block text-[10px] font-medium uppercase tracking-[0.12em] text-muni-muted">Talca se mueve en comunidad</span>
+                </span>
+            </a>
+            <p class="mt-5 max-w-md text-sm leading-6 text-muni-muted">
+                Cartelera municipal de actividades deportivas, recreativas y de salud para vecinas y vecinos de Talca.
+            </p>
         </div>
 
-        <!-- Footer Bottom -->
-        <div class="pt-8 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-            <p>&copy; <%= new Date().getFullYear() %> Muni Sport Talca. Plataforma de desarrollo comunitario.</p>
-            <div class="flex items-center gap-4">
-                <a href="/contact" class="hover:text-slate-800 transition">Orientación Vecinal</a>
-                <span>•</span>
-                <a href="/" class="hover:text-slate-800 transition">Portal Talca</a>
-            </div>
+        <div class="lg:col-span-2">
+            <h2 class="mb-4 text-xs font-semibold uppercase tracking-[0.12em] text-muni-ink">Explorar</h2>
+            <ul class="space-y-3 text-sm text-muni-muted">
+                <li><a href="/event" class="hover:text-muni-red-dark">Cartelera</a></li>
+                <li><a href="/sport" class="hover:text-muni-red-dark">Disciplinas</a></li>
+                <li><a href="/personal" class="hover:text-muni-red-dark">Equipo</a></li>
+            </ul>
+        </div>
+
+        <div class="lg:col-span-2">
+            <h2 class="mb-4 text-xs font-semibold uppercase tracking-[0.12em] text-muni-ink">Participar</h2>
+            <ul class="space-y-3 text-sm text-muni-muted">
+                <li><a href="/contact" class="hover:text-muni-red-dark">Contacto municipal</a></li>
+                <li><a href="/login" class="hover:text-muni-red-dark">Acceso vecinal</a></li>
+                <li><a href="/register" class="hover:text-muni-red-dark">Crear cuenta vecinal</a></li>
+            </ul>
+        </div>
+
+        <div class="lg:col-span-3">
+            <h2 class="mb-4 text-xs font-semibold uppercase tracking-[0.12em] text-muni-ink">Municipalidad de Talca</h2>
+            <address class="space-y-2 text-sm not-italic leading-6 text-muni-muted">
+                <p>1 Oriente 1199, Talca, Región del Maule</p>
+                <p>Lunes a viernes · 08:30 a 17:30 hrs</p>
+                <p><a href="tel:+56712203800" class="hover:text-muni-red-dark">(+56 71) 220 3800</a></p>
+            </address>
+        </div>
+
+        <div class="flex flex-col gap-3 border-t border-black/10 pt-5 text-xs text-muni-muted sm:col-span-2 sm:flex-row sm:items-center sm:justify-between lg:col-span-12">
+            <p>&copy; <%= new Date().getFullYear() %> Muni Sport Talca. Información municipal de actividades.</p>
+            <a href="/admin/actividades" class="hover:text-muni-red-dark">Acceso para organizadores</a>
         </div>
     </div>
 </footer>

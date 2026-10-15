@@ -1,78 +1,146 @@
+<%
+    const perfilActivo = isResident && residentProfile
+        ? residentProfile
+        : (isOrganizer && organizerProfile ? organizerProfile : null);
+    const nombrePerfil = perfilActivo?.fullName
+        || (isOrganizer && organizerEmail ? organizerEmail.split("@")[0] : "Mi cuenta");
+    const correoPerfil = perfilActivo?.email || (isOrganizer ? organizerEmail : "");
+    const inicialesPerfil = perfilActivo?.initials
+        || String(nombrePerfil).split(/\s+/).filter(Boolean).slice(0, 2).map((parte) => Array.from(parte)[0] || "").join("").toLocaleUpperCase("es-CL")
+        || "M";
+    const avatarPerfil = perfilActivo?.avatarUrl || "";
+%>
 <a href="#contenido-principal" class="skip-link">Saltar al contenido principal</a>
 
-<header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 py-3.5 transition">
-    <div class="max-w-7xl mx-auto flex items-center justify-between">
-        <!-- Logo y Marca (Logo prominente, sin píldoras en la cabecera) -->
-        <a href="/" class="flex items-center gap-3.5 group" aria-label="Muni Sport Talca - Volver al inicio">
-            <img src="/images/logo-muni.png" alt="Emblema Ilustre Municipalidad de Talca" class="w-12 h-12 object-contain shrink-0" width="48" height="48">
-            <div class="flex flex-col">
-                <span class="text-xl font-black text-slate-900 tracking-tight group-hover:text-red-600 transition leading-tight">Muni Sport</span>
-                <span class="text-xs font-semibold text-slate-500 tracking-wider uppercase">Municipalidad de Talca</span>
-            </div>
+<header class="relative z-20 bg-white px-4 md:px-7">
+    <div class="mx-auto flex min-h-[82px] max-w-[1440px] items-center justify-between gap-3 border-b border-black/10 sm:gap-5">
+        <a href="/" class="flex shrink-0 items-center gap-1.5 md:gap-2" aria-label="Muni Sport Talca, inicio">
+            <img src="/images/logo-muni.png" alt="Escudo de la Municipalidad de Talca" class="h-10 w-10 object-contain md:h-14 md:w-14" width="56" height="56">
+            <span class="leading-tight">
+                <span class="block text-[17px] font-semibold tracking-[-0.04em] text-muni-ink md:text-[22px]">Muni Sport</span>
+                <span class="mt-0.5 block text-[9px] font-medium uppercase tracking-[0.1em] text-muni-muted md:text-[11px] md:tracking-[0.12em]">Municipalidad de Talca</span>
+            </span>
         </a>
 
-        <!-- Enlaces Desktop -->
-        <nav class="hidden md:flex items-center gap-1.5 text-sm font-semibold text-slate-700" aria-label="Navegación principal">
-            <a href="/" class="px-3.5 py-2 rounded-xl hover:text-slate-900 hover:bg-slate-100 transition">Inicio</a>
-            <a href="/event" class="px-3.5 py-2 rounded-xl hover:text-slate-900 hover:bg-slate-100 transition">Catálogo</a>
-            <a href="/sport" class="px-3.5 py-2 rounded-xl hover:text-slate-900 hover:bg-slate-100 transition">Disciplinas</a>
-            <a href="/personal" class="px-3.5 py-2 rounded-xl hover:text-slate-900 hover:bg-slate-100 transition">Profesionales</a>
-            <a href="/contact" class="px-3.5 py-2 rounded-xl hover:text-slate-900 hover:bg-slate-100 transition">Contacto</a>
+        <nav class="hidden items-center gap-5 text-sm font-medium text-muni-ink xl:flex xl:gap-7 xl:text-base" aria-label="Navegación principal">
+            <a href="/" class="transition-colors hover:text-muni-red-dark">Inicio</a>
+            <a href="/event" class="transition-colors hover:text-muni-red-dark">Cartelera</a>
+            <a href="/sport" class="transition-colors hover:text-muni-red-dark">Disciplinas</a>
+            <a href="/personal" class="transition-colors hover:text-muni-red-dark">Equipo</a>
+            <a href="/contact" class="transition-colors hover:text-muni-red-dark">Contacto</a>
         </nav>
 
-        <!-- Botón Acceso Vecinal -->
-        <div class="hidden md:flex items-center gap-3">
-            <a href="/login" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-red-600 hover:bg-red-700 active:bg-red-800 transition shadow-sm">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-                <span>Acceso Vecinal</span>
-            </a>
+        <div class="flex shrink-0 items-center gap-1 sm:gap-2">
+            <% if (isOrganizer || perfilActivo) { %>
+                <form action="/event" method="get" role="search" class="hidden h-10 items-center gap-2 rounded-full border border-black/10 bg-muni-soft/70 px-3 lg:flex">
+                    <label for="busqueda-header" class="sr-only">Buscar actividades</label>
+                    <input id="busqueda-header" name="buscar" type="search" maxlength="100" placeholder="Buscar actividades" class="w-36 bg-transparent text-xs text-muni-ink outline-none placeholder:text-muni-muted xl:w-44">
+                    <button type="submit" class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-muni-muted transition-colors hover:bg-white hover:text-muni-red-dark" aria-label="Buscar actividades">
+                        <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+                    </button>
+                </form>
+
+                <% if (isOrganizer) { %>
+                    <div class="hidden items-center gap-1 sm:flex">
+                        <a href="/admin/actividades/nueva" class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-muni-red-dark text-white transition-colors hover:bg-red-800" aria-label="Crear actividad" title="Crear actividad">
+                            <svg aria-hidden="true" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+                        </a>
+                        <a href="/admin/actividades" class="inline-flex h-10 w-10 items-center justify-center rounded-full text-muni-ink transition-colors hover:bg-muni-soft hover:text-muni-red-dark" aria-label="Editar y gestionar actividades" title="Editar y gestionar actividades">
+                            <svg aria-hidden="true" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
+                        </a>
+                    </div>
+                <% } else { %>
+                    <a href="/favoritos" class="hidden h-10 w-10 items-center justify-center rounded-full text-muni-ink transition-colors hover:bg-red-50 hover:text-muni-red-dark sm:inline-flex" aria-label="Mis actividades favoritas" title="Mis favoritos">
+                        <svg aria-hidden="true" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.8c0 5.4-8.8 10.2-8.8 10.2S3.2 14.2 3.2 8.8a4.3 4.3 0 0 1 8.8-1 4.3 4.3 0 0 1 8.8 1Z"></path></svg>
+                    </a>
+                <% } %>
+
+                <details class="relative">
+                    <summary class="flex h-10 w-10 cursor-pointer list-none items-center justify-center overflow-hidden rounded-full bg-muni-soft text-xs font-semibold text-muni-red-dark ring-1 ring-black/10 [&::-webkit-details-marker]:hidden" aria-label="Abrir perfil de <%= nombrePerfil %>">
+                        <% if (avatarPerfil) { %>
+                            <img src="<%= avatarPerfil %>" alt="" class="h-full w-full object-cover" referrerpolicy="no-referrer">
+                        <% } else { %>
+                            <span aria-hidden="true"><%= inicialesPerfil %></span>
+                        <% } %>
+                    </summary>
+                    <div class="absolute right-0 top-[calc(100%+0.75rem)] z-50 w-64 rounded-2xl border border-black/10 bg-white p-4 shadow-[0_18px_48px_-18px_rgba(25,25,25,0.28)]">
+                        <p class="truncate text-sm font-semibold text-muni-ink"><%= nombrePerfil %></p>
+                        <p class="mt-0.5 truncate text-xs text-muni-muted"><%= correoPerfil %></p>
+                        <% if (isOrganizer) { %>
+                            <a href="/admin/actividades" class="mt-4 flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-muni-ink hover:bg-muni-soft">
+                                <svg aria-hidden="true" class="h-4 w-4 text-muni-red-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
+                                Gestión de actividades
+                            </a>
+                            <a href="/admin/actividades/nueva" class="flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-muni-ink hover:bg-muni-soft">
+                                <svg aria-hidden="true" class="h-4 w-4 text-muni-red-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+                                Crear actividad
+                            </a>
+                            <a href="/event" class="flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-muni-ink hover:bg-muni-soft">Ver cartelera pública</a>
+                        <% } %>
+                        <% if (isResident) { %>
+                            <a href="/favoritos" class="<%= isOrganizer ? 'mt-1' : 'mt-4' %> flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-muni-ink hover:bg-muni-soft">
+                                <svg aria-hidden="true" class="h-4 w-4 text-muni-red-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.8c0 5.4-8.8 10.2-8.8 10.2S3.2 14.2 3.2 8.8a4.3 4.3 0 0 1 8.8-1 4.3 4.3 0 0 1 8.8 1Z"></path></svg>
+                                Mis favoritos
+                            </a>
+                        <% } %>
+                        <form action="<%= isOrganizer ? '/admin/logout' : '/logout' %>" method="post" class="mt-2 border-t border-black/10 pt-2">
+                            <input type="hidden" name="csrfToken" value="<%= csrfToken || '' %>">
+                            <button type="submit" class="w-full rounded-lg px-2 py-2 text-left text-sm font-medium text-muni-red-dark hover:bg-red-50">Cerrar sesión</button>
+                        </form>
+                    </div>
+                </details>
+            <% } else { %>
+                <a href="/login" class="inline-flex min-h-10 items-center gap-2 rounded-full bg-muni-red-dark px-3 text-xs font-semibold text-white transition-colors hover:bg-red-800 sm:px-5 sm:text-sm" aria-label="Acceso vecinal">
+                    <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M5 21a7 7 0 0 1 14 0"></path></svg>
+                    <span>Acceso vecinal</span>
+                </a>
+            <% } %>
         </div>
 
-        <!-- Botón Hamburguesa Móvil -->
-        <button type="button" id="navToggle" class="md:hidden p-2.5 rounded-xl text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-red-600" aria-expanded="false" aria-controls="navMenu" aria-label="Abrir menú de navegación">
-            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-        </button>
-    </div>
-
-    <!-- Menú Desplegable Móvil -->
-    <div id="navMenu" class="hidden md:hidden border-t border-slate-100 mt-3 pt-3 flex flex-col gap-1 pb-2">
-        <a href="/" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-800 hover:bg-slate-100 transition">Inicio</a>
-        <a href="/event" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-800 hover:bg-slate-100 transition">Catálogo</a>
-        <a href="/sport" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-800 hover:bg-slate-100 transition">Disciplinas</a>
-        <a href="/personal" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-800 hover:bg-slate-100 transition">Profesionales</a>
-        <a href="/contact" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-800 hover:bg-slate-100 transition">Contacto</a>
-        <div class="pt-2 mt-1 border-t border-slate-100">
-            <a href="/login" class="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-bold text-white bg-red-600 hover:bg-red-700 active:bg-red-800 transition">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-                <span>Acceso Vecinal</span>
-            </a>
-        </div>
+        <details class="relative xl:hidden">
+            <summary class="flex min-h-10 cursor-pointer list-none items-center gap-2 rounded-full border border-black/15 px-3 text-sm font-medium text-muni-ink focus-visible:outline-muni-red [&::-webkit-details-marker]:hidden sm:px-4">
+                Menú
+                <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
+            </summary>
+            <nav class="absolute right-0 top-[calc(100%+0.75rem)] z-50 flex w-[min(88vw,22rem)] flex-col gap-1 rounded-2xl border border-black/10 bg-white p-3 shadow-[0_18px_48px_-18px_rgba(25,25,25,0.28)]" aria-label="Navegación móvil">
+                <% if (isOrganizer || perfilActivo) { %>
+                    <form action="/event" method="get" role="search" class="mb-2 flex h-11 items-center gap-2 rounded-xl border border-black/10 bg-muni-soft/70 px-3">
+                        <label for="busqueda-menu" class="sr-only">Buscar actividades</label>
+                        <input id="busqueda-menu" name="buscar" type="search" maxlength="100" placeholder="Buscar actividades" class="min-w-0 flex-1 bg-transparent text-sm text-muni-ink outline-none placeholder:text-muni-muted">
+                        <button type="submit" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muni-muted hover:bg-white hover:text-muni-red-dark" aria-label="Buscar actividades"><svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg></button>
+                    </form>
+                <% } %>
+                <a href="/" class="rounded-xl px-4 py-3 text-sm font-medium text-muni-ink hover:bg-muni-soft">Inicio</a>
+                <a href="/event" class="rounded-xl px-4 py-3 text-sm font-medium text-muni-ink hover:bg-muni-soft">Cartelera</a>
+                <a href="/sport" class="rounded-xl px-4 py-3 text-sm font-medium text-muni-ink hover:bg-muni-soft">Disciplinas</a>
+                <a href="/personal" class="rounded-xl px-4 py-3 text-sm font-medium text-muni-ink hover:bg-muni-soft">Equipo</a>
+                <a href="/contact" class="rounded-xl px-4 py-3 text-sm font-medium text-muni-ink hover:bg-muni-soft">Contacto</a>
+                <% if (isOrganizer) { %>
+                    <div class="my-1 border-t border-black/10 pt-2">
+                        <a href="/admin/actividades/nueva" class="flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium text-muni-ink hover:bg-muni-soft">
+                            <svg aria-hidden="true" class="h-4 w-4 text-muni-red-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+                            Crear actividad
+                        </a>
+                        <a href="/admin/actividades" class="flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium text-muni-ink hover:bg-muni-soft">
+                            <svg aria-hidden="true" class="h-4 w-4 text-muni-red-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
+                            Gestión de actividades
+                        </a>
+                    </div>
+                <% } %>
+                <% if (isResident) { %>
+                    <a href="/favoritos" class="rounded-xl px-4 py-3 text-sm font-medium text-muni-ink hover:bg-muni-soft">♡ Mis favoritos</a>
+                <% } %>
+                <% if (isOrganizer || perfilActivo) { %>
+                    <form action="<%= isOrganizer ? '/admin/logout' : '/logout' %>" method="post" class="mt-1 border-t border-black/10 pt-2">
+                        <input type="hidden" name="csrfToken" value="<%= csrfToken || '' %>">
+                        <button type="submit" class="w-full rounded-xl px-4 py-3 text-left text-sm font-semibold text-muni-red-dark hover:bg-red-50">Cerrar sesión</button>
+                    </form>
+                <% } else { %>
+                    <a href="/login" class="mt-1 rounded-xl bg-muni-red-dark px-4 py-3 text-center text-sm font-semibold text-white hover:bg-red-800">Acceso vecinal</a>
+                    <a href="/register" class="rounded-xl px-4 py-3 text-center text-sm font-medium text-muni-ink hover:bg-muni-soft">Crear cuenta</a>
+                    <a href="/admin/login" class="rounded-xl px-4 py-3 text-center text-xs font-medium text-muni-muted hover:bg-muni-soft">Acceso de organizadores</a>
+                <% } %>
+            </nav>
+        </details>
     </div>
 </header>
-
-<script>
-    (function() {
-        const toggle = document.getElementById('navToggle');
-        const menu = document.getElementById('navMenu');
-        if (toggle && menu) {
-            toggle.addEventListener('click', function() {
-                const isHidden = menu.classList.contains('hidden');
-                if (isHidden) {
-                    menu.classList.remove('hidden');
-                    toggle.setAttribute('aria-expanded', 'true');
-                } else {
-                    menu.classList.add('hidden');
-                    toggle.setAttribute('aria-expanded', 'false');
-                }
-            });
-        }
-    })();
-</script>

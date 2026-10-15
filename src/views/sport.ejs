@@ -4,204 +4,146 @@
     <%- include('partials/head') %>
     <title><%= title %></title>
 </head>
-<body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen flex flex-col">
+<body class="min-h-screen bg-white font-sans text-muni-ink antialiased">
     <%- include('partials/navigation') %>
 
     <main id="contenido-principal" class="flex-grow">
-        <!-- Encabezado de Página -->
-        <header class="bg-white border-b border-slate-200 py-10 px-4">
-            <div class="max-w-7xl mx-auto">
-                <nav class="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-3" aria-label="Ruta de navegación">
-                    <a href="/" class="hover:text-red-600 transition">Inicio</a>
-                    <span>/</span>
-                    <span class="text-slate-900">Disciplinas Deportivas</span>
+        <header class="px-4 pb-10 pt-12 md:px-7 md:pb-14 md:pt-16">
+            <div class="mx-auto max-w-[1280px]">
+                <nav class="mb-6 flex items-center gap-2 text-xs font-medium text-muni-muted" aria-label="Ruta de navegación">
+                    <a href="/" class="hover:text-muni-red-dark">Inicio</a>
+                    <span aria-hidden="true">/</span>
+                    <span aria-current="page" class="text-muni-ink">Disciplinas</span>
                 </nav>
-
-                <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight mb-2">
-                    Disciplinas y ramas recreativas en Talca
-                </h1>
-                <p class="text-sm sm:text-base text-slate-600 max-w-2xl">
-                    Espacios de práctica y desarrollo motriz diseñados para fomentar la vida sana y la integración barrial en distintos recintos de la comuna.
-                </p>
+                <div class="grid gap-5 md:grid-cols-[1fr_0.72fr] md:items-end md:gap-10">
+                    <h1 class="max-w-3xl text-4xl font-semibold leading-[1.02] tracking-[-0.04em] sm:text-5xl lg:text-6xl">Movimiento para cada etapa y barrio.</h1>
+                    <p class="max-w-xl text-base leading-7 text-muni-muted md:justify-self-end">Conoce algunas de las disciplinas y espacios comunitarios que forman parte de la oferta deportiva de Talca.</p>
+                </div>
+                <div class="mt-9 h-[3px] w-20 bg-muni-red-dark" aria-hidden="true"></div>
             </div>
         </header>
 
-        <!-- Grilla de Disciplinas -->
-        <section class="max-w-7xl mx-auto px-4 py-12">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Disciplina 1 -->
-                <article class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center justify-between gap-2 mb-3">
-                            <span class="px-2.5 py-0.5 text-xs font-bold rounded-full bg-red-100 text-red-700">Deportes Formativos</span>
-                            <span class="text-[11px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">7 a 17 años</span>
+        <section class="px-4 pb-16 md:px-7 md:pb-24" aria-labelledby="disciplinas-heading">
+            <div class="mx-auto max-w-[1280px]">
+                <h2 id="disciplinas-heading" class="sr-only">Disciplinas y talleres</h2>
+                <div class="border-t border-black/15">
+                    <article class="grid gap-4 border-b border-black/10 py-7 sm:grid-cols-[11rem_minmax(0,1fr)_minmax(12rem,0.68fr)] sm:items-start sm:gap-8 sm:py-8">
+                        <div class="flex min-w-0 items-center gap-3 sm:block">
+                            <img src="/images/actividad de deporte.jpg" alt="" class="h-16 w-24 shrink-0 rounded-lg object-cover sm:mt-3 sm:h-28 sm:w-full" width="320" height="180" loading="lazy">
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.1em] text-muni-red-dark sm:text-xs">Deportes formativos</p>
                         </div>
-                        <h2 class="text-lg font-bold text-slate-900 mb-2">Básquetbol Formativo</h2>
-                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
-                            Desarrollo de fundamentos técnicos, pases, tiros y juego colectivo guiado por profesores en cancha techada de parquet.
-                        </p>
-                        <div class="py-3 border-y border-slate-100 space-y-1.5 text-xs mb-4">
-                            <div class="flex justify-between gap-2">
-                                <strong class="text-slate-700">Recinto:</strong>
-                                <span class="text-slate-600">Polideportivo Municipal</span>
-                            </div>
-                            <div class="flex justify-between gap-2">
-                                <strong class="text-slate-700">Requisito:</strong>
-                                <span class="text-slate-600">Zapatillas deportivas y toalla</span>
-                            </div>
+                        <div>
+                            <p class="mb-2 text-xs font-medium text-muni-muted">7 a 17 años</p>
+                            <h3 class="text-xl font-semibold tracking-[-0.035em] sm:text-2xl">Básquetbol formativo</h3>
+                            <p class="mt-2 max-w-[62ch] text-sm leading-6 text-muni-muted">Fundamentos técnicos, pases, tiros y juego colectivo guiado en cancha techada.</p>
                         </div>
-                    </div>
-                    <a href="/event?categoria=Deportes" class="w-full py-2 px-3 rounded-xl text-center text-xs sm:text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 transition block">
-                        Ver talleres de básquetbol &rarr;
-                    </a>
-                </article>
+                        <div class="flex flex-col gap-2 text-sm leading-6 text-muni-muted sm:pt-5">
+                            <p><span class="font-semibold text-muni-ink">Recinto:</span> Polideportivo Municipal</p>
+                            <p><span class="font-semibold text-muni-ink">Llevar:</span> zapatillas deportivas y toalla</p>
+                            <a href="/event?categoria=deportes" class="mt-2 inline-flex w-fit items-center gap-2 border-b border-muni-red pb-1 font-semibold text-muni-ink hover:text-muni-red-dark">
+                                Ver cartelera de deportes
+                                <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+                            </a>
+                        </div>
+                    </article>
 
-                <!-- Disciplina 2 -->
-                <article class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center justify-between gap-2 mb-3">
-                            <span class="px-2.5 py-0.5 text-xs font-bold rounded-full bg-red-100 text-red-700">Deportes Formativos</span>
-                            <span class="text-[11px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">Desde 16 años</span>
+                    <article class="grid gap-4 border-b border-black/10 py-7 sm:grid-cols-[11rem_minmax(0,1fr)_minmax(12rem,0.68fr)] sm:items-start sm:gap-8 sm:py-8">
+                        <div class="flex min-w-0 items-center gap-3 sm:block">
+                            <img src="/images/actividad vacaciones de invierno.jpeg" alt="" class="h-16 w-24 shrink-0 rounded-lg object-cover sm:mt-3 sm:h-28 sm:w-full" width="320" height="180" loading="lazy">
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.1em] text-muni-red-dark sm:text-xs">Deportes formativos</p>
                         </div>
-                        <h2 class="text-lg font-bold text-slate-900 mb-2">Acondicionamiento Funcional</h2>
-                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
-                            Circuitos dinámicos enfocados en resistencia cardiovascular, postura, movilidad articular y fortalecimiento general.
-                        </p>
-                        <div class="py-3 border-y border-slate-100 space-y-1.5 text-xs mb-4">
-                            <div class="flex justify-between gap-2">
-                                <strong class="text-slate-700">Recinto:</strong>
-                                <span class="text-slate-600">Estadio Sur y Polideportivo</span>
-                            </div>
-                            <div class="flex justify-between gap-2">
-                                <strong class="text-slate-700">Requisito:</strong>
-                                <span class="text-slate-600">Ropa deportiva y agua</span>
-                            </div>
+                        <div>
+                            <p class="mb-2 text-xs font-medium text-muni-muted">Desde 16 años</p>
+                            <h3 class="text-xl font-semibold tracking-[-0.035em] sm:text-2xl">Acondicionamiento funcional</h3>
+                            <p class="mt-2 max-w-[62ch] text-sm leading-6 text-muni-muted">Circuitos para trabajar resistencia, postura, movilidad articular y fortalecimiento general.</p>
                         </div>
-                    </div>
-                    <a href="/event?categoria=Deportes" class="w-full py-2 px-3 rounded-xl text-center text-xs sm:text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 transition block">
-                        Ver talleres de acondicionamiento &rarr;
-                    </a>
-                </article>
+                        <div class="flex flex-col gap-2 text-sm leading-6 text-muni-muted sm:pt-5">
+                            <p><span class="font-semibold text-muni-ink">Recinto:</span> Estadio Sur y Polideportivo</p>
+                            <p><span class="font-semibold text-muni-ink">Llevar:</span> ropa deportiva y agua</p>
+                            <a href="/event?categoria=deportes" class="mt-2 inline-flex w-fit items-center gap-2 border-b border-muni-red pb-1 font-semibold text-muni-ink hover:text-muni-red-dark">Ver cartelera de deportes <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+                        </div>
+                    </article>
 
-                <!-- Disciplina 3 -->
-                <article class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center justify-between gap-2 mb-3">
-                            <span class="px-2.5 py-0.5 text-xs font-bold rounded-full bg-emerald-100 text-emerald-800">Salud y Bienestar</span>
-                            <span class="text-[11px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">Todas las edades</span>
+                    <article class="grid gap-4 border-b border-black/10 py-7 sm:grid-cols-[11rem_minmax(0,1fr)_minmax(12rem,0.68fr)] sm:items-start sm:gap-8 sm:py-8">
+                        <div class="flex min-w-0 items-center gap-3 sm:block">
+                            <img src="/images/actividad baile en piscina.jpeg" alt="" class="h-16 w-24 shrink-0 rounded-lg object-cover sm:mt-3 sm:h-28 sm:w-full" width="320" height="180" loading="lazy">
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.1em] text-muni-red-dark sm:text-xs">Salud y bienestar</p>
                         </div>
-                        <h2 class="text-lg font-bold text-slate-900 mb-2">Hidrogimnasia y Natación</h2>
-                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
-                            Actividad física en piscina temperada con bajo impacto articular, ideal para movilidad, resistencia y bienestar.
-                        </p>
-                        <div class="py-3 border-y border-slate-100 space-y-1.5 text-xs mb-4">
-                            <div class="flex justify-between gap-2">
-                                <strong class="text-slate-700">Recinto:</strong>
-                                <span class="text-slate-600">Piscina Temperada Municipal</span>
-                            </div>
-                            <div class="flex justify-between gap-2">
-                                <strong class="text-slate-700">Requisito:</strong>
-                                <span class="text-slate-600">Gorro y traje de baño</span>
-                            </div>
+                        <div>
+                            <p class="mb-2 text-xs font-medium text-muni-muted">Todas las edades</p>
+                            <h3 class="text-xl font-semibold tracking-[-0.035em] sm:text-2xl">Hidrogimnasia y natación</h3>
+                            <p class="mt-2 max-w-[62ch] text-sm leading-6 text-muni-muted">Actividad de bajo impacto en piscina temperada, orientada a la movilidad y el bienestar.</p>
                         </div>
-                    </div>
-                    <a href="/event?categoria=Salud" class="w-full py-2 px-3 rounded-xl text-center text-xs sm:text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 transition block">
-                        Ver talleres acuáticos &rarr;
-                    </a>
-                </article>
+                        <div class="flex flex-col gap-2 text-sm leading-6 text-muni-muted sm:pt-5">
+                            <p><span class="font-semibold text-muni-ink">Recinto:</span> Piscina Temperada Municipal</p>
+                            <p><span class="font-semibold text-muni-ink">Llevar:</span> gorro y traje de baño</p>
+                            <a href="/event?categoria=salud" class="mt-2 inline-flex w-fit items-center gap-2 border-b border-muni-red pb-1 font-semibold text-muni-ink hover:text-muni-red-dark">Ver cartelera de salud <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+                        </div>
+                    </article>
 
-                <!-- Disciplina 4 -->
-                <article class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center justify-between gap-2 mb-3">
-                            <span class="px-2.5 py-0.5 text-xs font-bold rounded-full bg-emerald-100 text-emerald-800">Salud y Bienestar</span>
-                            <span class="text-[11px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">Público general</span>
+                    <article class="grid gap-4 border-b border-black/10 py-7 sm:grid-cols-[11rem_minmax(0,1fr)_minmax(12rem,0.68fr)] sm:items-start sm:gap-8 sm:py-8">
+                        <div class="flex min-w-0 items-center gap-3 sm:block">
+                            <img src="/images/actividad baile entretenido.jpg" alt="" class="h-16 w-24 shrink-0 rounded-lg object-cover sm:mt-3 sm:h-28 sm:w-full" width="320" height="180" loading="lazy">
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.1em] text-muni-red-dark sm:text-xs">Salud y bienestar</p>
                         </div>
-                        <h2 class="text-lg font-bold text-slate-900 mb-2">Baile Entretenido y Yoga</h2>
-                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
-                            Sesiones aeróbicas musicales y relajación corporal guiada al aire libre junto al entorno natural del río.
-                        </p>
-                        <div class="py-3 border-y border-slate-100 space-y-1.5 text-xs mb-4">
-                            <div class="flex justify-between gap-2">
-                                <strong class="text-slate-700">Recinto:</strong>
-                                <span class="text-slate-600">Parque Costanera Río Claro</span>
-                            </div>
-                            <div class="flex justify-between gap-2">
-                                <strong class="text-slate-700">Requisito:</strong>
-                                <span class="text-slate-600">Calzado cómodo y toalla</span>
-                            </div>
+                        <div>
+                            <p class="mb-2 text-xs font-medium text-muni-muted">Público general</p>
+                            <h3 class="text-xl font-semibold tracking-[-0.035em] sm:text-2xl">Baile entretenido y yoga</h3>
+                            <p class="mt-2 max-w-[62ch] text-sm leading-6 text-muni-muted">Sesiones de actividad aeróbica y relajación corporal en un entorno al aire libre.</p>
                         </div>
-                    </div>
-                    <a href="/event?categoria=Salud" class="w-full py-2 px-3 rounded-xl text-center text-xs sm:text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 transition block">
-                        Ver sesiones de baile y yoga &rarr;
-                    </a>
-                </article>
+                        <div class="flex flex-col gap-2 text-sm leading-6 text-muni-muted sm:pt-5">
+                            <p><span class="font-semibold text-muni-ink">Recinto:</span> Parque Costanera Río Claro</p>
+                            <p><span class="font-semibold text-muni-ink">Llevar:</span> calzado cómodo y toalla</p>
+                            <a href="/event?categoria=salud" class="mt-2 inline-flex w-fit items-center gap-2 border-b border-muni-red pb-1 font-semibold text-muni-ink hover:text-muni-red-dark">Ver cartelera de salud <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+                        </div>
+                    </article>
 
-                <!-- Disciplina 5 -->
-                <article class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center justify-between gap-2 mb-3">
-                            <span class="px-2.5 py-0.5 text-xs font-bold rounded-full bg-sky-100 text-sky-800">Sociales y Comunidad</span>
-                            <span class="text-[11px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">Mayores de 60</span>
+                    <article class="grid gap-4 border-b border-black/10 py-7 sm:grid-cols-[11rem_minmax(0,1fr)_minmax(12rem,0.68fr)] sm:items-start sm:gap-8 sm:py-8">
+                        <div class="flex min-w-0 items-center gap-3 sm:block">
+                            <img src="/images/actividades adulto mayor.jpeg" alt="" class="h-16 w-24 shrink-0 rounded-lg object-cover sm:mt-3 sm:h-28 sm:w-full" width="320" height="180" loading="lazy">
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.1em] text-muni-red-dark sm:text-xs">Sociales y comunidad</p>
                         </div>
-                        <h2 class="text-lg font-bold text-slate-900 mb-2">Talleres para Adulto Mayor</h2>
-                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
-                            Pausas activas barriales, gimnasia suave y dinámicas comunitarias orientadas a la autovalencia y sociabilización.
-                        </p>
-                        <div class="py-3 border-y border-slate-100 space-y-1.5 text-xs mb-4">
-                            <div class="flex justify-between gap-2">
-                                <strong class="text-slate-700">Recinto:</strong>
-                                <span class="text-slate-600">Sedes Vecinales y Las Américas</span>
-                            </div>
-                            <div class="flex justify-between gap-2">
-                                <strong class="text-slate-700">Requisito:</strong>
-                                <span class="text-slate-600">Calzado cerrado antideslizante</span>
-                            </div>
+                        <div>
+                            <p class="mb-2 text-xs font-medium text-muni-muted">Mayores de 60 años</p>
+                            <h3 class="text-xl font-semibold tracking-[-0.035em] sm:text-2xl">Talleres para personas mayores</h3>
+                            <p class="mt-2 max-w-[62ch] text-sm leading-6 text-muni-muted">Pausas activas, gimnasia suave y dinámicas comunitarias para promover autonomía y encuentro.</p>
                         </div>
-                    </div>
-                    <a href="/event?categoria=Sociales" class="w-full py-2 px-3 rounded-xl text-center text-xs sm:text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 transition block">
-                        Ver talleres de adulto mayor &rarr;
-                    </a>
-                </article>
+                        <div class="flex flex-col gap-2 text-sm leading-6 text-muni-muted sm:pt-5">
+                            <p><span class="font-semibold text-muni-ink">Recinto:</span> Sedes vecinales y Las Américas</p>
+                            <p><span class="font-semibold text-muni-ink">Llevar:</span> calzado cerrado antideslizante</p>
+                            <a href="/event?categoria=sociales" class="mt-2 inline-flex w-fit items-center gap-2 border-b border-muni-red pb-1 font-semibold text-muni-ink hover:text-muni-red-dark">Ver cartelera social <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+                        </div>
+                    </article>
 
-                <!-- Disciplina 6 -->
-                <article class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center justify-between gap-2 mb-3">
-                            <span class="px-2.5 py-0.5 text-xs font-bold rounded-full bg-sky-100 text-sky-800">Sociales y Comunidad</span>
-                            <span class="text-[11px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">Juventud y niñez</span>
+                    <article class="grid gap-4 border-b border-black/10 py-7 sm:grid-cols-[11rem_minmax(0,1fr)_minmax(12rem,0.68fr)] sm:items-start sm:gap-8 sm:py-8">
+                        <div class="flex min-w-0 items-center gap-3 sm:block">
+                            <img src="/images/actividad vacaciones de invierno 2.jpeg" alt="" class="h-16 w-24 shrink-0 rounded-lg object-cover sm:mt-3 sm:h-28 sm:w-full" width="320" height="180" loading="lazy">
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.1em] text-muni-red-dark sm:text-xs">Sociales y comunidad</p>
                         </div>
-                        <h2 class="text-lg font-bold text-slate-900 mb-2">Encuentros Deportivos Barriales</h2>
-                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
-                            Jornadas lúdicas durante recesos escolares con juegos colectivos, circuitos motrices y convivencia sana en el barrio.
-                        </p>
-                        <div class="py-3 border-y border-slate-100 space-y-1.5 text-xs mb-4">
-                            <div class="flex justify-between gap-2">
-                                <strong class="text-slate-700">Recinto:</strong>
-                                <span class="text-slate-600">Gimnasio Regional y Sedes</span>
-                            </div>
-                            <div class="flex justify-between gap-2">
-                                <strong class="text-slate-700">Requisito:</strong>
-                                <span class="text-slate-600">Zapatillas y gorro</span>
-                            </div>
+                        <div>
+                            <p class="mb-2 text-xs font-medium text-muni-muted">Niñas, niños y jóvenes</p>
+                            <h3 class="text-xl font-semibold tracking-[-0.035em] sm:text-2xl">Encuentros deportivos barriales</h3>
+                            <p class="mt-2 max-w-[62ch] text-sm leading-6 text-muni-muted">Juegos colectivos, circuitos motrices y actividades recreativas en espacios del barrio.</p>
                         </div>
-                    </div>
-                    <a href="/event?categoria=Sociales" class="w-full py-2 px-3 rounded-xl text-center text-xs sm:text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 transition block">
-                        Ver actividades barriales &rarr;
-                    </a>
-                </article>
+                        <div class="flex flex-col gap-2 text-sm leading-6 text-muni-muted sm:pt-5">
+                            <p><span class="font-semibold text-muni-ink">Recinto:</span> Gimnasio Regional y sedes vecinales</p>
+                            <p><span class="font-semibold text-muni-ink">Llevar:</span> zapatillas y gorro</p>
+                            <a href="/event?categoria=sociales" class="mt-2 inline-flex w-fit items-center gap-2 border-b border-muni-red pb-1 font-semibold text-muni-ink hover:text-muni-red-dark">Ver cartelera social <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+                        </div>
+                    </article>
+                </div>
             </div>
         </section>
 
-        <!-- Banner Inferior -->
-        <section class="max-w-7xl mx-auto px-4 pb-16">
-            <div class="bg-slate-900 text-white rounded-2xl p-8 sm:p-10 text-center">
-                <h2 class="text-xl sm:text-2xl font-extrabold mb-2">¿Quieres sumarte a los talleres de tu barrio?</h2>
-                <p class="text-sm text-slate-300 max-w-xl mx-auto mb-6">
-                    Revisa las fechas, recintos y vacantes activas directamente en nuestra cartelera comunal oficial.
-                </p>
-                <a href="/event" class="inline-flex px-6 py-3 rounded-xl font-bold text-sm bg-red-600 hover:bg-red-700 transition">
-                    Explorar cartelera oficial
+        <section class="bg-muni-soft px-4 py-12 md:px-7 md:py-16" aria-labelledby="disciplina-cta">
+            <div class="mx-auto flex max-w-[1280px] flex-col gap-5 border-t border-black/10 pt-8 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h2 id="disciplina-cta" class="text-2xl font-semibold tracking-[-0.04em] sm:text-3xl">Busca una actividad para tu barrio.</h2>
+                    <p class="mt-2 text-sm leading-6 text-muni-muted">Consulta fechas, lugares y estados en la cartelera municipal.</p>
+                </div>
+                <a href="/event" class="inline-flex min-h-12 w-fit shrink-0 items-center gap-3 rounded-full bg-muni-red-dark px-6 text-sm font-semibold text-white transition-colors hover:bg-red-800">
+                    Explorar la cartelera
+                    <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
                 </a>
             </div>
         </section>

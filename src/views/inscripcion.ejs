@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <%- include('partials/head') %>
+    <title><%= title %></title>
+</head>
+<body class="min-h-screen bg-white font-sans text-muni-ink antialiased">
+    <%- include('partials/navigation') %>
+
+    <main id="contenido-principal" class="flex flex-1 items-center px-4 py-14 md:px-7 md:py-20">
+        <section class="mx-auto w-full max-w-[900px]" aria-labelledby="inscripcion-heading">
+            <nav class="mb-7 flex items-center gap-2 text-xs font-medium text-muni-muted" aria-label="Ruta de navegación">
+                <a href="/event" class="hover:text-muni-red-dark">Cartelera</a>
+                <span aria-hidden="true">/</span>
+                <span aria-current="page" class="text-muni-ink">Inscripción</span>
+            </nav>
+
+            <% if (estadoInscripcion) { %>
+                <div class="mb-6 border-y px-4 py-4 text-sm leading-6 <%= estadoInscripcion.tipo === 'success' ? 'border-emerald-300 bg-emerald-50 text-emerald-950' : estadoInscripcion.tipo === 'error' ? 'border-red-200 bg-red-50 text-red-900' : 'border-sky-200 bg-sky-50 text-sky-950' %>" role="<%= estadoInscripcion.tipo === 'error' ? 'alert' : 'status' %>"><%= estadoInscripcion.mensaje %></div>
+            <% } %>
+
+            <article class="grid gap-8 border-y border-black/15 py-9 sm:grid-cols-[minmax(0,1fr)_15rem] sm:py-12">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-[0.12em] text-muni-red-dark"><%= actividad.categoria %></p>
+                    <h1 id="inscripcion-heading" class="mt-3 text-4xl font-semibold leading-[1.03] tracking-[-0.04em] sm:text-5xl"><%= actividad.nombre %></h1>
+                    <p class="mt-5 max-w-2xl text-base leading-7 text-muni-muted"><%= actividad.descripcion %></p>
+
+                    <dl class="mt-7 grid gap-4 border-t border-black/10 pt-6 text-sm sm:grid-cols-2">
+                        <div>
+                            <dt class="font-semibold text-muni-ink">Fecha y hora</dt>
+                            <dd class="mt-1 text-muni-muted"><%= new Intl.DateTimeFormat("es-CL", { dateStyle: "long", timeStyle: "short", timeZone: "America/Santiago" }).format(new Date(actividad.fecha)) %></dd>
+                        </div>
+                        <div>
+                            <dt class="font-semibold text-muni-ink">Lugar</dt>
+                            <dd class="mt-1 text-muni-muted"><%= actividad.lugar %></dd>
+                        </div>
+                        <div>
+                            <dt class="font-semibold text-muni-ink">Disponibilidad</dt>
+                            <dd class="mt-1 text-muni-muted"><%= cuposDisponibles === 1 ? "1 cupo disponible" : `${cuposDisponibles} cupos disponibles` %></dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <aside class="flex flex-col justify-center border-t border-black/10 pt-6 sm:border-l sm:border-t-0 sm:pl-7 sm:pt-0">
+                    <% if (inscripcion) { %>
+                        <p class="text-lg font-semibold">Ya estás inscrito.</p>
+                        <p class="mt-2 text-sm leading-6 text-muni-muted">Tu cupo está reservado para esta actividad.</p>
+                    <% } else if (actividad.estado !== "activo") { %>
+                        <p class="text-lg font-semibold">Inscripción cerrada</p>
+                        <p class="mt-2 text-sm leading-6 text-muni-muted">Esta actividad no está recibiendo nuevas inscripciones.</p>
+                    <% } else if (cuposDisponibles <= 0) { %>
+                        <p class="text-lg font-semibold">No quedan cupos</p>
+                        <p class="mt-2 text-sm leading-6 text-muni-muted">La capacidad de esta actividad ya está completa.</p>
+                    <% } else { %>
+                        <p class="text-lg font-semibold">Reserva tu cupo</p>
+                        <p class="mt-2 text-sm leading-6 text-muni-muted">La inscripción se confirma al enviar este formulario. No se solicitan datos de pago.</p>
+                        <form action="/inscripciones/<%= actividad.id %>" method="post" class="mt-6">
+                            <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
+                            <button type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-muni-red-dark px-6 text-sm font-semibold text-white transition-colors hover:bg-red-800">Confirmar inscripción</button>
+                        </form>
+                    <% } %>
+                    <a href="/event" class="mt-5 inline-flex w-fit border-b border-muni-red pb-1 text-sm font-semibold text-muni-ink hover:text-muni-red-dark">Volver a la cartelera</a>
+                </aside>
+            </article>
+        </section>
+    </main>
+
+    <%- include('partials/footer') %>
+</body>
+</html>

@@ -5,18 +5,24 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon src/index.js"
+    "dev": "concurrently --kill-others --names CSS,SERVER \"npm:dev:css\" \"npm:dev:server\"",
+    "dev:css": "tailwindcss -i ./src/styles.css -o ./src/public/main.css --watch",
+    "dev:server": "node --watch src/index.js",
+    "build:css": "tailwindcss -i ./src/styles.css -o ./src/public/main.css --minify"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.3",
     "ejs": "^6.0.1",
     "express": "^5.2.1",
-    "mongodb": "^7.6.0",
+    "express-session": "^1.19.0",
     "morgan": "^1.12.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "@tailwindcss/cli": "^4.3.3",
+    "concurrently": "^10.0.6",
+    "tailwindcss": "^4.3.3"
   }
 }

@@ -1,0 +1,151 @@
+{
+  "title": "Elige el lenguaje visual de Muni Sport",
+  "question": "La estructura del hero, la tipografía Geist Sans, el blanco, el rojo #E63946 y el escudo municipal quedan fijos en todas las opciones. ¿Qué sistema debe unir la cartelera pública y el panel de actividades?",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "Registro municipal en movimiento",
+      "kicker": "THE ROLL",
+      "lineage": "Registro cronológico de terminal, traducido al blanco, rojo y Geist Sans que fijaste.",
+      "thesis": "La cartelera es un flujo claro de lo próximo, lo publicado y lo que cambió.",
+      "palette": ["#FFFFFF", "#E63946", "#191919"],
+      "materials": ["filas de registro", "reglas impresas", "indicador carmín"],
+      "viewport": "La navegación municipal blanca corona una foto panorámica de actividad; el título y el botón quedan a la izquierda, una ficha de la próxima actividad se superpone abajo a la derecha. Al seguir el scroll, las actividades aparecen como filas cronológicas con fecha, lugar, categoría y estado visible.",
+      "risk": "Puede sentirse como una herramienta de oficina si las fotos y la vida barrial no abren la composición.",
+      "raised": [
+        {
+          "from": "challenger-mesophotic-deep-dive",
+          "raise": "Cada etapa de una actividad queda escrita en una etiqueta además de señalarse en rojo; el estado sigue siendo claro sin depender del color."
+        }
+      ],
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          {"label": "navegación municipal", "x": 0, "y": 0, "w": 12, "h": 1},
+          {"label": "foto y titular a la izquierda", "x": 0, "y": 1, "w": 12, "h": 7, "accent": true},
+          {"label": "ficha flotante de próxima actividad", "x": 7, "y": 6, "w": 4, "h": 2},
+          {"label": "acción explorar cartelera", "x": 1, "y": 6, "w": 3, "h": 1}
+        ]
+      },
+      "comp": ".impeccable/mocks/decision/assigned.webp"
+    },
+    {
+      "id": "model-pick",
+      "label": "Tablón de convocatorias del barrio",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "El tablero físico de un gimnasio, centro comunitario o sede vecinal.",
+      "thesis": "La oferta municipal se entiende como convocatorias concretas que invitan a participar.",
+      "palette": ["#FFFFFF", "#E63946", "#191919"],
+      "materials": ["papel blanco", "índices carmín", "fotografías reales de talleres"],
+      "viewport": "La cabecera mantiene tu navegación y escudo. Una foto panorámica domina el hero; titular y acción viven a la izquierda, y la convocatoria próxima aparece en una ficha limpia superpuesta abajo a la derecha. Debajo, los talleres se organizan en anuncios de distintos tamaños, agrupados por fecha y categoría.",
+      "risk": "Si todas las convocatorias reciben el mismo peso, se vuelve el catálogo municipal esperado.",
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          {"label": "navegación y escudo", "x": 0, "y": 0, "w": 12, "h": 1},
+          {"label": "foto panorámica del hero", "x": 0, "y": 1, "w": 12, "h": 7, "accent": true},
+          {"label": "titular y acción", "x": 1, "y": 4, "w": 5, "h": 3},
+          {"label": "convocatoria destacada", "x": 7, "y": 6, "w": 4, "h": 2},
+          {"label": "cartelera de anuncios", "x": 0, "y": 8, "w": 12, "h": 2}
+        ]
+      },
+      "comp": ".impeccable/mocks/decision/model-pick.webp"
+    },
+    {
+      "id": "challenger-quilt",
+      "label": "Mosaico de historias barriales",
+      "verdict": "wins",
+      "lineage": "La colcha comunitaria: piezas distintas que conservan la historia de cada familia y barrio.",
+      "thesis": "Cada taller es una pieza propia y la cartelera entera muestra una comunidad que se mueve junta.",
+      "palette": ["#FFFFFF", "#E63946", "#191919"],
+      "materials": ["fotografías de actividades", "bloques de proporción variable", "costuras gráficas carmín"],
+      "viewport": "La foto comunitaria ocupa el hero panorámico fijado; el titular queda a la izquierda y la ficha próxima se apoya abajo a la derecha. Al avanzar, la cartelera forma un mosaico asimétrico: cada pieza conserva imagen, fecha, lugar, estado y una entrada directa a la actividad.",
+      "case": "Gana en identificación porque la variedad de vecinos y talleres es la propia forma del mosaico; gana en claridad cuando cada pieza mantiene juntos nombre, fecha y lugar.",
+      "risk": "El mosaico puede dificultar comparar fechas si la grilla pierde el orden cronológico.",
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          {"label": "navegación municipal", "x": 0, "y": 0, "w": 12, "h": 1},
+          {"label": "foto panorámica y titular", "x": 0, "y": 1, "w": 12, "h": 7, "accent": true},
+          {"label": "ficha destacada", "x": 7, "y": 6, "w": 4, "h": 2},
+          {"label": "piezas de actividades en mosaico", "x": 0, "y": 8, "w": 12, "h": 2}
+        ]
+      },
+      "comp": ".impeccable/mocks/decision/challenger-quilt.webp",
+      "hero": "https://impeccable.style/worlds/cards/textiles-weave-drape-fashion-memory-quilt-atlas-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/textiles-weave-drape-fashion-memory-quilt-atlas.webp"
+    },
+    {
+      "id": "challenger-yeye-pop-sleeve",
+      "label": "Portada de actividad destacada",
+      "verdict": "competitive",
+      "lineage": "Portada francesa de pop de los años sesenta: retrato protagonista, nombre claro y una lista pequeña.",
+      "thesis": "Una actividad municipal aparece como una portada reconocible, con su información esencial a la vista.",
+      "palette": ["#FFFFFF", "#E63946", "#191919"],
+      "materials": ["fotografía recortada", "bloque tipográfico", "ficha de fecha y lugar"],
+      "viewport": "Un retrato fotográfico panorámico lidera el hero; el título y la acción quedan a la izquierda. Una ficha de la actividad elegida se superpone abajo a la derecha con nombre, fecha y recinto. La portada se repite a menor escala en el catálogo.",
+      "case": "Compite en claridad porque destaca una convocatoria y sus datos esenciales; su modelo de pocas piezas cerradas sirve peor a una cartelera abierta de varios barrios.",
+      "risk": "Puede reducir el resto de los talleres a acompañamiento de una sola convocatoria.",
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          {"label": "navegación municipal", "x": 0, "y": 0, "w": 12, "h": 1},
+          {"label": "retrato panorámico de actividad", "x": 0, "y": 1, "w": 12, "h": 7, "accent": true},
+          {"label": "titular y acción", "x": 1, "y": 4, "w": 5, "h": 3},
+          {"label": "ficha de actividad", "x": 7, "y": 6, "w": 4, "h": 2}
+        ]
+      },
+      "comp": ".impeccable/mocks/decision/challenger-yeye-pop-sleeve.webp",
+      "hero": "https://impeccable.style/worlds/cards/posters-covers-sleeves-yeye-pop-sleeve-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/posters-covers-sleeves-yeye-pop-sleeve.webp"
+    },
+    {
+      "id": "challenger-mesophotic-deep-dive",
+      "label": "Descenso por etapas",
+      "verdict": "declined",
+      "lineage": "Perfil vertical de un buceo técnico, desde la superficie hasta la vuelta.",
+      "thesis": "Una actividad se entiende como etapas con un estado legible en cada punto.",
+      "palette": ["#FFFFFF", "#E63946", "#191919"],
+      "materials": ["línea de tiempo vertical", "etapas etiquetadas", "punto activo carmín"],
+      "viewport": "La portada fija encabeza una agenda cronológica; cada actividad muestra con palabras su etapa actual y conserva fecha, lugar y cupos en la misma fila.",
+      "case": "Declinada: el perfil de inmersión estrecha la identidad a actividades acuáticas y su eje no ayuda a reconocer la oferta completa.",
+      "kept": "Las etapas distintas de una actividad deben nombrarse y no depender solo del color.",
+      "risk": "Una línea vertical larga podría complicar una cartelera que debe compararse rápidamente.",
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          {"label": "hero fijado", "x": 0, "y": 0, "w": 12, "h": 5, "accent": true},
+          {"label": "etapas de agenda", "x": 1, "y": 5, "w": 10, "h": 5}
+        ]
+      },
+      "hero": "https://impeccable.style/worlds/cards/rivers-tides-ocean-depths-mesophotic-deep-dive-hero.webp"
+    }
+  ],
+  "reroll": {"registers": ["safer", "bolder"]},
+  "buildPath": {"value": "code", "toggle": true},
+  "canon": true,
+  "canonCard": {
+    "label": "Cartelera municipal estándar",
+    "thesis": "Una portada fotográfica seguida por tarjetas iguales con los datos esenciales de cada actividad.",
+    "palette": ["#FFFFFF", "#E63946", "#191919"],
+    "materials": ["grilla regular", "fotografía de actividad", "filtros por categoría"],
+    "viewport": "Hero con foto grande, título a la izquierda, acción visible y una convocatoria destacada abajo a la derecha; catálogo de tarjetas uniformes después.",
+    "risk": "La estructura es familiar, pero no deja una identidad propia si todas las piezas tienen el mismo peso.",
+    "wireframe": {
+      "cols": 12,
+      "rows": 10,
+      "regions": [
+        {"label": "navegación municipal", "x": 0, "y": 0, "w": 12, "h": 1},
+        {"label": "hero fotográfico", "x": 0, "y": 1, "w": 12, "h": 7, "accent": true},
+        {"label": "ficha y acción", "x": 7, "y": 6, "w": 4, "h": 2},
+        {"label": "grilla de tarjetas iguales", "x": 0, "y": 8, "w": 12, "h": 2}
+      ]
+    }
+  },
+  "steer": true
+}

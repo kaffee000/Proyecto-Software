@@ -1,137 +1,331 @@
-//enviar html que este en index.ejs
-//enrutar tambien
 import { Router } from "express";
+import {
+    csrfTokenPara,
+    iniciarSesionOrganizador,
+    requireOrganizer,
+    validarCsrf
+} from "../middleware/organizador.js";
+import {
+    clienteVecinalDeSesion,
+    iniciarSesionVecinal,
+    registrarVecino,
+    requireResident
+} from "../middleware/vecino.js";
+
 const router = Router();
 
-// Actividades de ejemplo para el catalogo comunitario de Talca
-const actividadesBase = [
-    {
-        id: "act-1",
-        nombre: "Taller formativo de básquetbol y deporte",
-        descripcion: "Entrenamiento dinámico para el desarrollo de fundamentos técnicos, trabajo en equipo y acondicionamiento físico.",
-        categoria: "Deportes",
-        fecha: "2026-10-18T10:00:00",
-        lugar: "Polideportivo Municipal Talca",
-        cupos: "18 cupos libres",
-        estado: "activo",
-        imagen: "/images/actividad de deporte.jpg"
-    },
-    {
-        id: "act-2",
-        nombre: "Baile entretenido y vida activa",
-        descripcion: "Sesiones guiadas de acondicionamiento aeróbico, ritmo y vitalidad en comunidad aptas para todas las edades.",
-        categoria: "Salud",
-        fecha: "2026-10-19T09:30:00",
-        lugar: "Parque Costanera Río Claro",
-        cupos: "24 cupos libres",
-        estado: "activo",
-        imagen: "/images/actividad baile entretenido.jpg"
-    },
-    {
-        id: "act-3",
-        nombre: "Encuentro y actividades para adulto mayor",
-        descripcion: "Jornada de integración vecinal con ejercicios de estiramiento, pausas activas y dinámicas participativas.",
-        categoria: "Sociales",
-        fecha: "2026-10-20T16:00:00",
-        lugar: "Centro Comunitario Las Américas",
-        cupos: "40 cupos libres",
-        estado: "activo",
-        imagen: "/images/actividades adulto mayor.jpeg"
-    },
-    {
-        id: "act-4",
-        nombre: "Talleres deportivos de invierno y juventud",
-        descripcion: "Espacios recreativos para niñas, niños y jóvenes durante temporadas de descanso escolar en recintos locales.",
-        categoria: "Deportes",
-        fecha: "2026-10-21T15:00:00",
-        lugar: "Estadio Sur Talca",
-        cupos: "25 cupos libres",
-        estado: "activo",
-        imagen: "/images/actividad vacaciones de invierno.jpeg"
-    },
-    {
-        id: "act-5",
-        nombre: "Jornada formativa infanto-juvenil",
-        descripcion: "Práctica de habilidades motrices, juegos colectivos y orientación en salud física preventiva.",
-        categoria: "Salud",
-        fecha: "2026-10-22T11:00:00",
-        lugar: "Gimnasio Regional de Talca",
-        cupos: "30 cupos libres",
-        estado: "activo",
-        imagen: "/images/actividad vacaciones de invierno 2.jpeg"
-    },
-    {
-        id: "act-6",
-        nombre: "Hidrogimnasia y bienestar acuático",
-        descripcion: "Sesiones guiadas en piscina temperada para fortalecimiento cardiovascular, bajo impacto articular y bienestar comunitario.",
-        categoria: "Salud",
-        fecha: "2026-10-23T11:00:00",
-        lugar: "Piscina Municipal de Talca",
-        cupos: "20 cupos libres",
-        estado: "activo",
-        imagen: "/images/actividad baile en piscina.jpeg"
-    }
-];
+const categorias = new Map([
+    ["deportes", "Deportes"],
+    ["salud", "Salud"],
+    ["sociales", "Sociales"]
+]);
+const categoriasPermitidas = new Set(["Deportes", "Salud", "Sociales"]);
+const estadosPermitidos = new Set(["activo", "pausado", "finalizado", "cancelado"]);
+const idValido = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-function obtenerActividadesFiltradas(categoria) {
-    if (categoria && categoria !== "todas") {
-        return actividadesBase.filter(
-            actividad => actividad.categoria.toLowerCase() === categoria.toLowerCase()
-        );
+async function obtenerActividades(supabase, categoria) {
+    if (!supabase) {
+        throw new Error("Supabase no está configurado.");
     }
-    return actividadesBase;
+
+    let consulta = supabase
+        .from("actividades")
+        .select("id,nombre,descripcion,categoria,fecha,lugar,cupos,cupos_totales,cupos_ocupados,estado,imagen")
+        .order("fecha", { ascending: true });
+
+    const categoriaNormalizada = categorias.get(categoria.toLowerCase());
+    if (categoria.toLowerCase() !== "todas") {
+        consulta = consulta.eq("categoria", categoriaNormalizada || categoria);
+    }
+
+    const { data, error } = await consulta;
+    if (error) {
+        throw error;
+    }
+
+    return data || [];
 }
 
-// Ruta principal con catálogo integrado (RF-01, AC-01)
-router.get("/", (req, res) => {
-    const categoria = req.query.categoria || "todas";
-    const actividadesFiltradas = obtenerActividadesFiltradas(categoria);
-    res.render("index.ejs", {
-        title: "Muni Sport - Portal Comunitario de Actividades en Talca",
-        actividades: actividadesFiltradas,
-        categoria: categoria
-    });
-});
+function normalizarTextoBusqueda(value) {
+    return value
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLocaleLowerCase("es-CL");
+}
 
-// Catálogo de eventos y actividades (RF-02)
-router.get("/event", (req, res) => {
-    const categoria = req.query.categoria || "todas";
-    const actividadesFiltradas = obtenerActividadesFiltradas(categoria);
-    res.render("event.ejs", {
-        title: "Catálogo de Actividades - Muni Sport",
-        actividades: actividadesFiltradas,
-        categoria: categoria
+function destinoVecinalSeguro(value, fallback = "/") {
+    if (typeof value !== "string" || !value.startsWith("/") || value.startsWith("//")) {
+        return fallback;
+    }
+
+    try {
+        const destino = new URL(value, "http://munisport.local");
+        if (destino.origin !== "http://munisport.local") return fallback;
+        const rutaInscripcion = /^\/inscripciones\/[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(destino.pathname);
+        if (!["/", "/event", "/favoritos"].includes(destino.pathname) && !rutaInscripcion) return fallback;
+        return `${destino.pathname}${destino.search}${destino.hash}`;
+    } catch {
+        return fallback;
+    }
+}
+
+function guardarSesionVecinal(req, res, next, session, destination) {
+    req.session.regenerate((sessionError) => {
+        if (sessionError) return next(sessionError);
+
+        req.session.residentSession = session;
+        req.session.csrfToken = csrfTokenPara(req);
+        req.session.save((saveError) => {
+            if (saveError) return next(saveError);
+            res.redirect(303, destination);
+        });
     });
-});
+}
+
+async function obtenerFavoritosVecinales(req) {
+    if (!req.session?.residentSession) return [];
+
+    try {
+        const cliente = await clienteVecinalDeSesion(req);
+        if (!cliente) return [];
+        const { data, error } = await cliente
+            .from("actividad_favoritos")
+            .select("actividad_id");
+        if (error) throw error;
+        return (data || []).map((favorito) => favorito.actividad_id);
+    } catch (error) {
+        console.error("No se pudieron consultar los favoritos vecinales:", error.message || error);
+        return [];
+    }
+}
+
+async function renderizarCatalogo(req, res, vista, title) {
+    const categoria = typeof req.query.categoria === "string"
+        ? req.query.categoria
+        : "todas";
+    const buscar = typeof req.query.buscar === "string"
+        ? req.query.buscar.trim().slice(0, 100)
+        : "";
+
+    try {
+        let actividades = await obtenerActividades(req.app.locals.supabase, categoria);
+        if (buscar) {
+            const terminos = normalizarTextoBusqueda(buscar);
+            actividades = actividades.filter((actividad) => normalizarTextoBusqueda([
+                actividad.nombre,
+                actividad.descripcion,
+                actividad.categoria,
+                actividad.lugar
+            ].filter(Boolean).join(" ")).includes(terminos));
+        }
+        const favoriteIds = await obtenerFavoritosVecinales(req);
+        res.render(vista, {
+            title,
+            actividades,
+            categoria,
+            buscar,
+            favoriteIds,
+            csrfToken: req.session?.residentSession ? csrfTokenPara(req) : null,
+            currentPath: req.originalUrl,
+            favoritoError: req.query.error === "guardar",
+            reintentarUrl: req.originalUrl,
+            catalogoError: false
+        });
+    } catch (error) {
+        console.error("Error consultando actividades en Supabase:", error.message || error);
+        res.status(503).render(vista, {
+            title,
+            actividades: [],
+            categoria,
+            buscar,
+            favoriteIds: [],
+            csrfToken: req.session?.residentSession ? csrfTokenPara(req) : null,
+            currentPath: req.originalUrl,
+            favoritoError: req.query.error === "guardar",
+            reintentarUrl: req.originalUrl,
+            catalogoError: true
+        });
+    }
+}
+
+function formatDateTimeLocal(value) {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+
+    const parts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Santiago",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23"
+    }).formatToParts(date);
+    const part = (type) => parts.find((item) => item.type === type)?.value || "";
+
+    return `${part("year")}-${part("month")}-${part("day")}T${part("hour")}:${part("minute")}`;
+}
+
+function fechaLocalTalcaAISO(value) {
+    if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)) return null;
+
+    const targetAsUtc = Date.parse(`${value}:00Z`);
+    if (!Number.isFinite(targetAsUtc)) return null;
+
+    let timestamp = targetAsUtc;
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+        const parts = new Intl.DateTimeFormat("en-CA", {
+            timeZone: "America/Santiago",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hourCycle: "h23"
+        }).formatToParts(new Date(timestamp));
+        const part = (type) => Number(parts.find((item) => item.type === type)?.value);
+        const equivalentLocalAsUtc = Date.UTC(
+            part("year"), part("month") - 1, part("day"),
+            part("hour"), part("minute"), part("second")
+        );
+        timestamp = targetAsUtc - (equivalentLocalAsUtc - timestamp);
+    }
+
+    const result = new Date(timestamp);
+    return formatDateTimeLocal(result.toISOString()) === value ? result.toISOString() : null;
+}
+
+function actividadDesdeFormulario(body) {
+    const nombre = typeof body.nombre === "string" ? body.nombre.trim() : "";
+    const descripcion = typeof body.descripcion === "string" ? body.descripcion.trim() : "";
+    const categoria = typeof body.categoria === "string" ? body.categoria : "";
+    const fecha = fechaLocalTalcaAISO(body.fechaLocal);
+    const lugar = typeof body.lugar === "string" ? body.lugar.trim() : "";
+    const cuposTotalesTexto = typeof body.cuposTotales === "string" ? body.cuposTotales.trim() : "";
+    const cuposTotales = /^\d+$/.test(cuposTotalesTexto) ? Number(cuposTotalesTexto) : NaN;
+    const estado = typeof body.estado === "string" ? body.estado : "";
+    const imagen = typeof body.imagen === "string" ? body.imagen.trim() : "";
+    const errores = [];
+
+    if (!nombre || nombre.length > 120) errores.push("El nombre es obligatorio y debe tener hasta 120 caracteres.");
+    if (!descripcion || descripcion.length > 2000) errores.push("La descripción es obligatoria y debe tener hasta 2.000 caracteres.");
+    if (!categoriasPermitidas.has(categoria)) errores.push("Elige una categoría válida.");
+    if (!fecha) errores.push("Indica una fecha y hora válidas para Talca.");
+    if (!lugar || lugar.length > 180) errores.push("El lugar es obligatorio y debe tener hasta 180 caracteres.");
+    if (!Number.isSafeInteger(cuposTotales) || cuposTotales < 0 || cuposTotales > 1000000) {
+        errores.push("Indica una capacidad total entre 0 y 1.000.000 cupos.");
+    }
+    if (!estadosPermitidos.has(estado)) errores.push("Elige un estado válido.");
+
+    let imagenSegura = null;
+    if (imagen) {
+        if (imagen.startsWith("/images/") && !imagen.includes("..")) {
+            imagenSegura = imagen;
+        } else {
+            try {
+                const url = new URL(imagen);
+                if (url.protocol === "https:" && !url.username && !url.password) {
+                    imagenSegura = url.toString();
+                }
+            } catch {
+                // El error se explica junto al campo para que el organizador pueda corregirlo.
+            }
+        }
+        if (!imagenSegura) errores.push("La imagen debe ser una ruta local de /images o una dirección HTTPS.");
+    }
+
+    return {
+        errores,
+        actividad: {
+            nombre,
+            descripcion,
+            categoria,
+            fecha,
+            lugar,
+            cupos_totales: cuposTotales,
+            estado,
+            imagen: imagenSegura
+        }
+    };
+}
+
+function valoresDeFormulario(body = {}) {
+    return {
+        ...body,
+        fechaLocal: typeof body.fechaLocal === "string" ? body.fechaLocal : "",
+        cuposTotales: typeof body.cuposTotales === "string" ? body.cuposTotales : "",
+        imagen: typeof body.imagen === "string" ? body.imagen : ""
+    };
+}
+
+async function renderFormularioActividad(req, res, { activity = {}, editing = false, errors = [], status = 200 }) {
+    return res.status(status).render("admin/actividad-form.ejs", {
+        title: editing ? "Editar actividad - Muni Sport" : "Nueva actividad - Muni Sport",
+        activity: {
+            ...activity,
+            fechaLocal: activity.fechaLocal || formatDateTimeLocal(activity.fecha)
+        },
+        editing,
+        errors,
+        csrfToken: csrfTokenPara(req)
+    });
+}
+
+function adminNext(value) {
+    return typeof value === "string" && value.startsWith("/admin/actividades") && !value.startsWith("//")
+        ? value
+        : "/admin/actividades";
+}
+
+// Página principal con catálogo de actividades cargado desde Supabase.
+router.get("/", (req, res) => renderizarCatalogo(
+    req,
+    res,
+    "index.ejs",
+    "Muni Sport - Portal Comunitario de Actividades en Talca"
+));
+
+// Catálogo de eventos y actividades.
+router.get("/event", (req, res) => renderizarCatalogo(
+    req,
+    res,
+    "event.ejs",
+    "Catálogo de Actividades - Muni Sport"
+));
 
 router.get("/contact", (req, res) => res.render("contact.ejs", {
     title: "Contacto y Atención Ciudadana - Muni Sport"
 }));
 
 router.get("/personal", async (req, res) => {
-    try {
-        const db = req.app.locals.db;
-        if (!db) {
-            return res.render("personal.ejs", {
-                title: "Equipo Profesional - Muni Sport",
-                profesionales: [],
-                dbConnected: false
-            });
-        }
+    const supabase = req.app.locals.supabase;
+    if (!supabase) {
+        return res.render("personal.ejs", {
+            title: "Equipo Profesional - Muni Sport",
+            profesionales: [],
+            dbConnected: false
+        });
+    }
 
-        const profesionales = await db
-            .collection("profesionales")
-            .find({})
-            .toArray();
+    try {
+        const { data, error } = await supabase
+            .from("profesionales")
+            .select("nombre,profesion,email")
+            .order("nombre", { ascending: true });
+
+        if (error) {
+            throw error;
+        }
 
         res.render("personal.ejs", {
             title: "Equipo Profesional - Muni Sport",
-            profesionales: profesionales,
+            profesionales: data || [],
             dbConnected: true
         });
-
     } catch (error) {
-        console.error("Error obteniendo profesionales:", error.message || error);
+        console.error("Error obteniendo profesionales desde Supabase:", error.message || error);
         res.render("personal.ejs", {
             title: "Equipo Profesional - Muni Sport",
             profesionales: [],
@@ -144,16 +338,601 @@ router.get("/sport", (req, res) => res.render("sport.ejs", {
     title: "Disciplinas Deportivas - Muni Sport"
 }));
 
-router.get("/login", (req, res) => res.render("login.ejs", {
-    title: "Acceso Vecinal - Muni Sport"
-}));
+router.get("/login", (req, res) => {
+    if (req.session?.residentSession) return res.redirect("/");
+    res.set("Cache-Control", "no-store");
+    res.render("login.ejs", {
+        title: "Acceso Vecinal - Muni Sport",
+        csrfToken: csrfTokenPara(req),
+        next: destinoVecinalSeguro(req.query.next),
+        error: null,
+        notice: req.query.registro === "pendiente"
+            ? "Te enviamos un correo para confirmar tu cuenta. Después podrás iniciar sesión."
+            : req.query.expired === "1"
+                ? "Tu sesión venció. Inicia sesión nuevamente para continuar."
+                : null
+    });
+});
 
-router.get("/register", (req, res) => res.render("register.ejs", {
-    title: "Registro Ciudadano - Muni Sport"
-}));
+router.post("/login", validarCsrf, async (req, res, next) => {
+    const email = typeof req.body.email === "string" ? req.body.email.trim() : "";
+    const password = typeof req.body.password === "string" ? req.body.password : "";
+    const destination = destinoVecinalSeguro(req.body.next);
+
+    if (!email || !password) {
+        return res.status(400).render("login.ejs", {
+            title: "Acceso Vecinal - Muni Sport",
+            csrfToken: csrfTokenPara(req),
+            next: destination,
+            error: "Escribe tu correo y contraseña para continuar.",
+            notice: null
+        });
+    }
+
+    try {
+        const result = await iniciarSesionVecinal(req, email, password);
+        if (!result.session) {
+            return res.status(result.configuracion === false ? 503 : 401).render("login.ejs", {
+                title: "Acceso Vecinal - Muni Sport",
+                csrfToken: csrfTokenPara(req),
+                next: destination,
+                error: result.configuracion === false
+                    ? "Supabase no está configurado en este proyecto."
+                    : "No pudimos iniciar sesión. Revisa tus datos y confirma tu cuenta si acabas de registrarte.",
+                notice: null
+            });
+        }
+
+        guardarSesionVecinal(req, res, next, result.session, destination);
+    } catch (error) {
+        next(error);
+    }
+});
+
+router.get("/register", (req, res) => {
+    if (req.session?.residentSession) return res.redirect("/");
+    res.set("Cache-Control", "no-store");
+    res.render("register.ejs", {
+        title: "Crear cuenta vecinal - Muni Sport",
+        csrfToken: csrfTokenPara(req),
+        errors: [],
+        values: { fullName: "", email: "", avatarUrl: "" }
+    });
+});
+
+router.post("/register", validarCsrf, async (req, res, next) => {
+    const fullName = typeof req.body.fullName === "string" ? req.body.fullName.trim() : "";
+    const email = typeof req.body.email === "string" ? req.body.email.trim() : "";
+    const password = typeof req.body.password === "string" ? req.body.password : "";
+    const passwordConfirmation = typeof req.body.passwordConfirmation === "string" ? req.body.passwordConfirmation : "";
+    const avatarUrl = typeof req.body.avatarUrl === "string" ? req.body.avatarUrl.trim() : "";
+    const values = { fullName, email, avatarUrl };
+    const errors = [];
+
+    if (fullName.length < 2 || fullName.length > 80) errors.push("Escribe tu nombre (entre 2 y 80 caracteres).");
+    if (!email || email.length > 254) errors.push("Escribe un correo válido.");
+    if (password.length < 8 || password.length > 72) errors.push("La contraseña debe tener entre 8 y 72 caracteres.");
+    if (password !== passwordConfirmation) errors.push("Las contraseñas no coinciden.");
+
+    if (avatarUrl) {
+        try {
+            const avatar = new URL(avatarUrl);
+            if (avatar.protocol !== "https:" || avatar.username || avatar.password || avatarUrl.length > 1000) {
+                errors.push("La foto de perfil debe tener una URL HTTPS válida.");
+            }
+        } catch {
+            errors.push("La foto de perfil debe tener una URL HTTPS válida.");
+        }
+    }
+
+    if (errors.length) {
+        return res.status(422).render("register.ejs", {
+            title: "Crear cuenta vecinal - Muni Sport",
+            csrfToken: csrfTokenPara(req),
+            errors,
+            values
+        });
+    }
+
+    try {
+        const result = await registrarVecino(req, { fullName, email, password, avatarUrl });
+        if (result.configuracion === false) {
+            return res.status(503).render("register.ejs", {
+                title: "Crear cuenta vecinal - Muni Sport",
+                csrfToken: csrfTokenPara(req),
+                errors: ["Supabase no está configurado en este proyecto."],
+                values
+            });
+        }
+        if (result.error || !result.user) {
+            console.error("No se pudo registrar la cuenta vecinal:", result.error?.message || "Respuesta sin usuario");
+            return res.status(400).render("register.ejs", {
+                title: "Crear cuenta vecinal - Muni Sport",
+                csrfToken: csrfTokenPara(req),
+                errors: ["No pudimos crear la cuenta. Revisa los datos e inténtalo nuevamente o inicia sesión si ya tienes una cuenta."],
+                values
+            });
+        }
+
+        if (!result.session) return res.redirect(303, "/login?registro=pendiente");
+        guardarSesionVecinal(req, res, next, result.session, "/");
+    } catch (error) {
+        next(error);
+    }
+});
+
+router.post("/logout", requireResident, validarCsrf, (req, res, next) => {
+    delete req.session.residentSession;
+    req.session.save((error) => {
+        if (error) return next(error);
+        res.redirect(303, "/");
+    });
+});
+
+router.get("/favoritos", requireResident, async (req, res, next) => {
+    try {
+        const { data: favoritos, error: favoritosError } = await req.supabaseResident
+            .from("actividad_favoritos")
+            .select("actividad_id");
+        if (favoritosError) throw favoritosError;
+
+        const favoriteIds = (favoritos || []).map((favorito) => favorito.actividad_id);
+        let actividades = [];
+        if (favoriteIds.length) {
+            const { data, error } = await req.supabaseResident
+                .from("actividades")
+                .select("id,nombre,descripcion,categoria,fecha,lugar,cupos,cupos_totales,cupos_ocupados,estado,imagen")
+                .in("id", favoriteIds)
+                .order("fecha", { ascending: true });
+            if (error) throw error;
+            actividades = data || [];
+        }
+
+        res.render("favoritos.ejs", {
+            title: "Mis favoritos - Muni Sport",
+            actividades,
+            categoria: "todas",
+            buscar: "",
+            favoriteIds,
+            csrfToken: csrfTokenPara(req),
+            currentPath: req.originalUrl,
+            reintentarUrl: "/favoritos",
+            catalogoError: false,
+            favoritoError: req.query.error === "guardar"
+        });
+    } catch (error) {
+        console.error("No se pudieron cargar los favoritos:", error.message || error);
+        res.status(503).render("favoritos.ejs", {
+            title: "Mis favoritos - Muni Sport",
+            actividades: [],
+            categoria: "todas",
+            buscar: "",
+            favoriteIds: [],
+            csrfToken: csrfTokenPara(req),
+            currentPath: req.originalUrl,
+            reintentarUrl: "/favoritos",
+            catalogoError: true,
+            favoritoError: false
+        });
+    }
+});
+
+router.post("/favoritos/:id", requireResident, validarCsrf, async (req, res, next) => {
+    const destination = destinoVecinalSeguro(req.body.returnTo, "/favoritos");
+    if (!idValido.test(req.params.id)) {
+        return res.status(404).render("error.ejs", {
+            title: "Actividad no encontrada - Muni Sport",
+            status: 404,
+            message: "La actividad que buscas no existe o ya no está disponible."
+        });
+    }
+
+    try {
+        let error;
+        if (req.body.action === "remove") {
+            ({ error } = await req.supabaseResident
+                .from("actividad_favoritos")
+                .delete()
+                .eq("actividad_id", req.params.id));
+        } else {
+            ({ error } = await req.supabaseResident
+                .from("actividad_favoritos")
+                .insert({ actividad_id: req.params.id }));
+        }
+        if (error) throw error;
+        res.redirect(303, destination);
+    } catch (error) {
+        console.error("No se pudo actualizar un favorito:", error.message || error);
+        const separator = destination.includes("?") ? "&" : "?";
+        res.redirect(303, `${destination}${separator}error=guardar`);
+    }
+});
+
+router.get("/inscripciones/:id", requireResident, async (req, res, next) => {
+    if (!idValido.test(req.params.id)) {
+        return res.status(404).render("error.ejs", {
+            title: "Actividad no encontrada - Muni Sport",
+            status: 404,
+            message: "La actividad que buscas no existe o ya no está disponible."
+        });
+    }
+
+    try {
+        const { data: actividad, error: actividadError } = await req.supabaseResident
+            .from("actividades")
+            .select("id,nombre,descripcion,categoria,fecha,lugar,cupos_totales,cupos_ocupados,estado,imagen")
+            .eq("id", req.params.id)
+            .maybeSingle();
+        if (actividadError) throw actividadError;
+        if (!actividad) {
+            return res.status(404).render("error.ejs", {
+                title: "Actividad no encontrada - Muni Sport",
+                status: 404,
+                message: "La actividad que buscas no existe o ya no está disponible."
+            });
+        }
+
+        const { data: inscripcion, error: inscripcionError } = await req.supabaseResident
+            .from("inscripciones")
+            .select("created_at")
+            .eq("actividad_id", actividad.id)
+            .maybeSingle();
+        if (inscripcionError) throw inscripcionError;
+
+        const estados = {
+            confirmada: { tipo: "success", mensaje: "Tu inscripción quedó confirmada. Tu cupo está reservado." },
+            duplicada: { tipo: "info", mensaje: "Ya estás inscrito en esta actividad." },
+            sin_cupos: { tipo: "error", mensaje: "La actividad ya no tiene cupos disponibles." },
+            inscripcion_cerrada: { tipo: "error", mensaje: "Las inscripciones para esta actividad están cerradas." },
+            error: { tipo: "error", mensaje: "No pudimos confirmar la inscripción. Inténtalo nuevamente." }
+        };
+
+        res.render("inscripcion.ejs", {
+            title: `Inscripción - ${actividad.nombre} - Muni Sport`,
+            actividad,
+            inscripcion,
+            cuposDisponibles: Math.max(0, actividad.cupos_totales - actividad.cupos_ocupados),
+            estadoInscripcion: estados[req.query.estado] || null,
+            csrfToken: csrfTokenPara(req)
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+router.post("/inscripciones/:id", requireResident, validarCsrf, async (req, res, next) => {
+    if (!idValido.test(req.params.id)) {
+        return res.status(404).render("error.ejs", {
+            title: "Actividad no encontrada - Muni Sport",
+            status: 404,
+            message: "La actividad que buscas no existe o ya no está disponible."
+        });
+    }
+
+    try {
+        const { data, error } = await req.supabaseResident.rpc("inscribir_en_actividad", {
+            p_actividad_id: req.params.id
+        });
+        if (error) throw error;
+
+        const estado = data?.status === "confirmada"
+            ? "confirmada"
+            : data?.status === "duplicada"
+                ? "duplicada"
+                : data?.status === "sin_cupos"
+                    ? "sin_cupos"
+                    : data?.status === "inscripcion_cerrada"
+                        ? "inscripcion_cerrada"
+                        : data?.status === "actividad_no_encontrada"
+                            ? null
+                            : "error";
+
+        if (data?.status === "actividad_no_encontrada") {
+            return res.status(404).render("error.ejs", {
+                title: "Actividad no encontrada - Muni Sport",
+                status: 404,
+                message: "La actividad que buscas no existe o ya no está disponible."
+            });
+        }
+
+        res.redirect(303, `/inscripciones/${req.params.id}${estado ? `?estado=${estado}` : ""}`);
+    } catch (error) {
+        console.error("No se pudo procesar la inscripción:", error.message || error);
+        res.redirect(303, `/inscripciones/${req.params.id}?estado=error`);
+    }
+});
 
 router.get("/pagos", (req, res) => res.render("pagos.ejs", {
-    title: "Inscripción en Proceso - Muni Sport"
+    title: "Inscripciones - Muni Sport"
 }));
+
+router.use("/admin", (req, res, next) => {
+    res.set("Cache-Control", "no-store");
+    next();
+});
+
+// Inicio de sesión exclusivo para cuentas autorizadas como organizadores.
+router.get("/admin/login", (req, res) => res.render("admin/login.ejs", {
+    title: "Acceso de organizadores - Muni Sport",
+    csrfToken: csrfTokenPara(req),
+    next: adminNext(req.query.next),
+    expired: req.query.expired === "1",
+    error: null
+}));
+
+router.post("/admin/login", validarCsrf, async (req, res, next) => {
+    const email = typeof req.body.email === "string" ? req.body.email.trim() : "";
+    const password = typeof req.body.password === "string" ? req.body.password : "";
+    const destination = adminNext(req.body.next);
+
+    if (!email || !password) {
+        return res.status(400).render("admin/login.ejs", {
+            title: "Acceso de organizadores - Muni Sport",
+            csrfToken: csrfTokenPara(req),
+            next: destination,
+            expired: false,
+            error: "Escribe tu correo y contraseña para continuar."
+        });
+    }
+
+    try {
+        const result = await iniciarSesionOrganizador(req, email, password);
+        if (!result.session) {
+            const status = result.configuracion === false ? 503 : (result.sinPermiso ? 403 : 401);
+            const message = result.configuracion === false
+                ? "Supabase no está configurado en este proyecto."
+                : (result.setup
+                    ? "No pudimos verificar tu permiso. Confirma que ejecutaste la migración de organizadores en Supabase."
+                : (result.sinPermiso
+                    ? result.error.message
+                    : "No pudimos iniciar sesión. Revisa tus datos y que tu cuenta de organizador esté habilitada."));
+
+            return res.status(status).render("admin/login.ejs", {
+                title: "Acceso de organizadores - Muni Sport",
+                csrfToken: csrfTokenPara(req),
+                next: destination,
+                expired: false,
+                error: message
+            });
+        }
+
+        req.session.regenerate((sessionError) => {
+            if (sessionError) return next(sessionError);
+
+            req.session.supabaseSession = result.session;
+            req.session.csrfToken = csrfTokenPara(req);
+            req.session.save((saveError) => {
+                if (saveError) return next(saveError);
+                res.redirect(303, destination);
+            });
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+router.get("/admin/actividades", requireOrganizer, async (req, res, next) => {
+    try {
+        const { data, error } = await req.supabaseOrganizer
+            .from("actividades")
+            .select("id,nombre,descripcion,categoria,fecha,lugar,cupos,cupos_totales,cupos_ocupados,estado,imagen")
+            .order("fecha", { ascending: true });
+
+        if (error) throw error;
+
+        res.render("admin/actividades.ejs", {
+            title: "Gestión de actividades - Muni Sport",
+            actividades: data || [],
+            dbError: null,
+            csrfToken: csrfTokenPara(req),
+            organizerEmail: res.locals.organizerEmail,
+            notice: req.query.aviso === "guardada"
+                ? "La actividad quedó guardada."
+                : req.query.aviso === "eliminada"
+                    ? "La actividad se eliminó de la cartelera."
+                    : null
+        });
+    } catch (error) {
+        console.error("Error cargando el panel de actividades:", error.message || error);
+        res.status(503).render("admin/actividades.ejs", {
+            title: "Gestión de actividades - Muni Sport",
+            actividades: [],
+            dbError: "No pudimos cargar las actividades. Revisa Supabase y vuelve a intentarlo.",
+            csrfToken: csrfTokenPara(req),
+            organizerEmail: res.locals.organizerEmail,
+            notice: null
+        });
+    }
+});
+
+router.get("/admin/actividades/nueva", requireOrganizer, (req, res) => renderFormularioActividad(req, res, {}));
+
+router.post("/admin/actividades", requireOrganizer, validarCsrf, async (req, res, next) => {
+    const { actividad, errores } = actividadDesdeFormulario(req.body);
+    if (errores.length) {
+        return renderFormularioActividad(req, res, {
+            activity: valoresDeFormulario(req.body),
+            errors: errores,
+            status: 422
+        });
+    }
+
+    try {
+        const { error } = await req.supabaseOrganizer.from("actividades").insert(actividad);
+        if (error) throw error;
+        res.redirect(303, "/admin/actividades?aviso=guardada");
+    } catch (error) {
+        console.error("Error creando actividad:", error.message || error);
+        return renderFormularioActividad(req, res, {
+            activity: valoresDeFormulario(req.body),
+            errors: ["No se pudo guardar la actividad. Revisa Supabase y vuelve a intentarlo."],
+            status: 503
+        });
+    }
+});
+
+router.get("/admin/actividades/:id/editar", requireOrganizer, async (req, res, next) => {
+    if (!idValido.test(req.params.id)) {
+        return res.status(404).render("error.ejs", {
+            title: "Actividad no encontrada - Muni Sport",
+            status: 404,
+            message: "La actividad que buscas no existe o ya no está disponible."
+        });
+    }
+
+    try {
+        const { data, error } = await req.supabaseOrganizer
+            .from("actividades")
+            .select("id,nombre,descripcion,categoria,fecha,lugar,cupos,cupos_totales,cupos_ocupados,estado,imagen")
+            .eq("id", req.params.id)
+            .maybeSingle();
+        if (error) throw error;
+        if (!data) {
+            return res.status(404).render("error.ejs", {
+                title: "Actividad no encontrada - Muni Sport",
+                status: 404,
+                message: "La actividad que buscas no existe o ya no está disponible."
+            });
+        }
+        return renderFormularioActividad(req, res, { activity: data, editing: true });
+    } catch (error) {
+        next(error);
+    }
+});
+
+router.post("/admin/actividades/:id/editar", requireOrganizer, validarCsrf, async (req, res, next) => {
+    if (!idValido.test(req.params.id)) {
+        return res.status(404).render("error.ejs", {
+            title: "Actividad no encontrada - Muni Sport",
+            status: 404,
+            message: "La actividad que buscas no existe o ya no está disponible."
+        });
+    }
+
+    const { actividad, errores } = actividadDesdeFormulario(req.body);
+    if (errores.length) {
+        return renderFormularioActividad(req, res, {
+            activity: { ...valoresDeFormulario(req.body), id: req.params.id },
+            editing: true,
+            errors: errores,
+            status: 422
+        });
+    }
+
+    try {
+        const { data, error } = await req.supabaseOrganizer
+            .from("actividades")
+            .update(actividad)
+            .eq("id", req.params.id)
+            .select("id")
+            .maybeSingle();
+        if (error) throw error;
+        if (!data) {
+            return res.status(404).render("error.ejs", {
+                title: "Actividad no encontrada - Muni Sport",
+                status: 404,
+                message: "La actividad que buscas no existe o ya no está disponible."
+            });
+        }
+        res.redirect(303, "/admin/actividades?aviso=guardada");
+    } catch (error) {
+        console.error("Error editando actividad:", error.message || error);
+        return renderFormularioActividad(req, res, {
+            activity: { ...valoresDeFormulario(req.body), id: req.params.id },
+            editing: true,
+            errors: [error.code === "23514"
+                ? "La capacidad total no puede ser menor que la cantidad de inscripciones confirmadas."
+                : "No se pudo actualizar la actividad. Revisa Supabase y vuelve a intentarlo."],
+            status: error.code === "23514" ? 422 : 503
+        });
+    }
+});
+
+router.get("/admin/actividades/:id/eliminar", requireOrganizer, async (req, res, next) => {
+    if (!idValido.test(req.params.id)) {
+        return res.status(404).render("error.ejs", {
+            title: "Actividad no encontrada - Muni Sport",
+            status: 404,
+            message: "La actividad que buscas no existe o ya no está disponible."
+        });
+    }
+
+    try {
+        const { data, error } = await req.supabaseOrganizer
+            .from("actividades")
+            .select("id,nombre,fecha,lugar")
+            .eq("id", req.params.id)
+            .maybeSingle();
+        if (error) throw error;
+        if (!data) {
+            return res.status(404).render("error.ejs", {
+                title: "Actividad no encontrada - Muni Sport",
+                status: 404,
+                message: "La actividad que buscas no existe o ya no está disponible."
+            });
+        }
+
+        return res.render("admin/actividad-eliminar.ejs", {
+            title: "Eliminar actividad - Muni Sport",
+            activity: data,
+            csrfToken: csrfTokenPara(req)
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+router.post("/admin/actividades/:id/eliminar", requireOrganizer, validarCsrf, async (req, res, next) => {
+    if (!idValido.test(req.params.id)) {
+        return res.status(404).render("error.ejs", {
+            title: "Actividad no encontrada - Muni Sport",
+            status: 404,
+            message: "La actividad que buscas no existe o ya no está disponible."
+        });
+    }
+
+    try {
+        const { data, error } = await req.supabaseOrganizer
+            .from("actividades")
+            .delete()
+            .eq("id", req.params.id)
+            .select("id")
+            .maybeSingle();
+        if (error) throw error;
+        if (!data) {
+            return res.status(404).render("error.ejs", {
+                title: "Actividad no encontrada - Muni Sport",
+                status: 404,
+                message: "La actividad que buscas no existe o ya no está disponible."
+            });
+        }
+        res.redirect(303, "/admin/actividades?aviso=eliminada");
+    } catch (error) {
+        console.error("Error eliminando actividad:", error.message || error);
+        return res.status(503).render("error.ejs", {
+            title: "No se pudo eliminar - Muni Sport",
+            status: 503,
+            message: "No pudimos eliminar esta actividad. Revisa Supabase y vuelve a intentarlo."
+        });
+    }
+});
+
+router.post("/admin/logout", requireOrganizer, validarCsrf, async (req, res, next) => {
+    try {
+        await req.supabaseOrganizer.auth.signOut({ scope: "local" });
+    } catch (error) {
+        console.error("No se pudo cerrar la sesión de Supabase:", error.message || error);
+    }
+
+    req.session.destroy((error) => {
+        if (error) return next(error);
+        res.clearCookie("munisport.sid", {
+            httpOnly: true,
+            sameSite: "lax",
+            secure: process.env.NODE_ENV === "production"
+        });
+        res.redirect(303, "/");
+    });
+});
 
 export default router;

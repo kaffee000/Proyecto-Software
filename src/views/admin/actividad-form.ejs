@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <%- include('../partials/head') %>
+    <title><%= title %></title>
+</head>
+<body class="min-h-screen bg-white font-sans text-muni-ink antialiased">
+    <%- include('../partials/navigation') %>
+    <main id="contenido-principal" class="flex-1 px-4 py-10 md:px-7 md:py-16">
+        <div class="mx-auto max-w-[1000px]">
+            <nav class="mb-6 flex items-center gap-2 text-xs font-medium text-muni-muted" aria-label="Ruta de navegación">
+                <a href="/admin/actividades" class="hover:text-muni-red-dark">Gestión de actividades</a><span aria-hidden="true">/</span>
+                <span aria-current="page" class="text-muni-ink"><%= editing ? "Editar actividad" : "Nueva actividad" %></span>
+            </nav>
+
+            <div class="mb-8 border-b border-black/10 pb-7">
+                <h1 class="text-3xl font-semibold tracking-[-0.04em] sm:text-5xl"><%= editing ? "Editar actividad" : "Publicar una actividad" %></h1>
+                <p class="mt-3 max-w-2xl text-sm leading-6 text-muni-muted">Los datos que guardes se reflejarán en la cartelera pública de Muni Sport.</p>
+            </div>
+
+            <% if (errors && errors.length) { %>
+                <div class="mb-7 border-y border-red-200 bg-red-50 px-5 py-4 text-sm text-red-900" role="alert" aria-labelledby="form-errors-heading">
+                    <h2 id="form-errors-heading" class="font-semibold">Revisa estos campos antes de guardar:</h2>
+                    <ul class="mt-2 list-inside list-disc space-y-1">
+                        <% errors.forEach((error) => { %><li><%= error %></li><% }) %>
+                    </ul>
+                </div>
+            <% } %>
+
+            <form method="post" action="<%= editing ? `/admin/actividades/${activity.id}/editar` : '/admin/actividades' %>" class="space-y-8">
+                <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
+
+                <section class="grid gap-x-8 gap-y-6 border-b border-black/10 pb-8 md:grid-cols-2" aria-label="Información de la actividad">
+                    <div class="md:col-span-2">
+                        <label for="nombre" class="form-label">Nombre de la actividad</label>
+                        <input id="nombre" name="nombre" class="form-control" type="text" maxlength="120" value="<%= activity.nombre || '' %>" placeholder="Ej.: Taller de básquetbol formativo" required autocomplete="off">
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <textarea id="descripcion" name="descripcion" class="form-control min-h-32 resize-y" maxlength="2000" placeholder="Cuenta qué harán las personas y a quién está dirigida la actividad." required><%= activity.descripcion || '' %></textarea>
+                        <p class="form-hint">Máximo 2.000 caracteres.</p>
+                    </div>
+
+                    <div>
+                        <label for="categoria" class="form-label">Categoría</label>
+                        <select id="categoria" name="categoria" class="form-control" required>
+                            <option value="">Selecciona una categoría</option>
+                            <option value="Deportes" <%= activity.categoria === "Deportes" ? "selected" : "" %>>Deportes</option>
+                            <option value="Salud" <%= activity.categoria === "Salud" ? "selected" : "" %>>Salud</option>
+                            <option value="Sociales" <%= activity.categoria === "Sociales" ? "selected" : "" %>>Sociales</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="estado" class="form-label">Estado de publicación</label>
+                        <select id="estado" name="estado" class="form-control" required>
+                            <option value="activo" <%= (activity.estado || "activo") === "activo" ? "selected" : "" %>>Activa</option>
+                            <option value="pausado" <%= activity.estado === "pausado" ? "selected" : "" %>>Pausada</option>
+                            <option value="finalizado" <%= activity.estado === "finalizado" ? "selected" : "" %>>Finalizada</option>
+                            <option value="cancelado" <%= activity.estado === "cancelado" ? "selected" : "" %>>Cancelada</option>
+                        </select>
+                        <p class="form-hint">El estado también se muestra en la cartelera para distinguir cada etapa.</p>
+                    </div>
+                </section>
+
+                <section class="grid gap-x-8 gap-y-6 border-b border-black/10 pb-8 md:grid-cols-2" aria-label="Fecha y lugar">
+                    <div>
+                        <label for="fechaLocal" class="form-label">Fecha y hora</label>
+                        <input id="fechaLocal" name="fechaLocal" class="form-control" type="datetime-local" value="<%= activity.fechaLocal || '' %>" required>
+                        <p class="form-hint">La hora se guardará según la zona horaria de Talca.</p>
+                    </div>
+
+                    <div>
+                        <label for="lugar" class="form-label">Recinto o lugar</label>
+                        <input id="lugar" name="lugar" class="form-control" type="text" maxlength="180" value="<%= activity.lugar || '' %>" placeholder="Ej.: Polideportivo Municipal de Talca" required>
+                    </div>
+
+                    <div>
+                        <label for="cuposTotales" class="form-label">Capacidad total</label>
+                        <input id="cuposTotales" name="cuposTotales" class="form-control" type="number" min="0" max="1000000" step="1" value="<%= activity.cupos_totales ?? '' %>" required>
+                        <p class="form-hint">La cartelera calcula los cupos disponibles descontando las inscripciones confirmadas. No se puede reducir la capacidad por debajo de las reservas existentes.</p>
+                    </div>
+
+                    <div>
+                        <label for="imagen" class="form-label">Imagen de la actividad</label>
+                        <input id="imagen" name="imagen" class="form-control" type="text" inputmode="url" value="<%= activity.imagen || '' %>" placeholder="https://... o /images/actividad.jpg" autocomplete="url">
+                        <p class="form-hint">Opcional. Acepta una URL HTTPS; las imágenes del proyecto pueden usar una ruta /images/.</p>
+                    </div>
+                </section>
+
+                <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                    <a href="/admin/actividades" class="inline-flex min-h-12 items-center justify-center rounded-full border border-black/20 px-6 text-sm font-semibold text-muni-ink hover:border-black/40">Cancelar</a>
+                    <button type="submit" class="inline-flex min-h-12 items-center justify-center rounded-full bg-muni-red-dark px-6 text-sm font-semibold text-white transition-colors hover:bg-red-800"><%= editing ? "Guardar cambios" : "Publicar actividad" %></button>
+                </div>
+            </form>
+        </div>
+    </main>
+    <%- include('../partials/footer') %>
+</body>
+</html>

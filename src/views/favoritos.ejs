@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <%- include('partials/head') %>
+    <title><%= title %></title>
+</head>
+<body class="min-h-screen bg-white font-sans text-muni-ink antialiased">
+    <%- include('partials/navigation') %>
+
+    <main id="contenido-principal" class="flex-grow">
+        <header class="px-4 pb-7 pt-12 md:px-7 md:pb-10 md:pt-16">
+            <div class="mx-auto max-w-[1280px]">
+                <nav class="mb-6 flex items-center gap-2 text-xs font-medium text-muni-muted" aria-label="Ruta de navegación">
+                    <a href="/" class="hover:text-muni-red-dark">Inicio</a>
+                    <span aria-hidden="true">/</span>
+                    <span aria-current="page" class="text-muni-ink">Mis favoritos</span>
+                </nav>
+                <div class="grid gap-5 md:grid-cols-[1fr_0.7fr] md:items-end md:gap-10">
+                    <h1 class="max-w-3xl text-4xl font-semibold leading-[1.02] tracking-[-0.04em] text-muni-ink sm:text-5xl lg:text-6xl">Tus actividades guardadas.</h1>
+                    <p class="max-w-xl text-base leading-7 text-muni-muted md:justify-self-end">Guarda con el corazón los talleres y encuentros que quieras revisar después.</p>
+                </div>
+                <div class="mt-9 h-[3px] w-20 bg-muni-red-dark" aria-hidden="true"></div>
+            </div>
+        </header>
+
+        <%- include('partials/catalogo', { catalogoMode: 'favorites' }) %>
+    </main>
+
+    <%- include('partials/footer') %>
+</body>
+</html>

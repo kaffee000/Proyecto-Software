@@ -1,0 +1,292 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-14T22:16:13Z",
+  "title": "Design System: Muni Sport",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Rojo municipal",
+        "canonical": "#E63946",
+        "tonalRamp": [
+          "oklch(25.8% 0.092 26.042)",
+          "oklch(39.6% 0.141 25.723)",
+          "#A92330",
+          "#C92F3C",
+          "#E63946",
+          "oklch(80.8% 0.114 19.571)",
+          "oklch(88.5% 0.062 18.334)",
+          "#FFF1F2"
+        ]
+      },
+      "primary-deep": {
+        "role": "primary",
+        "displayName": "Carmín de acción",
+        "canonical": "#C92F3C",
+        "tonalRamp": [
+          "oklch(25.8% 0.092 26.042)",
+          "oklch(39.6% 0.141 25.723)",
+          "#A92330",
+          "#C92F3C",
+          "#E63946",
+          "oklch(80.8% 0.114 19.571)",
+          "oklch(88.5% 0.062 18.334)",
+          "#FFF1F2"
+        ]
+      },
+      "featured": {
+        "role": "brand",
+        "displayName": "Carmín profundo de actividad",
+        "canonical": "#8F2632",
+        "tonalRamp": [
+          "#641822",
+          "#7A202B",
+          "#8F2632",
+          "#A93843",
+          "#C56B73",
+          "#E3A9AD",
+          "#F1D0D2",
+          "#FBF0F1"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Tinta",
+        "canonical": "#191919",
+        "tonalRamp": [
+          "oklch(15% 0.002 70)",
+          "oklch(22% 0.002 70)",
+          "oklch(32% 0.002 70)",
+          "oklch(44% 0.002 70)",
+          "oklch(58% 0.002 70)",
+          "oklch(72% 0.002 70)",
+          "oklch(84% 0.002 70)",
+          "oklch(96% 0.002 70)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Texto secundario",
+        "canonical": "#686868",
+        "tonalRamp": [
+          "oklch(15% 0.002 70)",
+          "oklch(22% 0.002 70)",
+          "oklch(32% 0.002 70)",
+          "oklch(44% 0.002 70)",
+          "oklch(58% 0.002 70)",
+          "oklch(72% 0.002 70)",
+          "oklch(84% 0.002 70)",
+          "oklch(96% 0.002 70)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Papel",
+        "canonical": "#FFFFFF",
+        "tonalRamp": [
+          "oklch(15% 0.002 70)",
+          "oklch(22% 0.002 70)",
+          "oklch(32% 0.002 70)",
+          "oklch(44% 0.002 70)",
+          "oklch(58% 0.002 70)",
+          "oklch(72% 0.002 70)",
+          "oklch(84% 0.002 70)",
+          "oklch(96% 0.002 70)"
+        ]
+      },
+      "soft": {
+        "role": "neutral",
+        "displayName": "Superficie suave",
+        "canonical": "#F5F4F2",
+        "tonalRamp": [
+          "oklch(15% 0.004 75)",
+          "oklch(22% 0.004 75)",
+          "oklch(32% 0.004 75)",
+          "oklch(44% 0.004 75)",
+          "oklch(58% 0.004 75)",
+          "oklch(72% 0.004 75)",
+          "oklch(84% 0.004 75)",
+          "oklch(96% 0.004 75)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Titular de portada",
+        "purpose": "Titular principal del hero fotográfico."
+      },
+      "headline": {
+        "displayName": "Titular de página",
+        "purpose": "Títulos de la cartelera y las secciones."
+      },
+      "title": {
+        "displayName": "Título de actividad",
+        "purpose": "Nombres de actividades y fichas."
+      },
+      "body": {
+        "displayName": "Texto principal",
+        "purpose": "Introducciones y descripciones."
+      },
+      "label": {
+        "displayName": "Metadato",
+        "purpose": "Categorías, horas y etiquetas compactas."
+      }
+    },
+    "shadows": [
+      {
+        "name": "featured-activity",
+        "value": "0 18px 50px -22px rgba(0, 0, 0, 0.5)",
+        "purpose": "Separa la ficha de próxima actividad sobre la fotografía del hero."
+      },
+      {
+        "name": "mobile-navigation",
+        "value": "0 18px 48px -18px rgba(25, 25, 25, 0.28)",
+        "purpose": "Separa el menú móvil flotante de la página."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-standard",
+        "value": "150ms cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "Transiciones breves de color y posición en acciones."
+      },
+      {
+        "name": "field-focus",
+        "value": "border-color 160ms ease, box-shadow 160ms ease",
+        "purpose": "Transición del borde y foco visible de los campos."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Navegación municipal",
+      "kind": "nav",
+      "refersTo": "navigation-shell",
+      "description": "Cabecera blanca con escudo junto a Muni Sport, navegación municipal y acceso vecinal; con sesión muestra búsqueda, favoritos y perfil.",
+      "html": "<header class=\"ds-navigation\"><a class=\"ds-brand\"><img alt=\"\" src=\"logo-muni.png\"><strong>Muni Sport</strong><small>Municipalidad de Talca</small></a><nav class=\"ds-links\"><a>Inicio</a><a>Cartelera</a><a>Disciplinas</a></nav><a class=\"ds-nav-action\">Acceso vecinal</a></header>",
+      "css": ".ds-navigation { display:flex; align-items:center; justify-content:space-between; gap:24px; min-height:82px; padding:0 28px; border-bottom:1px solid rgb(0 0 0 / 10%); background:var(--color-muni-paper); color:var(--color-muni-ink); font-family:var(--font-sans); }\n.ds-brand { display:flex; flex-direction:column; color:inherit; text-decoration:none; }\n.ds-brand strong { font-size:19px; font-weight:600; line-height:1.15; letter-spacing:-0.04em; }\n.ds-brand small { margin-top:2px; color:var(--color-muni-muted); font-size:10px; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; }\n.ds-links { display:flex; gap:28px; font-size:13px; font-weight:500; }\n.ds-links a { color:inherit; text-decoration:none; }\n.ds-links a:hover { color:var(--color-muni-red-dark); }\n.ds-nav-action { display:inline-flex; align-items:center; min-height:44px; padding:0 20px; border-radius:9999px; background:var(--color-muni-red-dark); color:#fff; font-size:13px; font-weight:600; text-decoration:none; }\n.ds-nav-action:hover { background:var(--color-red-800); }\n.ds-navigation a:focus-visible { outline:2px solid var(--color-muni-red); outline-offset:3px; }\n@media (max-width:767px) { .ds-navigation { padding:0 16px; } .ds-links,.ds-nav-action { display:none; } }"
+    },
+    {
+      "name": "Acción principal",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "CTA carmín para explorar la cartelera o confirmar una acción.",
+      "html": "<button class=\"ds-button-primary\" type=\"button\">Explorar la cartelera</button>",
+      "css": ".ds-button-primary { display:inline-flex; align-items:center; justify-content:center; min-height:48px; padding:0 24px; border:0; border-radius:9999px; background:var(--color-muni-red-dark); color:var(--color-muni-paper); font:600 14px/1.2 var(--font-sans); cursor:pointer; transition:background-color 150ms cubic-bezier(0.4,0,0.2,1),transform 150ms cubic-bezier(0.4,0,0.2,1); }\n.ds-button-primary:hover { transform:translateY(-2px); background:var(--color-red-800); }\n.ds-button-primary:focus-visible { outline:2px solid var(--color-muni-red); outline-offset:3px; }\n@media (prefers-reduced-motion:reduce) { .ds-button-primary { transition:none; } }"
+    },
+    {
+      "name": "Acción secundaria",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Acción de menor prioridad con borde fino sobre una superficie clara.",
+      "html": "<button class=\"ds-button-secondary\" type=\"button\">Conocer los recintos</button>",
+      "css": ".ds-button-secondary { display:inline-flex; align-items:center; justify-content:center; min-height:48px; padding:0 24px; border:1px solid rgb(0 0 0 / 20%); border-radius:9999px; background:#fff; color:var(--color-muni-ink); font:500 14px/1.2 var(--font-sans); cursor:pointer; }\n.ds-button-secondary:hover { border-color:rgb(0 0 0 / 40%); background:rgb(0 0 0 / 5%); }\n.ds-button-secondary:focus-visible { outline:2px solid var(--color-muni-red); outline-offset:3px; }"
+    },
+    {
+      "name": "Filtro de categoría",
+      "kind": "chip",
+      "refersTo": "filter-selected",
+      "description": "Píldora de filtro; tinta sólida identifica la categoría activa.",
+      "html": "<nav class=\"ds-filters\"><a class=\"ds-filter ds-filter-selected\" aria-current=\"page\">Todas</a><a class=\"ds-filter\">Deportes</a><a class=\"ds-filter\">Salud</a></nav>",
+      "css": ".ds-filters { display:flex; flex-wrap:wrap; gap:8px; font-family:var(--font-sans); }\n.ds-filter { display:inline-flex; align-items:center; min-height:36px; padding:0 16px; border:1px solid rgb(0 0 0 / 15%); border-radius:9999px; background:#fff; color:var(--color-muni-ink); font-size:13px; font-weight:500; text-decoration:none; }\n.ds-filter:hover { border-color:var(--color-muni-red); color:var(--color-muni-red-dark); }\n.ds-filter:focus-visible { outline:2px solid var(--color-muni-red); outline-offset:3px; }\n.ds-filter-selected,.ds-filter-selected:hover { border-color:var(--color-muni-ink); background:var(--color-muni-ink); color:#fff; }"
+    },
+    {
+      "name": "Estado de actividad",
+      "kind": "chip",
+      "refersTo": "status-active",
+      "description": "Etiqueta compacta donde el color acompaña al estado escrito.",
+      "html": "<span class=\"ds-state-active\">Activa</span>",
+      "css": ".ds-state-active { display:inline-flex; align-items:center; width:fit-content; padding:6px 12px; border-radius:9999px; background:var(--color-red-50); color:var(--color-red-800); font:600 12px/1.2 var(--font-sans); white-space:nowrap; }"
+    },
+    {
+      "name": "Ficha de próxima actividad",
+      "kind": "card",
+      "refersTo": "featured-activity",
+      "description": "Ficha carmín profundo superpuesta abajo a la derecha del hero, con texto blanco.",
+      "html": "<article class=\"ds-featured\"><h2>Taller comunitario</h2><p class=\"ds-featured-meta\">Fecha y hora por confirmar</p><p class=\"ds-featured-meta\">Polideportivo Municipal</p><a>Ver en la cartelera</a></article>",
+      "css": ".ds-featured { max-width:432px; padding:20px; border-radius:16px; background:#8F2632; color:var(--color-muni-paper); box-shadow:0 18px 50px -22px rgba(0,0,0,.5); font-family:var(--font-sans); }\n\n.ds-featured h2 { font-size:24px; font-weight:600; line-height:1.2; letter-spacing:-.035em; }\n.ds-featured-meta { margin-top:8px; color:rgb(255 255 255 / 85%); font-size:14px; line-height:1.5; }\n.ds-featured a { display:inline-flex; margin-top:16px; color:#fff; font-size:14px; font-weight:600; text-decoration:underline; text-decoration-color:rgb(255 255 255 / 50%); text-underline-offset:4px; }\n.ds-featured a:hover { text-decoration-color:#fff; }\n.ds-featured a:focus-visible { outline:2px solid var(--color-muni-red); outline-offset:3px; }"
+    },
+    {
+      "name": "Fila cronológica",
+      "kind": "custom",
+      "refersTo": "activity-row",
+      "description": "Registro abierto con fecha, actividad, recinto, estado y acción.",
+      "html": "<article class=\"ds-register-row\"><time class=\"ds-row-date\"><strong>15</strong><span>OCT</span></time><div class=\"ds-row-main\"><p class=\"ds-row-meta\">DEPORTES · 10:00</p><h3>Taller de actividad</h3><p class=\"ds-row-description\">Descripción de la convocatoria.</p></div><p class=\"ds-row-place\">Polideportivo Municipal</p><span class=\"ds-row-state\">Activa</span><a class=\"ds-row-action\">→</a></article>",
+      "css": ".ds-register-row { display:grid; grid-template-columns:92px minmax(0,1.45fr) minmax(160px,.85fr) 128px 40px; align-items:center; gap:24px; padding:28px 0; border-bottom:1px solid rgb(0 0 0 / 10%); color:var(--color-muni-ink); font-family:var(--font-sans); }\n.ds-row-date { display:flex; flex-direction:column; font-variant-numeric:tabular-nums; }\n.ds-row-date strong { font-size:30px; font-weight:600; line-height:1; letter-spacing:-.04em; }\n.ds-row-date span { margin-top:4px; color:var(--color-muni-red-dark); font-size:12px; font-weight:600; letter-spacing:.08em; }\n.ds-row-meta { margin-bottom:8px; color:var(--color-muni-muted); font-size:11px; font-weight:600; letter-spacing:.11em; }\n.ds-row-main h3 { font-size:18px; font-weight:600; line-height:1.375; letter-spacing:-.025em; }\n.ds-row-description,.ds-row-place { color:var(--color-muni-muted); font-size:14px; line-height:1.6; }\n.ds-row-description { margin-top:6px; }\n.ds-row-state { width:fit-content; padding:6px 12px; border-radius:9999px; background:var(--color-red-50); color:var(--color-red-800); font-size:12px; font-weight:600; }\n.ds-row-action { display:grid; width:40px; height:40px; place-items:center; border:1px solid rgb(0 0 0 / 15%); border-radius:9999px; color:var(--color-muni-ink); text-decoration:none; }\n.ds-row-action:hover { border-color:var(--color-muni-red); background:var(--color-red-800); color:#fff; }\n@media (max-width:639px) { .ds-register-row { grid-template-columns:1fr auto; gap:12px 16px; padding:24px 0; } .ds-row-date { flex-direction:row; gap:8px; } .ds-row-main,.ds-row-place { grid-column:1/-1; } .ds-row-action { display:none; } }"
+    },
+    {
+      "name": "Campo de actividad",
+      "kind": "input",
+      "refersTo": "activity-field",
+      "description": "Campo blanco con etiqueta, ayuda y foco visible para crear o editar.",
+      "html": "<label class=\"ds-field\"><span>Nombre de la actividad</span><input type=\"text\" placeholder=\"Ej.: Taller de básquetbol\"><small>Escribe un nombre fácil de reconocer.</small></label>",
+      "css": ".ds-field { display:block; color:var(--color-muni-ink); font-family:var(--font-sans); }\n.ds-field span { display:block; margin-bottom:8px; font-size:14px; font-weight:600; }\n.ds-field input { display:block; width:100%; padding:13.6px 16px; border:1px solid rgb(25 25 25 / 18%); border-radius:12px; background:#fff; color:var(--color-muni-ink); font:400 15px/1.5 var(--font-sans); transition:border-color 160ms ease,box-shadow 160ms ease; }\n.ds-field input::placeholder { color:var(--color-muni-muted); opacity:1; }\n.ds-field input:hover { border-color:rgb(25 25 25 / 38%); }\n.ds-field input:focus-visible { border-color:var(--color-muni-red); outline:none; box-shadow:0 0 0 3px rgb(230 57 70 / 16%); }\n.ds-field small { display:block; margin-top:6px; color:var(--color-muni-muted); font-size:12px; line-height:1.5; }"
+    },
+    {
+      "name": "Confirmación de eliminación",
+      "kind": "custom",
+      "refersTo": "delete-confirmation",
+      "description": "Confirma la actividad y separa eliminar de conservar.",
+      "html": "<section class=\"ds-delete\"><h2>¿Eliminar esta actividad?</h2><p>La actividad dejará de aparecer en la cartelera.</p><div class=\"ds-delete-actions\"><button class=\"ds-keep\">Conservar actividad</button><button class=\"ds-delete-button\">Eliminar definitivamente</button></div></section>",
+      "css": ".ds-delete { padding:32px 0; border-block:1px solid #f5a4aa; color:var(--color-muni-ink); font-family:var(--font-sans); }\n.ds-delete h2 { font-size:32px; font-weight:600; line-height:1.2; letter-spacing:-.04em; }\n.ds-delete p { margin-top:12px; color:var(--color-muni-muted); font-size:14px; line-height:1.6; }\n.ds-delete-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:12px; margin-top:24px; }\n.ds-keep,.ds-delete-button { min-height:48px; padding:0 24px; border-radius:9999px; font:600 14px/1.2 var(--font-sans); cursor:pointer; }\n.ds-keep { border:1px solid rgb(0 0 0 / 20%); background:#fff; color:var(--color-muni-ink); }\n.ds-delete-button { border:0; background:var(--color-muni-red-dark); color:#fff; }\n.ds-delete-button:hover { background:var(--color-red-800); }\n.ds-delete-actions button:focus-visible { outline:2px solid var(--color-muni-red); outline-offset:3px; }\n@media (max-width:639px) { .ds-delete-actions { flex-direction:column-reverse; } .ds-delete-actions button { width:100%; } }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Registro municipal en movimiento",
+    "overview": "Muni Sport presenta la oferta deportiva, recreativa y de salud de Talca como un registro local que se mantiene vivo con cada convocatoria. Una fotografía real de actividad comunitaria abre la experiencia; fechas, recintos, categorías y estados escritos mantienen la información concreta y fácil de comparar.\n\nLa cartelera es la tarea principal de vecinos y organizadores. El mismo lenguaje ordenado por fecha conecta la portada y la vista pública con el registro CRUD municipal. La identidad combina blanco amplio, tinta oscura, rojo municipal y Geist Sans, siempre junto al escudo oficial de la Municipalidad de Talca.",
+    "keyCharacteristics": [
+      "La fotografía de actividades reales abre la portada.",
+      "La cartelera se lee en filas cronológicas con fecha, lugar, categoría y estado.",
+      "El rojo señala acciones y datos clave; las etiquetas nombran cada estado.",
+      "El panel de organización reutiliza la claridad del registro público."
+    ],
+    "rules": [
+      {
+        "name": "The Carmine-Signal Rule",
+        "body": "El rojo municipal #E63946 señala referencias; el carmín #C92F3C identifica las acciones principales y el carmín profundo #8F2632 destaca la ficha de portada. Cada estado también aparece escrito.",
+        "section": "colors"
+      },
+      {
+        "name": "The Clear-Data Rule",
+        "body": "Mantén fecha, hora, recinto y estado legibles en sus propios rótulos; la jerarquía tipográfica ayuda a escanear, no sustituye los nombres de los datos.",
+        "section": "typography"
+      },
+      {
+        "name": "The Date-First Register Rule",
+        "body": "Mantén las actividades en orden cronológico y agrupa sus datos esenciales en cada fila para que vecinos y organizadores puedan comparar la misma información.",
+        "section": "layout"
+      },
+      {
+        "name": "The Flat-By-Default Rule",
+        "body": "Usa separadores y superficies para estructurar listas; reserva las sombras para elementos que flotan sobre otro contenido.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do conserva el escudo oficial y el nombre Muni Sport juntos en la navegación.",
+      "Do mantiene el hero casi a borde completo, con 24px de margen lateral y cuatro esquinas redondeadas en escritorio; en móvil coloca copia y acciones antes de la foto.",
+      "Do mantiene fecha, recinto y estado junto a cada actividad tanto en la cartelera como en el panel.",
+      "Do acompaña cada color de estado con una etiqueta escrita y visible."
+    ],
+    "donts": [
+      "Don't reemplaces la cartelera cronológica principal por una grilla de tarjetas idénticas.",
+      "Don't comuniques un estado solo mediante el color.",
+      "Don't muevas el texto o las acciones del hero móvil detrás de la fotografía.",
+      "Don't sustituyas el escudo de la Municipalidad de Talca por un símbolo genérico."
+    ]
+  }
+}

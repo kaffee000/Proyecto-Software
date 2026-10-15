@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <%- include('partials/head') %>
+    <title><%= title %></title>
+</head>
+<body class="min-h-screen bg-white font-sans text-muni-ink antialiased">
+    <%- include('partials/navigation') %>
+    <main id="contenido-principal" class="flex flex-1 items-center px-4 py-16 md:px-7 md:py-24">
+        <section class="mx-auto w-full max-w-[760px] border-y border-black/15 py-10 sm:py-14" aria-labelledby="error-heading">
+            <p class="text-sm font-semibold tabular-nums text-muni-red-dark"><%= status %></p>
+            <h1 id="error-heading" class="mt-3 text-3xl font-semibold tracking-[-0.04em] sm:text-5xl"><%= status === 404 ? "No encontramos esta página" : "No se pudo completar la solicitud" %></h1>
+            <p class="mt-4 max-w-xl text-base leading-7 text-muni-muted"><%= message %></p>
+            <a href="/" class="mt-8 inline-flex min-h-12 items-center gap-2 rounded-full bg-muni-red-dark px-6 text-sm font-semibold text-white hover:bg-red-800">Volver al inicio</a>
+        </section>
+    </main>
+    <%- include('partials/footer') %>
+</body>
+</html>

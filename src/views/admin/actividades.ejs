@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <%- include('../partials/head') %>
+    <title><%= title %></title>
+</head>
+<body class="min-h-screen bg-white font-sans text-muni-ink antialiased">
+    <%- include('../partials/navigation') %>
+    <main id="contenido-principal" class="flex-1 px-4 py-10 md:px-7 md:py-16">
+        <div class="mx-auto max-w-[1280px]">
+            <div class="mb-8 flex flex-col gap-6 border-b border-black/10 pb-8 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <nav class="mb-5 flex items-center gap-2 text-xs font-medium text-muni-muted" aria-label="Ruta de navegación">
+                        <a href="/" class="hover:text-muni-red-dark">Inicio</a><span aria-hidden="true">/</span><span aria-current="page" class="text-muni-ink">Gestión de actividades</span>
+                    </nav>
+                    <h1 class="text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">Gestión de actividades</h1>
+                    <p class="mt-3 max-w-2xl text-sm leading-6 text-muni-muted">Publica, actualiza y organiza la cartelera municipal desde una sola lista.</p>
+                </div>
+                <a href="/admin/actividades/nueva" class="inline-flex min-h-12 w-fit shrink-0 items-center gap-2 rounded-full bg-muni-red-dark px-5 text-sm font-semibold text-white transition-colors hover:bg-red-800">
+                    <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+                    Nueva actividad
+                </a>
+            </div>
+
+            <% if (notice) { %>
+                <div class="mb-6 border-y border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-950" role="status"><%= notice %></div>
+            <% } %>
+
+            <% if (dbError) { %>
+                <div class="border-y border-red-200 bg-red-50 px-5 py-5 text-sm leading-6 text-red-900" role="alert">
+                    <p class="font-semibold">No se pudo cargar la cartelera.</p>
+                    <p class="mt-1"><%= dbError %></p>
+                    <a href="/admin/actividades" class="mt-3 inline-flex font-semibold underline underline-offset-4">Reintentar</a>
+                </div>
+            <% } else if (!actividades || actividades.length === 0) { %>
+                <div class="border-y border-black/10 py-12">
+                    <h2 class="text-2xl font-semibold tracking-[-0.035em]">La cartelera aún no tiene actividades</h2>
+                    <p class="mt-2 max-w-xl text-sm leading-6 text-muni-muted">Crea la primera actividad para que aparezca en el sitio público.</p>
+                    <a href="/admin/actividades/nueva" class="mt-6 inline-flex min-h-11 items-center rounded-full bg-muni-red-dark px-5 text-sm font-semibold text-white hover:bg-red-800">Crear primera actividad</a>
+                </div>
+            <% } else { %>
+                <div class="mb-4 flex flex-wrap items-center justify-between gap-3 text-xs text-muni-muted">
+                    <p><span class="font-semibold tabular-nums text-muni-ink"><%= actividades.length %></span> actividades en la cartelera</p>
+                    <a href="/event" class="font-semibold text-muni-ink underline decoration-muni-red underline-offset-4 hover:text-muni-red-dark">Ver cartelera pública</a>
+                </div>
+
+                <div class="hidden overflow-x-auto border-y border-black/15 md:block">
+                    <table class="w-full min-w-[820px] border-collapse text-left">
+                        <thead>
+                            <tr class="border-b border-black/10 text-[11px] font-semibold uppercase tracking-[0.12em] text-muni-muted">
+                                <th scope="col" class="py-4 pr-5">Actividad</th>
+                                <th scope="col" class="px-4 py-4">Fecha</th>
+                                <th scope="col" class="px-4 py-4">Recinto</th>
+                                <th scope="col" class="px-4 py-4">Cupos libres</th>
+                                <th scope="col" class="px-4 py-4">Estado</th>
+                                <th scope="col" class="py-4 pl-4 text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-black/10">
+                            <% actividades.forEach((actividad) => { %>
+                                <%
+                                    const fecha = new Date(actividad.fecha);
+                                    const fechaValida = !Number.isNaN(fecha.getTime());
+                                    const fechaLegible = fechaValida
+                                        ? new Intl.DateTimeFormat("es-CL", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "America/Santiago", hourCycle: "h23" }).format(fecha)
+                                        : "Fecha por confirmar";
+                                    const etiquetasEstado = { activo: "Activa", pausado: "Pausada", finalizado: "Finalizada", cancelado: "Cancelada" };
+                                    const clasesEstado = { activo: "bg-red-50 text-red-800", pausado: "bg-amber-50 text-amber-900", finalizado: "bg-stone-100 text-stone-700", cancelado: "bg-stone-100 text-stone-700" };
+                                %>
+                                <tr class="align-top">
+                                    <td class="py-5 pr-5">
+                                        <p class="font-semibold leading-5 text-muni-ink"><%= actividad.nombre %></p>
+                                        <p class="mt-1 text-xs text-muni-muted"><%= actividad.categoria %></p>
+                                    </td>
+                                    <td class="px-4 py-5 text-sm tabular-nums text-muni-muted"><%= fechaLegible %></td>
+                                    <td class="max-w-[14rem] px-4 py-5 text-sm leading-5 text-muni-muted"><%= actividad.lugar %></td>
+                                    <td class="px-4 py-5 text-sm tabular-nums text-muni-muted"><%= Math.max(0, actividad.cupos_totales - actividad.cupos_ocupados) %> / <%= actividad.cupos_totales %></td>
+                                    <td class="px-4 py-5">
+                                        <span class="inline-flex whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold <%= clasesEstado[actividad.estado] || 'bg-stone-100 text-stone-700' %>"><%= etiquetasEstado[actividad.estado] || "Sin estado" %></span>
+                                    </td>
+                                    <td class="py-5 pl-4 text-right">
+                                        <div class="inline-flex items-center gap-3 text-xs font-semibold">
+                                            <a href="/admin/actividades/<%= actividad.id %>/editar" class="text-muni-ink underline decoration-black/25 underline-offset-4 hover:text-muni-red-dark">Editar</a>
+                                            <a href="/admin/actividades/<%= actividad.id %>/eliminar" class="text-red-700 underline decoration-red-300 underline-offset-4 hover:text-red-900">Eliminar</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="divide-y divide-black/10 border-y border-black/15 md:hidden">
+                    <% actividades.forEach((actividad) => { %>
+                        <%
+                            const fechaMovil = new Date(actividad.fecha);
+                            const fechaMovilValida = !Number.isNaN(fechaMovil.getTime());
+                            const fechaMovilLegible = fechaMovilValida
+                                ? new Intl.DateTimeFormat("es-CL", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "America/Santiago", hourCycle: "h23" }).format(fechaMovil)
+                                : "Fecha por confirmar";
+                            const estadosMovil = { activo: "Activa", pausado: "Pausada", finalizado: "Finalizada", cancelado: "Cancelada" };
+                            const clasesMovil = { activo: "bg-red-50 text-red-800", pausado: "bg-amber-50 text-amber-900", finalizado: "bg-stone-100 text-stone-700", cancelado: "bg-stone-100 text-stone-700" };
+                        %>
+                        <article class="py-5">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="min-w-0">
+                                    <h2 class="text-base font-semibold leading-5 tracking-[-0.025em] text-muni-ink"><%= actividad.nombre %></h2>
+                                    <p class="mt-1 text-xs font-medium uppercase tracking-[0.08em] text-muni-muted"><%= actividad.categoria %></p>
+                                </div>
+                                <span class="inline-flex shrink-0 rounded-full px-3 py-1.5 text-[11px] font-semibold <%= clasesMovil[actividad.estado] || 'bg-stone-100 text-stone-700' %>"><%= estadosMovil[actividad.estado] || "Sin estado" %></span>
+                            </div>
+                            <dl class="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                                <div>
+                                    <dt class="text-[10px] font-semibold uppercase tracking-[0.1em] text-muni-muted">Fecha y hora</dt>
+                                    <dd class="mt-1 tabular-nums text-muni-ink"><%= fechaMovilLegible %></dd>
+                                </div>
+                                <div>
+                                    <dt class="text-[10px] font-semibold uppercase tracking-[0.1em] text-muni-muted">Recinto</dt>
+                                    <dd class="mt-1 leading-5 text-muni-ink"><%= actividad.lugar %></dd>
+                                </div>
+                                <div>
+                                    <dt class="text-[10px] font-semibold uppercase tracking-[0.1em] text-muni-muted">Cupos libres / total</dt>
+                                    <dd class="mt-1 tabular-nums text-muni-ink"><%= Math.max(0, actividad.cupos_totales - actividad.cupos_ocupados) %> / <%= actividad.cupos_totales %></dd>
+                                </div>
+                            </dl>
+                            <div class="mt-4 flex items-center gap-5 text-xs font-semibold">
+                                <a href="/admin/actividades/<%= actividad.id %>/editar" class="text-muni-ink underline decoration-black/25 underline-offset-4 hover:text-muni-red-dark">Editar</a>
+                                <a href="/admin/actividades/<%= actividad.id %>/eliminar" class="text-red-700 underline decoration-red-300 underline-offset-4 hover:text-red-900">Eliminar</a>
+                            </div>
+                        </article>
+                    <% }) %>
+                </div>
+            <% } %>
+        </div>
+    </main>
+    <%- include('../partials/footer') %>
+</body>
+</html>

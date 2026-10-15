@@ -1,82 +1,97 @@
 import express from "express";
-import ejs from "ejs";
-import {dirname, join} from "path";
-import {fileURLToPath} from "url";
-import {MongoClient} from "mongodb";
+import { createClient } from "@supabase/supabase-js";
+import session from "express-session";
+import { randomBytes } from "crypto";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
 
-//rutas
 import indexRoutes from "./routes/index.js";
 
-//obtiene la ruta de este archivo para facilitar busqueda de arvhivos
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-// Carga de variables de entorno usando la API nativa de Node.js
+// Carga el archivo .env local cuando se ejecuta con Node.js 20.6 o superior.
 if (typeof process.loadEnvFile === "function") {
     try {
-        process.loadEnvFile();
+        process.loadEnvFile(join(__dirname, "../.env"));
     } catch (error) {
-        if (error.code === "ENOENT") {
-            try {
-                process.loadEnvFile(join(__dirname, "../.env"));
-            } catch (innerError) {
-                if (innerError.code !== "ENOENT") {
-                    console.error("Error al cargar el archivo .env:", innerError.message);
-                }
-            }
-        } else {
+        if (error.code !== "ENOENT") {
             console.error("Error al cargar el archivo .env:", error.message);
         }
     }
 }
 
 const app = express();
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY;
+const sessionSecret = process.env.SESSION_SECRET || (
+    process.env.NODE_ENV === "production" ? null : randomBytes(32).toString("hex")
+);
 
-//mongo db
-//const {MongoClient} = require('mongodb');
-const uri = process.env.MONGODB_URI;
-const dbName = "webMuni";
-
-//mongo db cosas
-async function main() {
-    if (!uri) {
-        console.error("Error: La variable de entorno MONGODB_URI no está configurada.");
-        return;
-    }
-
-	try {
-        const client = new MongoClient(uri);
-        await client.connect();
-        console.log("Connected to MongoDB");
-        // Perform database operations here
-        //mi base de datos
-        const db = client.db(dbName);
-
-        // Hacemos disponible la base de datos para las rutas
-        app.locals.db = db;
-        // Rutas
-        app.use(indexRoutes);
-
-        //coleccion de la base de datos
-        //const coleccion = db.collection("profesionales");
-        //const usuarios = await coleccion.find({}).toArray();
-        //console.log('Usuarios encontrados:', usuarios);
-
-    } catch (err) {
-        const safeMessage = err?.message
-            ? err.message.replace(/mongodb(\+srv)?:\/\/[^@]+@/g, "mongodb$1://<redacted>@")
-            : "Error al conectar a MongoDB";
-        console.error("Error connecting to MongoDB:", safeMessage);
-    }
+if (!sessionSecret) {
+    throw new Error("Define SESSION_SECRET antes de iniciar Muni Sport en producción.");
 }
-main();
 
-//set es decirle al servidor que vamos a usar
+app.use(express.urlencoded({ extended: false, limit: "16kb" }));
+app.use(session({
+    name: "munisport.sid",
+    secret: sessionSecret,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 8 * 60 * 60 * 1000
+    }
+}));
+
+if (supabaseUrl && supabaseKey) {
+    app.locals.supabase = createClient(supabaseUrl, supabaseKey, {
+        auth: {
+            autoRefreshToken: false,
+            persistSession: false
+        }
+    });
+} else {
+    app.locals.supabase = null;
+    console.warn("Supabase no está configurado. Completa SUPABASE_URL y SUPABASE_PUBLISHABLE_KEY en .env.");
+}
+
+app.locals.supabaseConfig = supabaseUrl && supabaseKey
+    ? { url: supabaseUrl, key: supabaseKey }
+    : null;
+
 app.set("view engine", "ejs");
 app.set("views", join(__dirname, "views"));
-app.use(indexRoutes);
 app.use(express.static(join(__dirname, "public")));
+app.use((req, res, next) => {
+    res.locals.isOrganizer = Boolean(req.session?.supabaseSession?.userId);
+    res.locals.isResident = Boolean(req.session?.residentSession?.userId);
+    res.locals.residentProfile = req.session?.residentSession?.profile || null;
+    res.locals.organizerProfile = req.session?.supabaseSession?.profile || null;
+    res.locals.organizerEmail = req.session?.supabaseSession?.email || "";
+    res.locals.csrfToken = req.session?.csrfToken || null;
+    next();
+});
+app.use(indexRoutes);
+app.use((req, res) => {
+    res.status(404).render("error.ejs", {
+        title: "Página no encontrada - Muni Sport",
+        status: 404,
+        message: "La dirección puede haber cambiado. Vuelve a la cartelera para encontrar las actividades municipales."
+    });
+});
+app.use((error, req, res, next) => {
+    console.error("Error atendiendo la solicitud:", error.message || error);
+    if (res.headersSent) return next(error);
+    res.status(500).render("error.ejs", {
+        title: "No se pudo completar la solicitud - Muni Sport",
+        status: 500,
+        message: "Ocurrió un problema al cargar esta página. Inténtalo nuevamente en unos minutos."
+    });
+});
 
-//arir o escuchar puerto 3000
 const PORT = process.env.PORT || 3000;
-app.listen(PORT);
-console.log(`Server on port ${PORT}`);
+app.listen(PORT, () => {
+    console.log(`Server on port ${PORT}`);
+});
