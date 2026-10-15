@@ -67,5 +67,3 @@ create policy "Organizadores eliminan actividades"
             where o.user_id = (select auth.uid())
         )
     );
-
-\n
