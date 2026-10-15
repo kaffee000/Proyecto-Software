@@ -11,9 +11,15 @@ export function csrfTokenPara(req) {
 
 export function validarCsrf(req, res, next) {
     const esperado = req.session?.csrfToken;
-    const recibido = typeof req.body?.csrfToken === "string" ? req.body.csrfToken : "";
+    const recibido = typeof req.body?.csrfToken === "string"
+        ? req.body.csrfToken
+        : (typeof req.headers["x-csrf-token"] === "string" ? req.headers["x-csrf-token"] : "");
+    const esAjax = req.xhr || req.headers["x-requested-with"] === "XMLHttpRequest" || req.headers.accept?.includes("application/json");
 
     if (!esperado || !recibido) {
+        if (esAjax) {
+            return res.status(403).json({ ok: false, error: "No pudimos validar este formulario." });
+        }
         return res.status(403).render("error.ejs", {
             title: "Solicitud no válida - Muni Sport",
             status: 403,
@@ -24,6 +30,9 @@ export function validarCsrf(req, res, next) {
     const esperadoBuffer = Buffer.from(esperado);
     const recibidoBuffer = Buffer.from(recibido);
     if (esperadoBuffer.length !== recibidoBuffer.length || !timingSafeEqual(esperadoBuffer, recibidoBuffer)) {
+        if (esAjax) {
+            return res.status(403).json({ ok: false, error: "El formulario venció." });
+        }
         return res.status(403).render("error.ejs", {
             title: "Solicitud no válida - Muni Sport",
             status: 403,

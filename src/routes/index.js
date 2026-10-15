@@ -519,7 +519,12 @@ router.get("/favoritos", requireResident, async (req, res, next) => {
 
 router.post("/favoritos/:id", requireResident, validarCsrf, async (req, res, next) => {
     const destination = destinoVecinalSeguro(req.body.returnTo, "/favoritos");
+    const esAjax = req.xhr || req.headers["x-requested-with"] === "XMLHttpRequest" || req.headers.accept?.includes("application/json");
+
     if (!idValido.test(req.params.id)) {
+        if (esAjax) {
+            return res.status(404).json({ ok: false, error: "Actividad no válida o no encontrada." });
+        }
         return res.status(404).render("error.ejs", {
             title: "Actividad no encontrada - Muni Sport",
             status: 404,
@@ -537,12 +542,27 @@ router.post("/favoritos/:id", requireResident, validarCsrf, async (req, res, nex
         } else {
             ({ error } = await req.supabaseResident
                 .from("actividad_favoritos")
-                .insert({ actividad_id: req.params.id }));
+                .upsert(
+                    { actividad_id: req.params.id },
+                    { onConflict: "user_id,actividad_id", ignoreDuplicates: true }
+                ));
         }
         if (error) throw error;
+
+        if (esAjax) {
+            return res.json({
+                ok: true,
+                action: req.body.action === "remove" ? "removed" : "added",
+                actividadId: req.params.id
+            });
+        }
+
         res.redirect(303, destination);
     } catch (error) {
         console.error("No se pudo actualizar un favorito:", error.message || error);
+        if (esAjax) {
+            return res.status(500).json({ ok: false, error: "No se pudo actualizar el favorito." });
+        }
         const separator = destination.includes("?") ? "&" : "?";
         res.redirect(303, `${destination}${separator}error=guardar`);
     }

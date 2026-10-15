@@ -119,7 +119,12 @@ export async function clienteVecinalDeSesion(req) {
 }
 
 export async function requireResident(req, res, next) {
+    const esAjax = req.xhr || req.headers["x-requested-with"] === "XMLHttpRequest" || req.headers.accept?.includes("application/json");
+
     if (!req.session?.residentSession) {
+        if (esAjax) {
+            return res.status(401).json({ ok: false, error: "Debes iniciar sesión.", redirect: `/login?next=${encodeURIComponent(req.originalUrl)}` });
+        }
         return res.redirect(`/login?next=${encodeURIComponent(req.originalUrl)}`);
     }
 
@@ -127,12 +132,18 @@ export async function requireResident(req, res, next) {
         const cliente = await clienteVecinalDeSesion(req);
         if (!cliente) {
             delete req.session.residentSession;
+            if (esAjax) {
+                return res.status(401).json({ ok: false, error: "Tu sesión venció.", redirect: "/login?expired=1" });
+            }
             return res.redirect("/login?expired=1");
         }
 
         const { data, error } = await cliente.auth.getUser();
         if (error || !data.user) {
             delete req.session.residentSession;
+            if (esAjax) {
+                return res.status(401).json({ ok: false, error: "Tu sesión venció.", redirect: "/login?expired=1" });
+            }
             return res.redirect("/login?expired=1");
         }
 

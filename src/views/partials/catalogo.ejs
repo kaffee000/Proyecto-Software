@@ -26,7 +26,7 @@
     };
 %>
 
-<section id="catalogo-actividades" class="scroll-mt-8 px-4 md:px-7 <%= esInicio ? 'py-16 md:py-24' : 'pb-16 pt-8 md:pb-24 md:pt-10' %>" aria-labelledby="catalogo-heading">
+<section id="catalogo-actividades" data-mode="<%= esFavoritos ? 'favorites' : (esInicio ? 'home' : 'full') %>" class="scroll-mt-8 px-4 md:px-7 <%= esInicio ? 'py-16 md:py-24' : 'pb-16 pt-8 md:pb-24 md:pt-10' %>" aria-labelledby="catalogo-heading">
     <div class="mx-auto max-w-[1280px]">
         <% if (esInicio) { %>
             <div class="mb-9 flex flex-col gap-5 sm:mb-12 sm:flex-row sm:items-end sm:justify-between">
@@ -97,7 +97,7 @@
                         const cuposDisponibles = Math.max(0, Number(actividad.cupos_totales || 0) - Number(actividad.cupos_ocupados || 0));
                         const inscripcionAbierta = estado === "activo" && cuposDisponibles > 0;
                     %>
-                    <article class="grid gap-4 border-b border-black/10 py-6 sm:grid-cols-[5.75rem_minmax(0,1.45fr)_minmax(10rem,0.85fr)_8rem_5.5rem] sm:items-center sm:gap-6 sm:py-7" data-categoria="<%= actividad.categoria %>">
+                    <article id="actividad-<%= actividad.id %>" class="grid gap-4 border-b border-black/10 py-6 sm:grid-cols-[5.75rem_minmax(0,1.45fr)_minmax(10rem,0.85fr)_8rem_5.5rem] sm:items-center sm:gap-6 sm:py-7" data-categoria="<%= actividad.categoria %>">
                         <time class="flex items-baseline gap-2 tabular-nums sm:block" datetime="<%= fechaValida ? fechaActividad.toISOString() : '' %>">
                             <span class="text-3xl font-semibold leading-none tracking-[-0.04em] text-muni-ink"><%= fechaValida ? parteFecha("day") : "—" %></span>
                             <span class="text-xs font-semibold uppercase tracking-[0.08em] text-muni-red-dark"><%= fechaValida ? parteFecha("month").replace(".", "") : "Por definir" %></span>
@@ -141,11 +141,11 @@
 
                         <div class="flex items-center gap-2">
                             <% if (isResident) { %>
-                                <form action="/favoritos/<%= actividad.id %>" method="post">
+                                <form action="/favoritos/<%= actividad.id %>" method="post" data-favorite-form>
                                     <input type="hidden" name="csrfToken" value="<%= csrfToken || '' %>">
                                     <input type="hidden" name="action" value="<%= esFavorita ? 'remove' : 'add' %>">
                                     <input type="hidden" name="returnTo" value="<%= currentPath || '/event' %>">
-                                    <button type="submit" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/15 text-muni-ink transition-colors hover:border-muni-red hover:bg-red-50 hover:text-muni-red-dark" aria-label="<%= esFavorita ? 'Quitar de favoritos' : 'Guardar en favoritos' %>: <%= actividad.nombre %>" title="<%= esFavorita ? 'Quitar de favoritos' : 'Guardar en favoritos' %>">
+                                    <button type="submit" data-favorite-button class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/15 text-muni-ink transition-colors hover:border-muni-red hover:bg-red-50 hover:text-muni-red-dark disabled:opacity-50" aria-label="<%= esFavorita ? 'Quitar de favoritos' : 'Guardar en favoritos' %>: <%= actividad.nombre %>" title="<%= esFavorita ? 'Quitar de favoritos' : 'Guardar en favoritos' %>">
                                         <svg aria-hidden="true" class="h-5 w-5 <%= esFavorita ? 'fill-muni-red-dark text-muni-red-dark' : '' %>" viewBox="0 0 24 24" fill="<%= esFavorita ? 'currentColor' : 'none' %>" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.8c0 5.4-8.8 10.2-8.8 10.2S3.2 14.2 3.2 8.8a4.3 4.3 0 0 1 8.8-1 4.3 4.3 0 0 1 8.8 1Z"></path></svg>
                                     </button>
                                 </form>
@@ -185,10 +185,122 @@
         const catalogoActualizado = documento.getElementById("catalogo-actividades");
         if (!catalogoActualizado) throw new Error("La respuesta no contiene la cartelera.");
 
+        if (catalogoActualizado.dataset.mode) {
+            catalogoSection.dataset.mode = catalogoActualizado.dataset.mode;
+        }
         catalogoSection.innerHTML = catalogoActualizado.innerHTML;
     }
 
+    async function manejarFavorito(form) {
+        if (!form) return;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn && submitBtn.disabled) return;
+        if (submitBtn) submitBtn.disabled = true;
+
+        // Se usa getAttribute('action') porque form.action colisiona con <input name="action">
+        const actionUrl = form.getAttribute("action");
+        if (!actionUrl) {
+            if (submitBtn) submitBtn.disabled = false;
+            return;
+        }
+
+        try {
+            const formData = new FormData(form);
+            const response = await fetch(actionUrl, {
+                method: "POST",
+                body: new URLSearchParams(formData),
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Accept": "application/json"
+                }
+            });
+
+            if (response.status === 401 || response.status === 403) {
+                const data = await response.json().catch(() => ({}));
+                window.location.assign(data.redirect || "/login?expired=1");
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error("No se pudo actualizar el favorito.");
+            }
+
+            const data = await response.json();
+            if (!data.ok) {
+                throw new Error(data.error || "Error al actualizar favorito.");
+            }
+
+            const isFavoritosView = catalogoSection.dataset.mode === "favorites";
+            const actionInput = form.querySelector('input[name="action"]');
+            const svg = form.querySelector("svg");
+
+            if (data.action === "removed") {
+                if (isFavoritosView) {
+                    const article = form.closest("article");
+                    if (article) {
+                        article.style.transition = "opacity 0.25s ease, transform 0.25s ease";
+                        article.style.opacity = "0";
+                        article.style.transform = "scale(0.98)";
+                        setTimeout(() => {
+                            article.remove();
+                            const remaining = catalogoSection.querySelectorAll("article");
+                            if (remaining.length === 0) {
+                                actualizarCatalogo(window.location.href).catch(() => {});
+                            }
+                        }, 250);
+                    }
+                } else {
+                    if (actionInput) actionInput.value = "add";
+                    if (submitBtn) {
+                        const actividadTitulo = submitBtn.getAttribute("aria-label")?.replace(/^(Quitar de|Guardar en) favoritos:\s*/, "") || "";
+                        submitBtn.setAttribute("aria-label", `Guardar en favoritos${actividadTitulo ? ': ' + actividadTitulo : ''}`);
+                        submitBtn.setAttribute("title", "Guardar en favoritos");
+                    }
+                    if (svg) {
+                        svg.classList.remove("fill-muni-red-dark", "text-muni-red-dark");
+                        svg.setAttribute("fill", "none");
+                    }
+                }
+            } else if (data.action === "added") {
+                if (actionInput) actionInput.value = "remove";
+                if (submitBtn) {
+                    const actividadTitulo = submitBtn.getAttribute("aria-label")?.replace(/^(Quitar de|Guardar en) favoritos:\s*/, "") || "";
+                    submitBtn.setAttribute("aria-label", `Quitar de favoritos${actividadTitulo ? ': ' + actividadTitulo : ''}`);
+                    submitBtn.setAttribute("title", "Quitar de favoritos");
+                }
+                if (svg) {
+                    svg.classList.add("fill-muni-red-dark", "text-muni-red-dark");
+                    svg.setAttribute("fill", "currentColor");
+                }
+            }
+        } catch (error) {
+            console.error("Error al actualizar favorito:", error);
+            let alertBox = catalogoSection.querySelector("[data-favorite-alert]");
+            if (!alertBox) {
+                alertBox = document.createElement("div");
+                alertBox.dataset.favoriteAlert = "true";
+                alertBox.className = "mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900";
+                catalogoSection.prepend(alertBox);
+            }
+            alertBox.textContent = "No se pudo actualizar el favorito en este momento. Inténtalo nuevamente.";
+            setTimeout(() => {
+                alertBox?.remove();
+            }, 4000);
+        } finally {
+            if (submitBtn) submitBtn.disabled = false;
+        }
+    }
+
     catalogoSection.addEventListener("click", async (event) => {
+        const favButton = event.target.closest("button[data-favorite-button]");
+        if (favButton && catalogoSection.contains(favButton)) {
+            event.preventDefault();
+            event.stopPropagation();
+            const form = favButton.closest("form[data-favorite-form]");
+            await manejarFavorito(form);
+            return;
+        }
+
         const enlace = event.target.closest("a[data-catalog-filter]");
         if (!enlace || !catalogoSection.contains(enlace)) return;
 
@@ -203,6 +315,14 @@
         } catch (error) {
             window.location.assign(destino.href);
         }
+    });
+
+    catalogoSection.addEventListener("submit", async (event) => {
+        const form = event.target.closest("form[data-favorite-form]");
+        if (!form || !catalogoSection.contains(form)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        await manejarFavorito(form);
     });
 
     window.addEventListener("popstate", async () => {
