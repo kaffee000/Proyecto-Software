@@ -58,7 +58,7 @@ create policy "Vecinos consultan sus inscripciones"
 revoke insert, update on table public.actividades from authenticated;
 grant insert (nombre, descripcion, categoria, fecha, lugar, cupos_totales, estado, imagen)
     on table public.actividades to authenticated;
-grant update (nombre, descripcion, categoria, fecha, lugar, cupos, cupos_totales, estado, imagen)
+grant update (nombre, descripcion, categoria, fecha, lugar, cupos_totales, estado, imagen)
     on table public.actividades to authenticated;
 
 create or replace function public.inscribir_en_actividad(p_actividad_id uuid)

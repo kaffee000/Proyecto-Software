@@ -30,7 +30,7 @@ async function obtenerActividades(supabase, categoria) {
 
     let consulta = supabase
         .from("actividades")
-        .select("id,nombre,descripcion,categoria,fecha,lugar,cupos,cupos_totales,cupos_ocupados,estado,imagen")
+        .select("id,nombre,descripcion,categoria,fecha,lugar,cupos_totales,cupos_ocupados,estado,imagen")
         .order("fecha", { ascending: true });
 
     const categoriaNormalizada = categorias.get(categoria.toLowerCase());
@@ -419,7 +419,7 @@ router.post("/register", validarCsrf, async (req, res, next) => {
     const errors = [];
 
     if (fullName.length < 2 || fullName.length > 80) errors.push("Escribe tu nombre (entre 2 y 80 caracteres).");
-    if (!email || email.length > 254) errors.push("Escribe un correo válido.");
+    if (!email || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push("Escribe un correo válido.");
     if (password.length < 8 || password.length > 72) errors.push("La contraseña debe tener entre 8 y 72 caracteres.");
     if (password !== passwordConfirmation) errors.push("Las contraseñas no coinciden.");
 
@@ -515,7 +515,7 @@ router.get("/favoritos", requireResident, async (req, res, next) => {
         if (favoriteIds.length) {
             const { data, error } = await req.supabaseResident
                 .from("actividades")
-                .select("id,nombre,descripcion,categoria,fecha,lugar,cupos,cupos_totales,cupos_ocupados,estado,imagen")
+                .select("id,nombre,descripcion,categoria,fecha,lugar,cupos_totales,cupos_ocupados,estado,imagen")
                 .in("id", favoriteIds)
                 .order("fecha", { ascending: true });
             if (error) throw error;
@@ -773,7 +773,7 @@ router.get("/admin/actividades", requireOrganizer, async (req, res, next) => {
     try {
         const { data, error } = await req.supabaseOrganizer
             .from("actividades")
-            .select("id,nombre,descripcion,categoria,fecha,lugar,cupos,cupos_totales,cupos_ocupados,estado,imagen")
+            .select("id,nombre,descripcion,categoria,fecha,lugar,cupos_totales,cupos_ocupados,estado,imagen")
             .order("fecha", { ascending: true });
 
         if (error) throw error;
@@ -841,7 +841,7 @@ router.get("/admin/actividades/:id/editar", requireOrganizer, async (req, res, n
     try {
         const { data, error } = await req.supabaseOrganizer
             .from("actividades")
-            .select("id,nombre,descripcion,categoria,fecha,lugar,cupos,cupos_totales,cupos_ocupados,estado,imagen")
+            .select("id,nombre,descripcion,categoria,fecha,lugar,cupos_totales,cupos_ocupados,estado,imagen")
             .eq("id", req.params.id)
             .maybeSingle();
         if (error) throw error;

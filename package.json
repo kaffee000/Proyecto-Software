@@ -2,7 +2,7 @@
   "name": "proyecto_software",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.js",
   "type": "module",
   "scripts": {
     "dev": "concurrently --kill-others --names CSS,SERVER \"npm:dev:css\" \"npm:dev:server\"",
@@ -17,8 +17,7 @@
     "@supabase/supabase-js": "^2.117.3",
     "ejs": "^6.0.1",
     "express": "^5.2.1",
-    "express-session": "^1.19.0",
-    "morgan": "^1.12.0"
+    "express-session": "^1.19.0"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.3.3",
