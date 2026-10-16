@@ -12,7 +12,7 @@
             <nav class="mb-7 flex items-center gap-2 text-xs font-medium text-muni-muted" aria-label="Ruta de navegación">
                 <a href="/" class="hover:text-muni-red-dark">Inicio</a>
                 <span aria-hidden="true">/</span>
-                <a href="/login" class="hover:text-muni-red-dark">Acceso vecinal</a>
+                <a href="<%= next && next !== '/' ? `/login?next=${encodeURIComponent(next)}` : '/login' %>" class="hover:text-muni-red-dark">Acceso vecinal</a>
                 <span aria-hidden="true">/</span>
                 <span aria-current="page" class="text-muni-ink">Crear cuenta</span>
             </nav>
@@ -27,6 +27,7 @@
 
             <form action="/register" method="post" class="mt-7 grid gap-x-6 gap-y-5 sm:grid-cols-2">
                 <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
+                <input type="hidden" name="next" value="<%= next || '/' %>">
                 <div class="sm:col-span-2">
                     <label for="fullName" class="form-label">Nombre</label>
                     <input id="fullName" name="fullName" type="text" class="form-control" value="<%= values.fullName || '' %>" placeholder="Tu nombre y apellido" minlength="2" maxlength="80" required autocomplete="name" autofocus>
@@ -53,7 +54,7 @@
                 </div>
             </form>
 
-            <p class="mt-6 text-center text-sm text-muni-muted">¿Ya tienes cuenta? <a href="/login" class="font-semibold text-muni-ink underline decoration-muni-red underline-offset-4 hover:text-muni-red-dark">Iniciar sesión</a></p>
+            <p class="mt-6 text-center text-sm text-muni-muted">¿Ya tienes cuenta? <a href="<%= next && next !== '/' ? `/login?next=${encodeURIComponent(next)}` : '/login' %>" class="font-semibold text-muni-ink underline decoration-muni-red underline-offset-4 hover:text-muni-red-dark">Iniciar sesión</a></p>
         </section>
     </main>
 

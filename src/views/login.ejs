@@ -48,7 +48,7 @@
                     <button type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-muni-red-dark px-6 text-sm font-semibold text-white transition-colors hover:bg-red-800">Iniciar sesión</button>
                 </form>
 
-                <p class="mt-6 text-center text-sm text-muni-muted">¿Aún no tienes cuenta? <a href="/register" class="font-semibold text-muni-ink underline decoration-muni-red underline-offset-4 hover:text-muni-red-dark">Crear cuenta vecinal</a></p>
+                <p class="mt-6 text-center text-sm text-muni-muted">¿Aún no tienes cuenta? <a href="<%= next && next !== '/' ? `/register?next=${encodeURIComponent(next)}` : '/register' %>" class="font-semibold text-muni-ink underline decoration-muni-red underline-offset-4 hover:text-muni-red-dark">Crear cuenta vecinal</a></p>
                 <p class="mt-7 border-t border-black/10 pt-5 text-center text-xs text-muni-muted"><a href="/admin/login" class="underline underline-offset-4 hover:text-muni-ink">Acceso para organizadores</a></p>
             </div>
         </section>

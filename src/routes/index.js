@@ -70,9 +70,13 @@ function destinoVecinalSeguro(value, fallback = "/") {
 }
 
 function guardarSesionVecinal(req, res, next, session, destination) {
+    const sesionOrganizador = req.session?.supabaseSession;
     req.session.regenerate((sessionError) => {
         if (sessionError) return next(sessionError);
 
+        if (sesionOrganizador) {
+            req.session.supabaseSession = sesionOrganizador;
+        }
         req.session.residentSession = session;
         req.session.csrfToken = csrfTokenPara(req);
         req.session.save((saveError) => {
@@ -106,6 +110,9 @@ async function renderizarCatalogo(req, res, vista, title) {
     const buscar = typeof req.query.buscar === "string"
         ? req.query.buscar.trim().slice(0, 100)
         : "";
+    const csrfToken = (req.session?.residentSession || req.session?.supabaseSession)
+        ? csrfTokenPara(req)
+        : null;
 
     try {
         let actividades = await obtenerActividades(req.app.locals.supabase, categoria);
@@ -125,7 +132,7 @@ async function renderizarCatalogo(req, res, vista, title) {
             categoria,
             buscar,
             favoriteIds,
-            csrfToken: req.session?.residentSession ? csrfTokenPara(req) : null,
+            csrfToken,
             currentPath: req.originalUrl,
             favoritoError: req.query.error === "guardar",
             reintentarUrl: req.originalUrl,
@@ -139,7 +146,7 @@ async function renderizarCatalogo(req, res, vista, title) {
             categoria,
             buscar,
             favoriteIds: [],
-            csrfToken: req.session?.residentSession ? csrfTokenPara(req) : null,
+            csrfToken,
             currentPath: req.originalUrl,
             favoritoError: req.query.error === "guardar",
             reintentarUrl: req.originalUrl,
@@ -395,6 +402,7 @@ router.get("/register", (req, res) => {
     res.render("register.ejs", {
         title: "Crear cuenta vecinal - Muni Sport",
         csrfToken: csrfTokenPara(req),
+        next: destinoVecinalSeguro(req.query.next),
         errors: [],
         values: { fullName: "", email: "", avatarUrl: "" }
     });
@@ -406,6 +414,7 @@ router.post("/register", validarCsrf, async (req, res, next) => {
     const password = typeof req.body.password === "string" ? req.body.password : "";
     const passwordConfirmation = typeof req.body.passwordConfirmation === "string" ? req.body.passwordConfirmation : "";
     const avatarUrl = typeof req.body.avatarUrl === "string" ? req.body.avatarUrl.trim() : "";
+    const destination = destinoVecinalSeguro(req.body.next);
     const values = { fullName, email, avatarUrl };
     const errors = [];
 
@@ -429,6 +438,7 @@ router.post("/register", validarCsrf, async (req, res, next) => {
         return res.status(422).render("register.ejs", {
             title: "Crear cuenta vecinal - Muni Sport",
             csrfToken: csrfTokenPara(req),
+            next: destination,
             errors,
             values
         });
@@ -440,6 +450,7 @@ router.post("/register", validarCsrf, async (req, res, next) => {
             return res.status(503).render("register.ejs", {
                 title: "Crear cuenta vecinal - Muni Sport",
                 csrfToken: csrfTokenPara(req),
+                next: destination,
                 errors: ["Supabase no está configurado en este proyecto."],
                 values
             });
@@ -449,20 +460,43 @@ router.post("/register", validarCsrf, async (req, res, next) => {
             return res.status(400).render("register.ejs", {
                 title: "Crear cuenta vecinal - Muni Sport",
                 csrfToken: csrfTokenPara(req),
+                next: destination,
                 errors: ["No pudimos crear la cuenta. Revisa los datos e inténtalo nuevamente o inicia sesión si ya tienes una cuenta."],
                 values
             });
         }
 
-        if (!result.session) return res.redirect(303, "/login?registro=pendiente");
-        guardarSesionVecinal(req, res, next, result.session, "/");
+        if (!result.session) {
+            const query = new URLSearchParams({ registro: "pendiente" });
+            if (destination !== "/") query.set("next", destination);
+            return res.redirect(303, `/login?${query.toString()}`);
+        }
+        guardarSesionVecinal(req, res, next, result.session, destination);
     } catch (error) {
         next(error);
     }
 });
 
-router.post("/logout", requireResident, validarCsrf, (req, res, next) => {
+router.post("/logout", requireResident, validarCsrf, async (req, res, next) => {
+    try {
+        await req.supabaseResident.auth.signOut({ scope: "local" });
+    } catch (error) {
+        console.error("No se pudo cerrar la sesión vecinal de Supabase:", error.message || error);
+    }
+
     delete req.session.residentSession;
+    if (!req.session.supabaseSession) {
+        return req.session.destroy((error) => {
+            if (error) return next(error);
+            res.clearCookie("munisport.sid", {
+                httpOnly: true,
+                sameSite: "lax",
+                secure: process.env.NODE_ENV === "production"
+            });
+            res.redirect(303, "/");
+        });
+    }
+
     req.session.save((error) => {
         if (error) return next(error);
         res.redirect(303, "/");
@@ -716,9 +750,13 @@ router.post("/admin/login", validarCsrf, async (req, res, next) => {
             });
         }
 
+        const sesionVecinal = req.session?.residentSession;
         req.session.regenerate((sessionError) => {
             if (sessionError) return next(sessionError);
 
+            if (sesionVecinal) {
+                req.session.residentSession = sesionVecinal;
+            }
             req.session.supabaseSession = result.session;
             req.session.csrfToken = csrfTokenPara(req);
             req.session.save((saveError) => {
@@ -944,13 +982,21 @@ router.post("/admin/logout", requireOrganizer, validarCsrf, async (req, res, nex
         console.error("No se pudo cerrar la sesión de Supabase:", error.message || error);
     }
 
-    req.session.destroy((error) => {
-        if (error) return next(error);
-        res.clearCookie("munisport.sid", {
-            httpOnly: true,
-            sameSite: "lax",
-            secure: process.env.NODE_ENV === "production"
+    delete req.session.supabaseSession;
+    if (!req.session.residentSession) {
+        return req.session.destroy((error) => {
+            if (error) return next(error);
+            res.clearCookie("munisport.sid", {
+                httpOnly: true,
+                sameSite: "lax",
+                secure: process.env.NODE_ENV === "production"
+            });
+            res.redirect(303, "/");
         });
+    }
+
+    req.session.save((error) => {
+        if (error) return next(error);
         res.redirect(303, "/");
     });
 });

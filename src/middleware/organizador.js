@@ -187,7 +187,7 @@ export async function requireOrganizer(req, res, next) {
         res.locals.isOrganizer = true;
         res.locals.organizerEmail = userData.user.email;
         res.locals.organizerProfile = perfilDesdeUsuario(userData.user);
-        res.locals.csrfToken = req.session.csrfToken || null;
+        res.locals.csrfToken = csrfTokenPara(req);
         next();
     } catch (error) {
         next(error);

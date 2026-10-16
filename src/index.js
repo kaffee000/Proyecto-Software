@@ -6,6 +6,7 @@ import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 
 import indexRoutes from "./routes/index.js";
+import { csrfTokenPara } from "./middleware/organizador.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -70,7 +71,9 @@ app.use((req, res, next) => {
     res.locals.residentProfile = req.session?.residentSession?.profile || null;
     res.locals.organizerProfile = req.session?.supabaseSession?.profile || null;
     res.locals.organizerEmail = req.session?.supabaseSession?.email || "";
-    res.locals.csrfToken = req.session?.csrfToken || null;
+    res.locals.csrfToken = (res.locals.isOrganizer || res.locals.isResident)
+        ? csrfTokenPara(req)
+        : (req.session?.csrfToken || null);
     next();
 });
 app.use(indexRoutes);

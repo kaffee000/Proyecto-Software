@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { csrfTokenPara } from "./organizador.js";
 
 function crearClienteVecinal(req) {
     const config = req.app.locals.supabaseConfig;
@@ -154,7 +155,7 @@ export async function requireResident(req, res, next) {
         req.supabaseResident = cliente;
         res.locals.isResident = true;
         res.locals.residentProfile = req.session.residentSession.profile;
-        res.locals.csrfToken = req.session.csrfToken || null;
+        res.locals.csrfToken = csrfTokenPara(req);
         res.set("Cache-Control", "no-store");
         next();
     } catch (error) {
