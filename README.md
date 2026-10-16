@@ -8,13 +8,13 @@ Muni Sport centraliza el descubrimiento de actividades deportivas, recreativas y
 - Registro e inicio de sesión vecinal con Supabase Auth, búsqueda, favoritos e inscripción por actividad.
 - Acceso separado para organizadores en `/admin/login` y gestión CRUD de la cartelera.
 - Vista `/personal` para el directorio profesional.
-- Inscripción autenticada con reserva de cupo, confirmación, rechazo de duplicados y control concurrente de capacidad. No procesa pagos.
+- Inscripción autenticada con reserva de cupo, confirmación, vista de inscripciones propias (`/inscripciones`), cancelación de reserva, rechazo de duplicados y control concurrente de capacidad. No procesa pagos.
 - Imágenes servidas desde `src/public/images`.
 
 ## Preparar Supabase
 
 1. Crea un proyecto en [Supabase](https://supabase.com/dashboard). Espera a que la base de datos termine de inicializarse.
-2. En el proyecto, abre **SQL Editor**, crea una consulta y ejecuta, en este orden, [`supabase/migrations/20261014000100_inicial.sql`](supabase/migrations/20261014000100_inicial.sql), [`supabase/migrations/20261014000200_crud_actividades_organizadores.sql`](supabase/migrations/20261014000200_crud_actividades_organizadores.sql), [`supabase/migrations/20261014000300_favoritos_vecinales.sql`](supabase/migrations/20261014000300_favoritos_vecinales.sql) y [`supabase/migrations/20261014000400_inscripciones_cupos.sql`](supabase/migrations/20261014000400_inscripciones_cupos.sql). La última migración agrega capacidad y reservas a las actividades y una operación atómica para confirmar inscripciones sin sobrepasar los cupos.
+2. En el proyecto, abre **SQL Editor**, crea una consulta y ejecuta, en este orden, [`supabase/migrations/20261014000100_inicial.sql`](supabase/migrations/20261014000100_inicial.sql), [`supabase/migrations/20261014000200_crud_actividades_organizadores.sql`](supabase/migrations/20261014000200_crud_actividades_organizadores.sql), [`supabase/migrations/20261014000300_favoritos_vecinales.sql`](supabase/migrations/20261014000300_favoritos_vecinales.sql), [`supabase/migrations/20261014000400_inscripciones_cupos.sql`](supabase/migrations/20261014000400_inscripciones_cupos.sql) y [`supabase/migrations/20261014000500_cancelar_inscripcion.sql`](supabase/migrations/20261014000500_cancelar_inscripcion.sql). Las últimas dos migraciones agregan capacidad y reservas a las actividades y operaciones atómicas para confirmar o cancelar inscripciones sin sobrepasar los cupos.
 3. En **Connect** o **Settings → API Keys**, copia el **Project URL** y la **Publishable key** (`sb_publishable_...`). Para proyectos antiguos, se puede usar la clave `anon` en su lugar.
 4. En la raíz del proyecto, crea `.env` desde la plantilla (`Copy-Item .env.example .env` en PowerShell; `cp .env.example .env` en macOS/Linux) y completa:
 

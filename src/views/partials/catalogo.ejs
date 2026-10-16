@@ -1,11 +1,14 @@
 <%
     const esInicio = catalogoMode === "home";
     const esFavoritos = catalogoMode === "favorites";
+    const esInscripciones = catalogoMode === "enrollments";
+    const esListaPersonal = esFavoritos || esInscripciones;
     const rutaCatalogo = esInicio ? "/" : "/event";
     const filtroActivo = typeof categoria === "string" ? categoria.toLowerCase() : "todas";
     const actividadesDisponibles = Array.isArray(actividades) ? actividades : [];
     const actividadesVisibles = esInicio ? actividadesDisponibles.slice(0, 4) : actividadesDisponibles;
     const idsFavoritos = Array.isArray(favoriteIds) ? favoriteIds : [];
+    const idsInscritos = Array.isArray(typeof enrolledIds !== "undefined" ? enrolledIds : []) ? enrolledIds : [];
     const filtrosCatalogo = [
         { id: "todas", label: "Todas" },
         { id: "deportes", label: "Deportes" },
@@ -26,7 +29,7 @@
     };
 %>
 
-<section id="catalogo-actividades" data-mode="<%= esFavoritos ? 'favorites' : (esInicio ? 'home' : 'full') %>" class="scroll-mt-8 px-4 md:px-7 <%= esInicio ? 'py-16 md:py-24' : 'pb-16 pt-8 md:pb-24 md:pt-10' %>" aria-labelledby="catalogo-heading">
+<section id="catalogo-actividades" data-mode="<%= esFavoritos ? 'favorites' : (esInscripciones ? 'enrollments' : (esInicio ? 'home' : 'full')) %>" class="scroll-mt-8 px-4 md:px-7 <%= esInicio ? 'py-16 md:py-24' : 'pb-16 pt-8 md:pb-24 md:pt-10' %>" aria-labelledby="catalogo-heading">
     <div class="mx-auto max-w-[1280px]">
         <% if (esInicio) { %>
             <div class="mb-9 flex flex-col gap-5 sm:mb-12 sm:flex-row sm:items-end sm:justify-between">
@@ -43,7 +46,7 @@
             </div>
         <% } %>
 
-        <% if (!esFavoritos) { %>
+        <% if (!esListaPersonal) { %>
             <div class="mb-6 flex flex-wrap gap-2" aria-label="Filtrar actividades por categoría">
                 <% filtrosCatalogo.forEach((filtro) => { %>
                     <%
@@ -67,14 +70,16 @@
         <% if (catalogoError) { %>
             <div class="border-y border-red-200 bg-red-50 px-5 py-5 text-sm text-red-900" role="alert">
                 <p class="font-semibold">No pudimos consultar la cartelera ahora.</p>
-                <p class="mt-1"><%= esFavoritos ? "Comprueba que la migración de favoritos esté aplicada en Supabase y vuelve a intentarlo." : "Revisa la conexión con Supabase y que estén aplicadas las migraciones del proyecto." %></p>
+                <p class="mt-1"><%= esFavoritos ? "Comprueba que la migración de favoritos esté aplicada en Supabase y vuelve a intentarlo." : (esInscripciones ? "Comprueba que la migración de inscripciones esté aplicada en Supabase y vuelve a intentarlo." : "Revisa la conexión con Supabase y que estén aplicadas las migraciones del proyecto.") %></p>
                 <a href="<%= reintentarUrl %>" class="mt-3 inline-flex font-semibold underline underline-offset-4">Reintentar</a>
             </div>
         <% } else if (actividadesVisibles.length === 0) { %>
             <div class="border-y border-black/10 py-12">
-                <h3 class="text-xl font-semibold tracking-[-0.03em] text-muni-ink"><%= esFavoritos ? "Todavía no guardas actividades" : buscar ? "No encontramos actividades con esa búsqueda" : "Todavía no hay actividades en esta categoría" %></h3>
-                <p class="mt-2 max-w-xl text-sm leading-6 text-muni-muted"><%= esFavoritos ? "Marca el corazón de una actividad para tenerla a mano aquí." : "Prueba con otra palabra o categoría, o vuelve a revisar la cartelera más adelante." %></p>
-                <% if (!esFavoritos && (filtroActivo !== "todas" || buscar)) { %>
+                <h3 class="text-xl font-semibold tracking-[-0.03em] text-muni-ink"><%= esFavoritos ? "Todavía no guardas actividades" : (esInscripciones ? "Todavía no tienes inscripciones confirmadas" : (buscar ? "No encontramos actividades con esa búsqueda" : "Todavía no hay actividades en esta categoría")) %></h3>
+                <p class="mt-2 max-w-xl text-sm leading-6 text-muni-muted"><%= esFavoritos ? "Marca el corazón de una actividad para tenerla a mano aquí." : (esInscripciones ? "Explora la cartelera y reserva tu cupo en los talleres o encuentros disponibles." : "Prueba con otra palabra o categoría, o vuelve a revisar la cartelera más adelante.") %></p>
+                <% if (esInscripciones) { %>
+                    <a href="/event" class="mt-5 inline-flex border-b border-muni-red pb-1 text-sm font-semibold text-muni-ink hover:text-muni-red-dark">Explorar la cartelera</a>
+                <% } else if (!esFavoritos && (filtroActivo !== "todas" || buscar)) { %>
                     <a href="<%= rutaCatalogo %>" data-catalog-filter class="mt-5 inline-flex border-b border-muni-red pb-1 text-sm font-semibold text-muni-ink hover:text-muni-red-dark">Ver todas las actividades</a>
                 <% } %>
             </div>
@@ -94,6 +99,7 @@
                         const estado = actividad.estado || "activo";
                         const imagenActividad = typeof actividad.imagen === "string" ? actividad.imagen.trim() : "";
                         const esFavorita = idsFavoritos.includes(actividad.id);
+                        const estaInscrito = idsInscritos.includes(actividad.id);
                         const cuposDisponibles = Math.max(0, Number(actividad.cupos_totales || 0) - Number(actividad.cupos_ocupados || 0));
                         const inscripcionAbierta = estado === "activo" && cuposDisponibles > 0;
                     %>
@@ -154,7 +160,9 @@
                                     <svg aria-hidden="true" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.8c0 5.4-8.8 10.2-8.8 10.2S3.2 14.2 3.2 8.8a4.3 4.3 0 0 1 8.8-1 4.3 4.3 0 0 1 8.8 1Z"></path></svg>
                                 </a>
                             <% } %>
-                            <% if (inscripcionAbierta) { %>
+                            <% if (estaInscrito) { %>
+                                <a href="/inscripciones/<%= actividad.id %>" class="inline-flex h-10 items-center justify-center rounded-full border border-emerald-300 bg-emerald-50 px-3.5 text-xs font-semibold text-emerald-950 transition-colors hover:border-emerald-400 hover:bg-emerald-100" aria-label="Ver o gestionar inscripción: <%= actividad.nombre %>">Inscrito</a>
+                            <% } else if (inscripcionAbierta) { %>
                                 <a href="/inscripciones/<%= actividad.id %>" class="inline-flex h-10 items-center justify-center rounded-full bg-muni-red-dark px-4 text-xs font-semibold text-white transition-colors hover:bg-red-800" aria-label="Inscribirse: <%= actividad.nombre %>">Inscribirme</a>
                             <% } else { %>
                                 <span class="inline-flex h-10 items-center justify-center rounded-full border border-black/10 px-3 text-xs font-medium text-muni-muted" aria-label="Inscripción cerrada para <%= actividad.nombre %>"><%= estado === "activo" ? "Sin cupos" : "Cerrada" %></span>

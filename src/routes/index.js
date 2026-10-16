@@ -62,7 +62,7 @@ function destinoVecinalSeguro(value, fallback = "/") {
         const destino = new URL(value, "http://munisport.local");
         if (destino.origin !== "http://munisport.local") return fallback;
         const rutaInscripcion = /^\/inscripciones\/[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(destino.pathname);
-        if (!["/", "/event", "/favoritos"].includes(destino.pathname) && !rutaInscripcion) return fallback;
+        if (!["/", "/event", "/favoritos", "/inscripciones"].includes(destino.pathname) && !rutaInscripcion) return fallback;
         return `${destino.pathname}${destino.search}${destino.hash}`;
     } catch {
         return fallback;
@@ -86,20 +86,36 @@ function guardarSesionVecinal(req, res, next, session, destination) {
     });
 }
 
-async function obtenerFavoritosVecinales(req) {
-    if (!req.session?.residentSession) return [];
+async function obtenerEstadoVecinal(req) {
+    if (!req.session?.residentSession) return { favoriteIds: [], enrolledIds: [] };
 
     try {
         const cliente = await clienteVecinalDeSesion(req);
-        if (!cliente) return [];
-        const { data, error } = await cliente
-            .from("actividad_favoritos")
-            .select("actividad_id");
-        if (error) throw error;
-        return (data || []).map((favorito) => favorito.actividad_id);
+        if (!cliente) return { favoriteIds: [], enrolledIds: [] };
+
+        const [favoritosResult, inscripcionesResult] = await Promise.all([
+            cliente.from("actividad_favoritos").select("actividad_id"),
+            cliente.from("inscripciones").select("actividad_id")
+        ]);
+
+        const favoriteIds = !favoritosResult.error && favoritosResult.data
+            ? favoritosResult.data.map((favorito) => favorito.actividad_id)
+            : [];
+        const enrolledIds = !inscripcionesResult.error && inscripcionesResult.data
+            ? inscripcionesResult.data.map((inscripcion) => inscripcion.actividad_id)
+            : [];
+
+        if (favoritosResult.error) {
+            console.error("No se pudieron consultar los favoritos vecinales:", favoritosResult.error.message || favoritosResult.error);
+        }
+        if (inscripcionesResult.error) {
+            console.error("No se pudieron consultar las inscripciones vecinales:", inscripcionesResult.error.message || inscripcionesResult.error);
+        }
+
+        return { favoriteIds, enrolledIds };
     } catch (error) {
-        console.error("No se pudieron consultar los favoritos vecinales:", error.message || error);
-        return [];
+        console.error("No se pudo consultar el estado vecinal:", error.message || error);
+        return { favoriteIds: [], enrolledIds: [] };
     }
 }
 
@@ -125,13 +141,14 @@ async function renderizarCatalogo(req, res, vista, title) {
                 actividad.lugar
             ].filter(Boolean).join(" ")).includes(terminos));
         }
-        const favoriteIds = await obtenerFavoritosVecinales(req);
+        const { favoriteIds, enrolledIds } = await obtenerEstadoVecinal(req);
         res.render(vista, {
             title,
             actividades,
             categoria,
             buscar,
             favoriteIds,
+            enrolledIds,
             csrfToken,
             currentPath: req.originalUrl,
             favoritoError: req.query.error === "guardar",
@@ -146,6 +163,7 @@ async function renderizarCatalogo(req, res, vista, title) {
             categoria,
             buscar,
             favoriteIds: [],
+            enrolledIds: [],
             csrfToken,
             currentPath: req.originalUrl,
             favoritoError: req.query.error === "guardar",
@@ -505,12 +523,14 @@ router.post("/logout", requireResident, validarCsrf, async (req, res, next) => {
 
 router.get("/favoritos", requireResident, async (req, res, next) => {
     try {
-        const { data: favoritos, error: favoritosError } = await req.supabaseResident
-            .from("actividad_favoritos")
-            .select("actividad_id");
+        const [{ data: favoritos, error: favoritosError }, { data: inscripciones }] = await Promise.all([
+            req.supabaseResident.from("actividad_favoritos").select("actividad_id"),
+            req.supabaseResident.from("inscripciones").select("actividad_id")
+        ]);
         if (favoritosError) throw favoritosError;
 
         const favoriteIds = (favoritos || []).map((favorito) => favorito.actividad_id);
+        const enrolledIds = (inscripciones || []).map((inscripcion) => inscripcion.actividad_id);
         let actividades = [];
         if (favoriteIds.length) {
             const { data, error } = await req.supabaseResident
@@ -528,6 +548,7 @@ router.get("/favoritos", requireResident, async (req, res, next) => {
             categoria: "todas",
             buscar: "",
             favoriteIds,
+            enrolledIds,
             csrfToken: csrfTokenPara(req),
             currentPath: req.originalUrl,
             reintentarUrl: "/favoritos",
@@ -542,6 +563,7 @@ router.get("/favoritos", requireResident, async (req, res, next) => {
             categoria: "todas",
             buscar: "",
             favoriteIds: [],
+            enrolledIds: [],
             csrfToken: csrfTokenPara(req),
             currentPath: req.originalUrl,
             reintentarUrl: "/favoritos",
@@ -602,6 +624,58 @@ router.post("/favoritos/:id", requireResident, validarCsrf, async (req, res, nex
     }
 });
 
+router.get("/inscripciones", requireResident, async (req, res) => {
+    try {
+        const [{ data: inscripciones, error: inscripcionesError }, { data: favoritos }] = await Promise.all([
+            req.supabaseResident.from("inscripciones").select("actividad_id"),
+            req.supabaseResident.from("actividad_favoritos").select("actividad_id")
+        ]);
+        if (inscripcionesError) throw inscripcionesError;
+
+        const enrolledIds = (inscripciones || []).map((inscripcion) => inscripcion.actividad_id);
+        const favoriteIds = (favoritos || []).map((favorito) => favorito.actividad_id);
+        let actividades = [];
+        if (enrolledIds.length) {
+            const { data, error } = await req.supabaseResident
+                .from("actividades")
+                .select("id,nombre,descripcion,categoria,fecha,lugar,cupos_totales,cupos_ocupados,estado,imagen")
+                .in("id", enrolledIds)
+                .order("fecha", { ascending: true });
+            if (error) throw error;
+            actividades = data || [];
+        }
+
+        res.render("inscripciones.ejs", {
+            title: "Mis inscripciones - Muni Sport",
+            actividades,
+            categoria: "todas",
+            buscar: "",
+            favoriteIds,
+            enrolledIds,
+            csrfToken: csrfTokenPara(req),
+            currentPath: req.originalUrl,
+            reintentarUrl: "/inscripciones",
+            catalogoError: false,
+            favoritoError: req.query.error === "guardar"
+        });
+    } catch (error) {
+        console.error("No se pudieron cargar las inscripciones:", error.message || error);
+        res.status(503).render("inscripciones.ejs", {
+            title: "Mis inscripciones - Muni Sport",
+            actividades: [],
+            categoria: "todas",
+            buscar: "",
+            favoriteIds: [],
+            enrolledIds: [],
+            csrfToken: csrfTokenPara(req),
+            currentPath: req.originalUrl,
+            reintentarUrl: "/inscripciones",
+            catalogoError: true,
+            favoritoError: false
+        });
+    }
+});
+
 router.get("/inscripciones/:id", requireResident, async (req, res, next) => {
     if (!idValido.test(req.params.id)) {
         return res.status(404).render("error.ejs", {
@@ -635,10 +709,13 @@ router.get("/inscripciones/:id", requireResident, async (req, res, next) => {
 
         const estados = {
             confirmada: { tipo: "success", mensaje: "Tu inscripción quedó confirmada. Tu cupo está reservado." },
+            cancelada: { tipo: "info", mensaje: "Cancelaste tu inscripción y el cupo quedó liberado." },
             duplicada: { tipo: "info", mensaje: "Ya estás inscrito en esta actividad." },
+            no_inscrito: { tipo: "info", mensaje: "No tienes una inscripción activa en esta actividad." },
             sin_cupos: { tipo: "error", mensaje: "La actividad ya no tiene cupos disponibles." },
             inscripcion_cerrada: { tipo: "error", mensaje: "Las inscripciones para esta actividad están cerradas." },
-            error: { tipo: "error", mensaje: "No pudimos confirmar la inscripción. Inténtalo nuevamente." }
+            error: { tipo: "error", mensaje: "No pudimos confirmar la inscripción. Inténtalo nuevamente." },
+            error_cancelar: { tipo: "error", mensaje: "No pudimos cancelar la inscripción. Verifica que la migración de cancelación esté aplicada en Supabase e inténtalo nuevamente." }
         };
 
         res.render("inscripcion.ejs", {
@@ -693,6 +770,42 @@ router.post("/inscripciones/:id", requireResident, validarCsrf, async (req, res,
     } catch (error) {
         console.error("No se pudo procesar la inscripción:", error.message || error);
         res.redirect(303, `/inscripciones/${req.params.id}?estado=error`);
+    }
+});
+
+router.post("/inscripciones/:id/cancelar", requireResident, validarCsrf, async (req, res) => {
+    if (!idValido.test(req.params.id)) {
+        return res.status(404).render("error.ejs", {
+            title: "Actividad no encontrada - Muni Sport",
+            status: 404,
+            message: "La actividad que buscas no existe o ya no está disponible."
+        });
+    }
+
+    try {
+        const { data, error } = await req.supabaseResident.rpc("cancelar_inscripcion_actividad", {
+            p_actividad_id: req.params.id
+        });
+        if (error) throw error;
+
+        if (data?.status === "actividad_no_encontrada") {
+            return res.status(404).render("error.ejs", {
+                title: "Actividad no encontrada - Muni Sport",
+                status: 404,
+                message: "La actividad que buscas no existe o ya no está disponible."
+            });
+        }
+
+        const estado = data?.status === "cancelada"
+            ? "cancelada"
+            : data?.status === "no_inscrito"
+                ? "no_inscrito"
+                : "error_cancelar";
+
+        res.redirect(303, `/inscripciones/${req.params.id}?estado=${estado}`);
+    } catch (error) {
+        console.error("No se pudo cancelar la inscripción:", error.message || error);
+        res.redirect(303, `/inscripciones/${req.params.id}?estado=error_cancelar`);
     }
 });
 

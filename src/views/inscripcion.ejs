@@ -44,7 +44,11 @@
                 <aside class="flex flex-col justify-center border-t border-black/10 pt-6 sm:border-l sm:border-t-0 sm:pl-7 sm:pt-0">
                     <% if (inscripcion) { %>
                         <p class="text-lg font-semibold">Ya estás inscrito.</p>
-                        <p class="mt-2 text-sm leading-6 text-muni-muted">Tu cupo está reservado para esta actividad.</p>
+                        <p class="mt-2 text-sm leading-6 text-muni-muted">Tu cupo está reservado para esta actividad. Si no podrás asistir, puedes liberar tu cupo.</p>
+                        <form action="/inscripciones/<%= actividad.id %>/cancelar" method="post" class="mt-6">
+                            <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
+                            <button type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-black/20 px-6 text-sm font-semibold text-muni-ink transition-colors hover:border-muni-red hover:bg-red-50 hover:text-muni-red-dark">Cancelar inscripción</button>
+                        </form>
                     <% } else if (actividad.estado !== "activo") { %>
                         <p class="text-lg font-semibold">Inscripción cerrada</p>
                         <p class="mt-2 text-sm leading-6 text-muni-muted">Esta actividad no está recibiendo nuevas inscripciones.</p>
@@ -59,7 +63,10 @@
                             <button type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-muni-red-dark px-6 text-sm font-semibold text-white transition-colors hover:bg-red-800">Confirmar inscripción</button>
                         </form>
                     <% } %>
-                    <a href="/event" class="mt-5 inline-flex w-fit border-b border-muni-red pb-1 text-sm font-semibold text-muni-ink hover:text-muni-red-dark">Volver a la cartelera</a>
+                    <div class="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2">
+                        <a href="/event" class="inline-flex w-fit border-b border-muni-red pb-1 text-sm font-semibold text-muni-ink hover:text-muni-red-dark">Volver a la cartelera</a>
+                        <a href="/inscripciones" class="inline-flex w-fit border-b border-black/20 pb-1 text-sm font-medium text-muni-muted hover:border-muni-red hover:text-muni-red-dark">Mis inscripciones</a>
+                    </div>
                 </aside>
             </article>
         </section>
