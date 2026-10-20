@@ -73,7 +73,32 @@ export async function iniciarSesionVecinal(req, email, password) {
         return { configuracion: true, error: error || new Error("No se pudo iniciar sesión.") };
     }
 
-    return { session: sesionVecinalDesdeSupabase(data.session, data.user) };
+    let organizerSession = null;
+    try {
+        const { data: organizador } = await cliente
+            .from("organizadores")
+            .select("user_id")
+            .eq("user_id", data.user.id)
+            .maybeSingle();
+
+        if (organizador) {
+            organizerSession = {
+                access_token: data.session.access_token,
+                refresh_token: data.session.refresh_token,
+                userId: data.user.id,
+                email: data.user.email,
+                profile: perfilDesdeUsuario(data.user)
+            };
+        }
+    } catch {
+        // Si falla la consulta de organizador, no impide el inicio de sesión vecinal.
+    }
+
+    return {
+        session: sesionVecinalDesdeSupabase(data.session, data.user),
+        organizerSession,
+        isOrganizer: Boolean(organizerSession)
+    };
 }
 
 export async function registrarVecino(req, { fullName, email, password, avatarUrl }) {

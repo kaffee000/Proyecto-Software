@@ -69,8 +69,8 @@ function destinoVecinalSeguro(value, fallback = "/") {
     }
 }
 
-function guardarSesionVecinal(req, res, next, session, destination) {
-    const sesionOrganizador = req.session?.supabaseSession;
+function guardarSesionVecinal(req, res, next, session, destination, organizerSession = null) {
+    const sesionOrganizador = organizerSession || req.session?.supabaseSession;
     req.session.regenerate((sessionError) => {
         if (sessionError) return next(sessionError);
 
@@ -78,6 +78,7 @@ function guardarSesionVecinal(req, res, next, session, destination) {
             req.session.supabaseSession = sesionOrganizador;
         }
         req.session.residentSession = session;
+        req.session.organizerChecked = true;
         req.session.csrfToken = csrfTokenPara(req);
         req.session.save((saveError) => {
             if (saveError) return next(saveError);
@@ -408,7 +409,7 @@ router.post("/login", validarCsrf, async (req, res, next) => {
             });
         }
 
-        guardarSesionVecinal(req, res, next, result.session, destination);
+        guardarSesionVecinal(req, res, next, result.session, destination, result.organizerSession);
     } catch (error) {
         next(error);
     }
@@ -503,20 +504,14 @@ router.post("/logout", requireResident, validarCsrf, async (req, res, next) => {
     }
 
     delete req.session.residentSession;
-    if (!req.session.supabaseSession) {
-        return req.session.destroy((error) => {
-            if (error) return next(error);
-            res.clearCookie("munisport.sid", {
-                httpOnly: true,
-                sameSite: "lax",
-                secure: process.env.NODE_ENV === "production"
-            });
-            res.redirect(303, "/");
-        });
-    }
-
-    req.session.save((error) => {
+    delete req.session.supabaseSession;
+    return req.session.destroy((error) => {
         if (error) return next(error);
+        res.clearCookie("munisport.sid", {
+            httpOnly: true,
+            sameSite: "lax",
+            secure: process.env.NODE_ENV === "production"
+        });
         res.redirect(303, "/");
     });
 });
@@ -863,7 +858,7 @@ router.post("/admin/login", validarCsrf, async (req, res, next) => {
             });
         }
 
-        const sesionVecinal = req.session?.residentSession;
+        const sesionVecinal = req.session?.residentSession || result.session;
         req.session.regenerate((sessionError) => {
             if (sessionError) return next(sessionError);
 
@@ -871,6 +866,7 @@ router.post("/admin/login", validarCsrf, async (req, res, next) => {
                 req.session.residentSession = sesionVecinal;
             }
             req.session.supabaseSession = result.session;
+            req.session.organizerChecked = true;
             req.session.csrfToken = csrfTokenPara(req);
             req.session.save((saveError) => {
                 if (saveError) return next(saveError);
@@ -1096,20 +1092,14 @@ router.post("/admin/logout", requireOrganizer, validarCsrf, async (req, res, nex
     }
 
     delete req.session.supabaseSession;
-    if (!req.session.residentSession) {
-        return req.session.destroy((error) => {
-            if (error) return next(error);
-            res.clearCookie("munisport.sid", {
-                httpOnly: true,
-                sameSite: "lax",
-                secure: process.env.NODE_ENV === "production"
-            });
-            res.redirect(303, "/");
-        });
-    }
-
-    req.session.save((error) => {
+    delete req.session.residentSession;
+    return req.session.destroy((error) => {
         if (error) return next(error);
+        res.clearCookie("munisport.sid", {
+            httpOnly: true,
+            sameSite: "lax",
+            secure: process.env.NODE_ENV === "production"
+        });
         res.redirect(303, "/");
     });
 });

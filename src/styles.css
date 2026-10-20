@@ -21,6 +21,7 @@
 @layer base {
     html {
         scroll-behavior: smooth;
+        scroll-padding-top: 5.5rem;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
     }
@@ -65,7 +66,7 @@
 
 @layer components {
     .skip-link {
-        position: absolute;
+        position: fixed;
         z-index: 9999;
         top: -5rem;
         left: 1rem;
@@ -74,6 +75,12 @@
         padding: 0.75rem 1rem;
         color: white;
         font-weight: 700;
+    }
+
+    .btn-catalogo-accion {
+        width: 108px !important;
+        min-width: 108px !important;
+        text-align: center;
     }
 
     .skip-link:focus {

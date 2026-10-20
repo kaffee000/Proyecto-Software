@@ -65,7 +65,34 @@ app.locals.supabaseConfig = supabaseUrl && supabaseKey
 app.set("view engine", "ejs");
 app.set("views", join(__dirname, "views"));
 app.use(express.static(join(__dirname, "public")));
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
+    if (req.session?.residentSession?.userId && !req.session?.supabaseSession && req.session.organizerChecked !== true) {
+        req.session.organizerChecked = true;
+        try {
+            const config = req.app.locals.supabaseConfig;
+            if (config && req.session.residentSession.access_token) {
+                const cliente = createClient(config.url, config.key, {
+                    auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false }
+                });
+                await cliente.auth.setSession({
+                    access_token: req.session.residentSession.access_token,
+                    refresh_token: req.session.residentSession.refresh_token
+                });
+                const { data: org } = await cliente
+                    .from("organizadores")
+                    .select("user_id")
+                    .eq("user_id", req.session.residentSession.userId)
+                    .maybeSingle();
+
+                if (org) {
+                    req.session.supabaseSession = { ...req.session.residentSession };
+                }
+            }
+        } catch {
+            // Silencioso ante errores temporales de conexión
+        }
+    }
+
     res.locals.isOrganizer = Boolean(req.session?.supabaseSession?.userId);
     res.locals.isResident = Boolean(req.session?.residentSession?.userId);
     res.locals.residentProfile = req.session?.residentSession?.profile || null;

@@ -161,11 +161,11 @@
                                 </a>
                             <% } %>
                             <% if (estaInscrito) { %>
-                                <a href="/inscripciones/<%= actividad.id %>" class="inline-flex h-10 items-center justify-center rounded-full border border-emerald-300 bg-emerald-50 px-3.5 text-xs font-semibold text-emerald-950 transition-colors hover:border-emerald-400 hover:bg-emerald-100" aria-label="Ver o gestionar inscripción: <%= actividad.nombre %>">Inscrito</a>
+                                <a href="/inscripciones/<%= actividad.id %>" style="width: 108px; min-width: 108px;" class="btn-catalogo-accion inline-flex h-10 items-center justify-center rounded-full border border-emerald-300 bg-emerald-50 px-2 text-xs font-semibold text-emerald-950 transition-colors hover:border-emerald-400 hover:bg-emerald-100" aria-label="Ver o gestionar inscripción: <%= actividad.nombre %>">Inscrito</a>
                             <% } else if (inscripcionAbierta) { %>
-                                <a href="/inscripciones/<%= actividad.id %>" class="inline-flex h-10 items-center justify-center rounded-full bg-muni-red-dark px-4 text-xs font-semibold text-white transition-colors hover:bg-red-800" aria-label="Inscribirse: <%= actividad.nombre %>">Inscribirme</a>
+                                <a href="/inscripciones/<%= actividad.id %>" style="width: 108px; min-width: 108px;" class="btn-catalogo-accion inline-flex h-10 items-center justify-center rounded-full bg-muni-red-dark px-2 text-xs font-semibold text-white transition-colors hover:bg-red-800" aria-label="Inscribirse: <%= actividad.nombre %>">Inscribirme</a>
                             <% } else { %>
-                                <span class="inline-flex h-10 items-center justify-center rounded-full border border-black/10 px-3 text-xs font-medium text-muni-muted" aria-label="Inscripción cerrada para <%= actividad.nombre %>"><%= estado === "activo" ? "Sin cupos" : "Cerrada" %></span>
+                                <span style="width: 108px; min-width: 108px;" class="btn-catalogo-accion inline-flex h-10 items-center justify-center rounded-full border border-black/10 px-2 text-xs font-medium text-muni-muted" aria-label="Inscripción cerrada para <%= actividad.nombre %>"><%= estado === "activo" ? "Sin cupos" : "Cerrada" %></span>
                             <% } %>
                         </div>
                     </article>
