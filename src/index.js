@@ -64,6 +64,12 @@ app.locals.supabaseConfig = supabaseUrl && supabaseKey
 
 app.set("view engine", "ejs");
 app.set("views", join(__dirname, "views"));
+app.use("/images", (req, res, next) => {
+    if (/\.(?:jpg|jpeg|png)$/i.test(req.path)) {
+        req.url = req.url.replace(/\.(?:jpg|jpeg|png)(?=$|\?)/i, ".webp");
+    }
+    next();
+});
 app.use(express.static(join(__dirname, "public")));
 app.use(async (req, res, next) => {
     if (req.session?.residentSession?.userId && !req.session?.supabaseSession && req.session.organizerChecked !== true) {

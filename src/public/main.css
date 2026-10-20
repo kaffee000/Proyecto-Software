@@ -329,6 +329,9 @@
   .mb-2 {
     margin-bottom: calc(var(--spacing) * 2);
   }
+  .mb-3 {
+    margin-bottom: calc(var(--spacing) * 3);
+  }
   .mb-4 {
     margin-bottom: calc(var(--spacing) * 4);
   }
@@ -385,6 +388,9 @@
   }
   .h-11 {
     height: calc(var(--spacing) * 11);
+  }
+  .h-14 {
+    height: calc(var(--spacing) * 14);
   }
   .h-16 {
     height: calc(var(--spacing) * 16);
@@ -802,6 +808,12 @@
   .bg-muni-soft {
     background-color: var(--color-muni-soft);
   }
+  .bg-muni-soft\/60 {
+    background-color: color-mix(in srgb, #f5f4f2 60%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-muni-soft) 60%, transparent);
+    }
+  }
   .bg-muni-soft\/70 {
     background-color: color-mix(in srgb, #f5f4f2 70%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
@@ -900,6 +912,9 @@
   }
   .object-cover {
     object-fit: cover;
+  }
+  .p-2\.5 {
+    padding: calc(var(--spacing) * 2.5);
   }
   .p-3 {
     padding: calc(var(--spacing) * 3);
@@ -1349,6 +1364,36 @@
     --tw-outline-style: none;
     outline-style: none;
   }
+  .file\:mr-4::file-selector-button {
+    margin-right: calc(var(--spacing) * 4);
+  }
+  .file\:rounded-full::file-selector-button {
+    border-radius: calc(infinity * 1px);
+  }
+  .file\:border-0::file-selector-button {
+    border-style: var(--tw-border-style);
+    border-width: 0px;
+  }
+  .file\:bg-muni-red-dark::file-selector-button {
+    background-color: var(--color-muni-red-dark);
+  }
+  .file\:px-4::file-selector-button {
+    padding-inline: calc(var(--spacing) * 4);
+  }
+  .file\:py-1\.5::file-selector-button {
+    padding-block: calc(var(--spacing) * 1.5);
+  }
+  .file\:text-xs::file-selector-button {
+    font-size: var(--text-xs);
+    line-height: var(--tw-leading, var(--text-xs--line-height));
+  }
+  .file\:font-semibold::file-selector-button {
+    --tw-font-weight: var(--font-weight-semibold);
+    font-weight: var(--font-weight-semibold);
+  }
+  .file\:text-white::file-selector-button {
+    color: var(--color-white);
+  }
   .placeholder\:text-muni-muted::placeholder {
     color: var(--color-muni-muted);
   }
@@ -1408,6 +1453,9 @@
     }
     .hover\:decoration-white:hover {
       text-decoration-color: var(--color-white);
+    }
+    .hover\:file\:bg-red-800:hover::file-selector-button {
+      background-color: var(--color-red-800);
     }
   }
   .focus-visible\:outline-muni-red:focus-visible {

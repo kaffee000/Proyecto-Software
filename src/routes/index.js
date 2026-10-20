@@ -11,6 +11,11 @@ import {
     registrarVecino,
     requireResident
 } from "../middleware/vecino.js";
+import {
+    convertirYGuardarImagenWebp,
+    normalizarRutaImagenWebp,
+    procesarSubidaImagen
+} from "../middleware/imagenes.js";
 
 const router = Router();
 
@@ -43,7 +48,10 @@ async function obtenerActividades(supabase, categoria) {
         throw error;
     }
 
-    return data || [];
+    return (data || []).map((item) => ({
+        ...item,
+        imagen: normalizarRutaImagenWebp(item.imagen)
+    }));
 }
 
 function normalizarTextoBusqueda(value) {
@@ -248,7 +256,7 @@ function actividadDesdeFormulario(body) {
     let imagenSegura = null;
     if (imagen) {
         if (imagen.startsWith("/images/") && !imagen.includes("..")) {
-            imagenSegura = imagen;
+            imagenSegura = normalizarRutaImagenWebp(imagen);
         } else {
             try {
                 const url = new URL(imagen);
@@ -291,7 +299,8 @@ async function renderFormularioActividad(req, res, { activity = {}, editing = fa
         title: editing ? "Editar actividad - Muni Sport" : "Nueva actividad - Muni Sport",
         activity: {
             ...activity,
-            fechaLocal: activity.fechaLocal || formatDateTimeLocal(activity.fecha)
+            fechaLocal: activity.fechaLocal || formatDateTimeLocal(activity.fecha),
+            imagen: normalizarRutaImagenWebp(activity.imagen)
         },
         editing,
         errors,
@@ -889,7 +898,7 @@ router.get("/admin/actividades", requireOrganizer, async (req, res, next) => {
 
         res.render("admin/actividades.ejs", {
             title: "Gestión de actividades - Muni Sport",
-            actividades: data || [],
+            actividades: (data || []).map((item) => ({ ...item, imagen: normalizarRutaImagenWebp(item.imagen) })),
             dbError: null,
             csrfToken: csrfTokenPara(req),
             organizerEmail: res.locals.organizerEmail,
@@ -914,8 +923,18 @@ router.get("/admin/actividades", requireOrganizer, async (req, res, next) => {
 
 router.get("/admin/actividades/nueva", requireOrganizer, (req, res) => renderFormularioActividad(req, res, {}));
 
-router.post("/admin/actividades", requireOrganizer, validarCsrf, async (req, res, next) => {
+router.post("/admin/actividades", requireOrganizer, procesarSubidaImagen, validarCsrf, async (req, res, next) => {
     const { actividad, errores } = actividadDesdeFormulario(req.body);
+    if (req.errorArchivoImagen) {
+        errores.push(req.errorArchivoImagen);
+    }
+    if (!errores.length && req.file?.buffer) {
+        try {
+            actividad.imagen = await convertirYGuardarImagenWebp(req.file.buffer);
+        } catch {
+            errores.push("No pudimos procesar la imagen subida. Asegúrate de subir un archivo de imagen válido.");
+        }
+    }
     if (errores.length) {
         return renderFormularioActividad(req, res, {
             activity: valoresDeFormulario(req.body),
@@ -967,7 +986,7 @@ router.get("/admin/actividades/:id/editar", requireOrganizer, async (req, res, n
     }
 });
 
-router.post("/admin/actividades/:id/editar", requireOrganizer, validarCsrf, async (req, res, next) => {
+router.post("/admin/actividades/:id/editar", requireOrganizer, procesarSubidaImagen, validarCsrf, async (req, res, next) => {
     if (!idValido.test(req.params.id)) {
         return res.status(404).render("error.ejs", {
             title: "Actividad no encontrada - Muni Sport",
@@ -977,6 +996,16 @@ router.post("/admin/actividades/:id/editar", requireOrganizer, validarCsrf, asyn
     }
 
     const { actividad, errores } = actividadDesdeFormulario(req.body);
+    if (req.errorArchivoImagen) {
+        errores.push(req.errorArchivoImagen);
+    }
+    if (!errores.length && req.file?.buffer) {
+        try {
+            actividad.imagen = await convertirYGuardarImagenWebp(req.file.buffer);
+        } catch {
+            errores.push("No pudimos procesar la imagen subida. Asegúrate de subir un archivo de imagen válido.");
+        }
+    }
     if (errores.length) {
         return renderFormularioActividad(req, res, {
             activity: { ...valoresDeFormulario(req.body), id: req.params.id },

@@ -55,41 +55,41 @@ values
         'Taller formativo de básquetbol y deporte',
         'Entrenamiento dinámico para el desarrollo de fundamentos técnicos, trabajo en equipo y acondicionamiento físico.',
         'Deportes', '2026-10-18 10:00:00-03:00', 'Polideportivo Municipal Talca',
-        '18 cupos libres', 'activo', '/images/actividad de deporte.jpg'
+        '18 cupos libres', 'activo', '/images/actividad de deporte.webp'
     ),
     (
         '00000000-0000-4000-8000-000000000002',
         'Baile entretenido y vida activa',
         'Sesiones guiadas de acondicionamiento aeróbico, ritmo y vitalidad en comunidad aptas para todas las edades.',
         'Salud', '2026-10-19 09:30:00-03:00', 'Parque Costanera Río Claro',
-        '24 cupos libres', 'activo', '/images/actividad baile entretenido.jpg'
+        '24 cupos libres', 'activo', '/images/actividad baile entretenido.webp'
     ),
     (
         '00000000-0000-4000-8000-000000000003',
         'Encuentro y actividades para adulto mayor',
         'Jornada de integración vecinal con ejercicios de estiramiento, pausas activas y dinámicas participativas.',
         'Sociales', '2026-10-20 16:00:00-03:00', 'Centro Comunitario Las Américas',
-        '40 cupos libres', 'activo', '/images/actividades adulto mayor.jpeg'
+        '40 cupos libres', 'activo', '/images/actividades adulto mayor.webp'
     ),
     (
         '00000000-0000-4000-8000-000000000004',
         'Talleres deportivos de invierno y juventud',
         'Espacios recreativos para niñas, niños y jóvenes durante temporadas de descanso escolar en recintos locales.',
         'Deportes', '2026-10-21 15:00:00-03:00', 'Estadio Sur Talca',
-        '25 cupos libres', 'activo', '/images/actividad vacaciones de invierno.jpeg'
+        '25 cupos libres', 'activo', '/images/actividad vacaciones de invierno.webp'
     ),
     (
         '00000000-0000-4000-8000-000000000005',
         'Jornada formativa infanto-juvenil',
         'Práctica de habilidades motrices, juegos colectivos y orientación en salud física preventiva.',
         'Salud', '2026-10-22 11:00:00-03:00', 'Gimnasio Regional de Talca',
-        '30 cupos libres', 'activo', '/images/actividad vacaciones de invierno 2.jpeg'
+        '30 cupos libres', 'activo', '/images/actividad vacaciones de invierno 2.webp'
     ),
     (
         '00000000-0000-4000-8000-000000000006',
         'Hidrogimnasia y bienestar acuático',
         'Sesiones guiadas en piscina temperada para fortalecimiento cardiovascular, bajo impacto articular y bienestar comunitario.',
         'Salud', '2026-10-23 11:00:00-03:00', 'Piscina Municipal de Talca',
-        '20 cupos libres', 'activo', '/images/actividad baile en piscina.jpeg'
+        '20 cupos libres', 'activo', '/images/actividad baile en piscina.webp'
     )
 on conflict (id) do nothing;

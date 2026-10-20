@@ -27,7 +27,7 @@
                 </div>
             <% } %>
 
-            <form method="post" action="<%= editing ? `/admin/actividades/${activity.id}/editar` : '/admin/actividades' %>" class="space-y-8">
+            <form method="post" action="<%= editing ? `/admin/actividades/${activity.id}/editar` : '/admin/actividades' %>" enctype="multipart/form-data" class="space-y-8">
                 <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
 
                 <section class="grid gap-x-8 gap-y-6 border-b border-black/10 pb-8 md:grid-cols-2" aria-label="Información de la actividad">
@@ -83,8 +83,18 @@
                     </div>
 
                     <div>
-                        <label for="imagen" class="form-label">Imagen de la actividad</label>
-                        <input id="imagen" name="imagen" class="form-control" type="text" inputmode="url" value="<%= activity.imagen || '' %>" placeholder="https://... o /images/actividad.jpg" autocomplete="url">
+
+                        <label for="imagenArchivo" class="form-label">Subir imagen de la actividad</label>
+                        <input id="imagenArchivo" name="imagenArchivo" class="form-control cursor-pointer file:mr-4 file:rounded-full file:border-0 file:bg-muni-red-dark file:px-4 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:file:bg-red-800" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif">
+                        <p class="form-hint mb-3">Sube una imagen desde tu dispositivo (JPG, PNG, WebP, etc.). Se convertirá automáticamente a formato <strong>.webp</strong>.</p>
+                        <% if (activity.imagen) { %>
+                            <div class="mb-3 flex items-center gap-3 rounded-xl border border-black/10 bg-muni-soft/60 p-2.5">
+                                <img id="imagen-preview" src="<%= activity.imagen %>" alt="Vista previa de la actividad" class="h-14 w-20 rounded-lg object-cover">
+                                <span class="truncate text-xs text-muni-muted">Actual: <%= activity.imagen %></span>
+                            </div>
+                        <% } %>
+                        <label for="imagen" class="form-label text-xs text-muni-muted">Ruta o URL de imagen (opcional si subes archivo)</label>
+                        <input id="imagen" name="imagen" class="form-control" type="text" inputmode="url" value="<%= activity.imagen || '' %>" placeholder="https://... o /images/actividad.webp" autocomplete="url">
                         <p class="form-hint">Opcional. Acepta una URL HTTPS; las imágenes del proyecto pueden usar una ruta /images/.</p>
                     </div>
                 </section>
