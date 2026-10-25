@@ -14,7 +14,7 @@ Muni Sport centraliza el descubrimiento de actividades deportivas, recreativas y
 ## Preparar Supabase
 
 1. Crea un proyecto en [Supabase](https://supabase.com/dashboard). Espera a que la base de datos termine de inicializarse.
-2. En el proyecto, abre **SQL Editor**, crea una consulta y ejecuta, en este orden, [`supabase/migrations/20261014000100_inicial.sql`](supabase/migrations/20261014000100_inicial.sql), [`supabase/migrations/20261014000200_crud_actividades_organizadores.sql`](supabase/migrations/20261014000200_crud_actividades_organizadores.sql), [`supabase/migrations/20261014000300_favoritos_vecinales.sql`](supabase/migrations/20261014000300_favoritos_vecinales.sql), [`supabase/migrations/20261014000400_inscripciones_cupos.sql`](supabase/migrations/20261014000400_inscripciones_cupos.sql) y [`supabase/migrations/20261014000500_cancelar_inscripcion.sql`](supabase/migrations/20261014000500_cancelar_inscripcion.sql). Las últimas dos migraciones agregan capacidad y reservas a las actividades y operaciones atómicas para confirmar o cancelar inscripciones sin sobrepasar los cupos.
+2. En el proyecto, abre **SQL Editor**, crea una consulta y ejecuta estas migraciones en orden: [`supabase/migrations/20261014000100_inicial.sql`](supabase/migrations/20261014000100_inicial.sql), [`supabase/migrations/20261014000200_crud_actividades_organizadores.sql`](supabase/migrations/20261014000200_crud_actividades_organizadores.sql), [`supabase/migrations/20261014000300_favoritos_vecinales.sql`](supabase/migrations/20261014000300_favoritos_vecinales.sql), [`supabase/migrations/20261014000400_inscripciones_cupos.sql`](supabase/migrations/20261014000400_inscripciones_cupos.sql), [`supabase/migrations/20261014000500_cancelar_inscripcion.sql`](supabase/migrations/20261014000500_cancelar_inscripcion.sql) y [`supabase/migrations/20261014000600_imagenes_webp.sql`](supabase/migrations/20261014000600_imagenes_webp.sql). Las migraciones 004 y 005 agregan reservas y cancelaciones con control de cupos; la 006 actualiza a `.webp` las rutas locales de imágenes existentes.
 3. En **Connect** o **Settings → API Keys**, copia el **Project URL** y la **Publishable key** (`sb_publishable_...`). Para proyectos antiguos, se puede usar la clave `anon` en su lugar.
 4. En la raíz del proyecto, crea `.env` desde la plantilla (`Copy-Item .env.example .env` en PowerShell; `cp .env.example .env` en macOS/Linux) y completa:
 
@@ -26,10 +26,11 @@ Muni Sport centraliza el descubrimiento de actividades deportivas, recreativas y
 
    Si tu proyecto antiguo solo tiene la clave `anon`, usa `SUPABASE_ANON_KEY` en lugar de `SUPABASE_PUBLISHABLE_KEY`. No agregues la clave `service_role` ni una clave `sb_secret_` al archivo de la aplicación.
 
-5. Instala dependencias e inicia la aplicación:
+5. Instala dependencias, ejecuta las pruebas y luego inicia la aplicación:
 
    ```bash
    npm install
+   npm test
    npm run dev
    ```
 
@@ -56,18 +57,26 @@ El código anterior consultaba la colección `webMuni.profesionales`, pero este 
 
 Requisitos: Node.js 20.6 o posterior y npm. `npm run dev` inicia Express y Tailwind CSS en modo watch. `npm run build:css` genera el CSS minificado para compilarlo antes de desplegar. Supabase debe estar configurado para cargar el catálogo. Si faltan las variables de entorno o hay un error de conexión, la aplicación muestra un aviso en el catálogo y sigue disponible para navegar las demás páginas.
 
+`npm test` ejecuta las pruebas unitarias con el test runner integrado de Node.js (`node --test`), sin dependencias adicionales. La cobertura inicial comprueba la normalización de rutas de imágenes locales al formato WebP.
+
 El archivo `.env` está excluido de Git. Para conectar otro entorno, configura `SUPABASE_URL` y `SUPABASE_PUBLISHABLE_KEY` en las variables de entorno de ese servicio. Nunca uses una clave secreta o `service_role` en código cliente o en un repositorio.
 
 ## Estructura
 
 ```text
 src/
-├── index.js                 # Express y cliente Supabase
-├── routes/index.js          # Catálogo y CRUD de actividades
-├── middleware/organizador.js # Sesión, rol y protección CSRF del panel
-├── styles.css               # Entrada de Tailwind CSS
-├── public/                  # CSS generado e imágenes
-└── views/                   # Vistas EJS
+├── index.js                  # Express y cliente Supabase
+├── routes/
+│   └── index.js               # Catálogo y CRUD de actividades
+├── middleware/
+│   ├── organizador.js         # Sesión, rol y protección CSRF del panel
+│   ├── imagenes.js            # Carga y conversión de imágenes a WebP
+│   └── rutas-imagen.js        # Normalización de rutas locales de imagen
+├── styles.css                 # Entrada de Tailwind CSS
+├── public/                    # CSS generado e imágenes
+└── views/                     # Vistas EJS
 supabase/
 └── migrations/              # Esquema, RLS, datos y roles de organizador
+test/
+└── middleware/               # Pruebas unitarias de rutas de imagen
 ```

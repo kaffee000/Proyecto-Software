@@ -8,7 +8,8 @@
     "dev": "concurrently --kill-others --names CSS,SERVER \"npm:dev:css\" \"npm:dev:server\"",
     "dev:css": "tailwindcss -i ./src/styles.css -o ./src/public/main.css --watch",
     "dev:server": "node --watch src/index.js",
-    "build:css": "tailwindcss -i ./src/styles.css -o ./src/public/main.css --minify"
+    "build:css": "tailwindcss -i ./src/styles.css -o ./src/public/main.css --minify",
+    "test": "node --test"
   },
   "keywords": [],
   "author": "",

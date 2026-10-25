@@ -5,6 +5,8 @@ import { writeFile } from "fs/promises";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 
+export { normalizarRutaImagenWebp } from "./rutas-imagen.js";
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const directorioImagenes = join(__dirname, "../public/images");
 
@@ -79,17 +81,4 @@ export async function convertirYGuardarImagenWebp(buffer) {
     await writeFile(rutaDestino, webpBuffer);
 
     return `/images/${nombreArchivo}`;
-}
-
-/**
- * Normaliza rutas locales de /images/ para que siempre utilicen extensión .webp.
- */
-export function normalizarRutaImagenWebp(imagen) {
-    if (typeof imagen !== "string") return imagen;
-    const limpia = imagen.trim();
-    if (!limpia) return "";
-    if (limpia.startsWith("/images/") && !limpia.includes("..")) {
-        return limpia.replace(/\.(?:jpg|jpeg|png)$/i, ".webp");
-    }
-    return limpia;
 }
