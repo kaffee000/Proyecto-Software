@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <%- include('partials/head') %>
+    <title><%= title %></title>
+</head>
+<body class="min-h-screen bg-white font-sans text-muni-ink antialiased">
+    <%- include('partials/navigation') %>
+
+    <main id="contenido-principal" class="flex flex-1 items-center px-4 py-12 md:px-7 md:py-16">
+        <section class="mx-auto w-full max-w-[620px] rounded-3xl border border-black/10 bg-white p-6 shadow-[0_24px_80px_-48px_rgba(25,25,25,0.25)] sm:p-10 lg:p-12" aria-labelledby="verify-heading">
+            <nav class="mb-7 flex items-center gap-2 text-xs font-medium text-muni-muted" aria-label="Ruta de navegación">
+                <a href="/" class="hover:text-muni-red-dark">Inicio</a>
+                <span aria-hidden="true">/</span>
+                <a href="/register" class="hover:text-muni-red-dark">Crear cuenta vecinal</a>
+                <span aria-hidden="true">/</span>
+                <span aria-current="page" class="text-muni-ink">Verificar correo</span>
+            </nav>
+
+            <h1 id="verify-heading" class="text-3xl font-semibold leading-[1.03] tracking-[-0.04em] sm:text-4xl">Verifica tu correo.</h1>
+            <p class="mt-3 text-sm leading-6 text-muni-muted">
+                Enviamos un código de verificación de 4 dígitos a <strong class="font-semibold text-muni-ink"><%= email %></strong> para confirmar que te pertenece antes de crear tu cuenta vecinal.
+            </p>
+
+            <% if (notice) { %>
+                <div class="mt-6 border-y border-emerald-300 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-950" role="status"><%= notice %></div>
+            <% } %>
+
+            <% if (errors && errors.length) { %>
+                <div class="mt-6 border-y border-red-200 bg-red-50 px-4 py-4 text-sm leading-6 text-red-900" role="alert">
+                    <ul class="list-inside list-disc space-y-1"><% errors.forEach((message) => { %><li><%= message %></li><% }) %></ul>
+                </div>
+            <% } %>
+
+            <form action="/register/verificar" method="post" class="mt-7 space-y-5" novalidate>
+                <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
+                <input type="hidden" name="next" value="<%= next || '/' %>">
+
+                <div>
+                    <label for="codigo" class="form-label">Código de verificación (4 dígitos)</label>
+                    <input
+                        id="codigo"
+                        name="codigo"
+                        type="text"
+                        inputmode="numeric"
+                        pattern="[0-9]{4}"
+                        maxlength="4"
+                        class="form-control text-center font-mono text-2xl tracking-[0.4em]"
+                        placeholder="0000"
+                        required
+                        autocomplete="one-time-code"
+                        autofocus
+                    >
+                    <p class="form-hint">Ingresa los 4 números enviados a tu correo electrónico.</p>
+                </div>
+
+                <button type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-muni-red-dark px-6 text-sm font-semibold text-white transition-colors hover:bg-red-800">
+                    Confirmar código y finalizar registro
+                </button>
+            </form>
+
+            <div class="mt-6 flex flex-col items-center justify-between gap-3 border-t border-black/10 pt-5 sm:flex-row">
+                <form action="/register/reenviar-codigo" method="post">
+                    <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
+                    <input type="hidden" name="next" value="<%= next || '/' %>">
+                    <button type="submit" class="text-sm font-semibold text-muni-ink underline decoration-muni-red underline-offset-4 hover:text-muni-red-dark">
+                        Reenviar código de 4 dígitos
+                    </button>
+                </form>
+
+                <a href="<%= next && next !== '/' ? `/register?editar=1&next=${encodeURIComponent(next)}` : '/register?editar=1' %>" class="text-xs font-medium text-muni-muted hover:text-muni-ink">
+                    Corregir datos del formulario
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <%- include('partials/footer') %>
+</body>
+</html>

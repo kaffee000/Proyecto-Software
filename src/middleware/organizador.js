@@ -128,6 +128,13 @@ export async function iniciarSesionOrganizador(req, email, password) {
 
 export async function requireOrganizer(req, res, next) {
     if (!req.session?.supabaseSession) {
+        if (req.session?.residentSession) {
+            return res.status(403).render("error.ejs", {
+                title: "Acceso restringido - Muni Sport",
+                status: 403,
+                message: "Las cuentas de vecino no tienen permisos para crear ni editar actividades."
+            });
+        }
         const destino = encodeURIComponent(req.originalUrl);
         return res.redirect(`/admin/login?next=${destino}`);
     }

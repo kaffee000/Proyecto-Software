@@ -6,6 +6,7 @@ Muni Sport centraliza el descubrimiento de actividades deportivas, recreativas y
 
 - Catálogo de actividades en `/` y `/event`, filtrable por Deportes, Salud y Sociales.
 - Registro e inicio de sesión vecinal con Supabase Auth, búsqueda, favoritos e inscripción por actividad.
+- Estructura de usuario **vecino** (sin permisos para crear ni editar actividades) con registro validado mediante RUT chileno, primer nombre, apellido paterno, apellido materno, teléfono móvil de 9 dígitos (`9XXXXXXXX`), correo electrónico único y confirmación previa mediante un código de verificación de 4 dígitos enviado al correo.
 - Acceso separado para organizadores en `/admin/login` y gestión CRUD de la cartelera.
 - Vista `/personal` para el directorio profesional.
 - Inscripción autenticada con reserva de cupo, confirmación, vista de inscripciones propias (`/inscripciones`), cancelación de reserva, rechazo de duplicados y control concurrente de capacidad. No procesa pagos.
@@ -14,7 +15,7 @@ Muni Sport centraliza el descubrimiento de actividades deportivas, recreativas y
 ## Preparar Supabase
 
 1. Crea un proyecto en [Supabase](https://supabase.com/dashboard). Espera a que la base de datos termine de inicializarse.
-2. En el proyecto, abre **SQL Editor**, crea una consulta y ejecuta estas migraciones en orden: [`supabase/migrations/20261014000100_inicial.sql`](supabase/migrations/20261014000100_inicial.sql), [`supabase/migrations/20261014000200_crud_actividades_organizadores.sql`](supabase/migrations/20261014000200_crud_actividades_organizadores.sql), [`supabase/migrations/20261014000300_favoritos_vecinales.sql`](supabase/migrations/20261014000300_favoritos_vecinales.sql), [`supabase/migrations/20261014000400_inscripciones_cupos.sql`](supabase/migrations/20261014000400_inscripciones_cupos.sql), [`supabase/migrations/20261014000500_cancelar_inscripcion.sql`](supabase/migrations/20261014000500_cancelar_inscripcion.sql) y [`supabase/migrations/20261014000600_imagenes_webp.sql`](supabase/migrations/20261014000600_imagenes_webp.sql). Las migraciones 004 y 005 agregan reservas y cancelaciones con control de cupos; la 006 actualiza a `.webp` las rutas locales de imágenes existentes.
+2. En el proyecto, abre **SQL Editor**, crea una consulta y ejecuta estas migraciones en orden: [`supabase/migrations/20261014000100_inicial.sql`](supabase/migrations/20261014000100_inicial.sql), [`supabase/migrations/20261014000200_crud_actividades_organizadores.sql`](supabase/migrations/20261014000200_crud_actividades_organizadores.sql), [`supabase/migrations/20261014000300_favoritos_vecinales.sql`](supabase/migrations/20261014000300_favoritos_vecinales.sql), [`supabase/migrations/20261014000400_inscripciones_cupos.sql`](supabase/migrations/20261014000400_inscripciones_cupos.sql), [`supabase/migrations/20261014000500_cancelar_inscripcion.sql`](supabase/migrations/20261014000500_cancelar_inscripcion.sql), [`supabase/migrations/20261014000600_imagenes_webp.sql`](supabase/migrations/20261014000600_imagenes_webp.sql) y [`supabase/migrations/20261014000700_estructura_vecinos.sql`](supabase/migrations/20261014000700_estructura_vecinos.sql). Las migraciones 004 y 005 agregan reservas y cancelaciones con control de cupos; la 006 actualiza a `.webp` las rutas locales de imágenes existentes; la 007 crea la tabla `public.vecinos`, sus políticas RLS y la verificación de disponibilidad de correo/RUT.
 3. En **Connect** o **Settings → API Keys**, copia el **Project URL** y la **Publishable key** (`sb_publishable_...`). Para proyectos antiguos, se puede usar la clave `anon` en su lugar.
 4. En la raíz del proyecto, crea `.env` desde la plantilla (`Copy-Item .env.example .env` en PowerShell; `cp .env.example .env` en macOS/Linux) y completa:
 
@@ -43,7 +44,7 @@ Muni Sport centraliza el descubrimiento de actividades deportivas, recreativas y
 
    Luego abre `http://localhost:3000/admin/actividades` e inicia sesión con el correo y contraseña de esa cuenta. Las categorías permitidas son `Deportes`, `Salud` y `Sociales`; los estados son `activo`, `pausado`, `finalizado` y `cancelado`. La imagen puede ser una ruta local bajo `/images/` o una URL HTTPS.
 
-Las cuentas vecinales se crean desde `/register` y se autentican desde `/login`; pueden guardar actividades, buscarlas, ver sus favoritos e inscribirse en actividades con cupos disponibles. La capacidad se define como un número total en la gestión de actividades y el catálogo descuenta cada reserva confirmada. La base de datos impide reservas duplicadas y serializa las inscripciones concurrentes por actividad. Si Supabase Authentication exige confirmar el correo, la persona debe abrir el enlace recibido antes de iniciar sesión. La foto de perfil es opcional y acepta una URL HTTPS; si no se define, se muestran las iniciales.
+Las cuentas vecinales se crean desde `/register`, verifican la titularidad de su correo con un código de 4 dígitos en `/register/verificar` y se autentican desde `/login`; pueden guardar actividades, buscarlas, ver sus favoritos e inscribirse en actividades con cupos disponibles, pero no pueden crear ni editar eventos. La capacidad se define como un número total en la gestión de actividades y el catálogo descuenta cada reserva confirmada. La base de datos impide reservas duplicadas y serializa las inscripciones concurrentes por actividad. La foto de perfil es opcional y acepta una URL HTTPS; si no se define, se muestran las iniciales.
 
 El panel de organizadores usa una sesión almacenada en el servidor. En desarrollo se genera un secreto temporal; en producción define un `SESSION_SECRET` largo y configura un almacén de sesión persistente antes de desplegar varias instancias.
 
@@ -57,7 +58,7 @@ El código anterior consultaba la colección `webMuni.profesionales`, pero este 
 
 Requisitos: Node.js 20.6 o posterior y npm. `npm run dev` inicia Express y Tailwind CSS en modo watch. `npm run build:css` genera el CSS minificado para compilarlo antes de desplegar. Supabase debe estar configurado para cargar el catálogo. Si faltan las variables de entorno o hay un error de conexión, la aplicación muestra un aviso en el catálogo y sigue disponible para navegar las demás páginas.
 
-`npm test` ejecuta las pruebas unitarias con el test runner integrado de Node.js (`node --test`), sin dependencias adicionales. La cobertura inicial comprueba la normalización de rutas de imágenes locales al formato WebP.
+`npm test` ejecuta las pruebas unitarias con el test runner integrado de Node.js (`node --test`), sin dependencias adicionales. La suite valida la normalización de rutas de imágenes locales al formato WebP y las reglas de estructura, permisos, validaciones y código de verificación de 4 dígitos del usuario vecino.
 
 El archivo `.env` está excluido de Git. Para conectar otro entorno, configura `SUPABASE_URL` y `SUPABASE_PUBLISHABLE_KEY` en las variables de entorno de ese servicio. Nunca uses una clave secreta o `service_role` en código cliente o en un repositorio.
 
@@ -67,8 +68,9 @@ El archivo `.env` está excluido de Git. Para conectar otro entorno, configura `
 src/
 ├── index.js                  # Express y cliente Supabase
 ├── routes/
-│   └── index.js               # Catálogo y CRUD de actividades
+│   └── index.js               # Catálogo, registro vecinal y CRUD de actividades
 ├── middleware/
+│   ├── vecino.js              # Estructura, validaciones y código 4 dígitos del vecino
 │   ├── organizador.js         # Sesión, rol y protección CSRF del panel
 │   ├── imagenes.js            # Carga y conversión de imágenes a WebP
 │   └── rutas-imagen.js        # Normalización de rutas locales de imagen
@@ -76,7 +78,7 @@ src/
 ├── public/                    # CSS generado e imágenes
 └── views/                     # Vistas EJS
 supabase/
-└── migrations/              # Esquema, RLS, datos y roles de organizador
+└── migrations/              # Esquema, RLS, datos, vecinos y roles de organizador
 test/
-└── middleware/               # Pruebas unitarias de rutas de imagen
+└── middleware/               # Pruebas unitarias de rutas de imagen y usuario vecino
 ```

@@ -7,9 +7,14 @@ import {
 } from "../middleware/organizador.js";
 import {
     clienteVecinalDeSesion,
+    crearDesafioVerificacionCorreo,
+    enviarCodigoVerificacionCorreo,
     iniciarSesionVecinal,
     registrarVecino,
-    requireResident
+    requireResident,
+    validarDatosRegistroVecino,
+    verificarCodigoCorreo,
+    verificarDisponibilidadVecino
 } from "../middleware/vecino.js";
 import {
     convertirYGuardarImagenWebp,
@@ -427,38 +432,74 @@ router.post("/login", validarCsrf, async (req, res, next) => {
 router.get("/register", (req, res) => {
     if (req.session?.residentSession) return res.redirect("/");
     res.set("Cache-Control", "no-store");
+    const pendiente = req.query.editar === "1" ? req.session?.pendingResidentRegistration?.datos : null;
     res.render("register.ejs", {
         title: "Crear cuenta vecinal - Muni Sport",
         csrfToken: csrfTokenPara(req),
         next: destinoVecinalSeguro(req.query.next),
         errors: [],
-        values: { fullName: "", email: "", avatarUrl: "" }
+        values: {
+            rut: pendiente?.rut || "",
+            primerNombre: pendiente?.primerNombre || "",
+            apellidoPaterno: pendiente?.apellidoPaterno || "",
+            apellidoMaterno: pendiente?.apellidoMaterno || "",
+            telefono: pendiente?.telefono || "",
+            email: pendiente?.email || "",
+            avatarUrl: pendiente?.avatarUrl || ""
+        }
     });
 });
 
 router.post("/register", validarCsrf, async (req, res, next) => {
-    const fullName = typeof req.body.fullName === "string" ? req.body.fullName.trim() : "";
+    const rut = typeof req.body.rut === "string" ? req.body.rut.trim() : "";
+    const primerNombre = typeof req.body.primerNombre === "string" ? req.body.primerNombre.trim() : "";
+    const apellidoPaterno = typeof req.body.apellidoPaterno === "string" ? req.body.apellidoPaterno.trim() : "";
+    const apellidoMaterno = typeof req.body.apellidoMaterno === "string" ? req.body.apellidoMaterno.trim() : "";
+    const telefono = typeof req.body.telefono === "string" ? req.body.telefono.trim() : "";
     const email = typeof req.body.email === "string" ? req.body.email.trim() : "";
     const password = typeof req.body.password === "string" ? req.body.password : "";
     const passwordConfirmation = typeof req.body.passwordConfirmation === "string" ? req.body.passwordConfirmation : "";
     const avatarUrl = typeof req.body.avatarUrl === "string" ? req.body.avatarUrl.trim() : "";
     const destination = destinoVecinalSeguro(req.body.next);
-    const values = { fullName, email, avatarUrl };
-    const errors = [];
 
-    if (fullName.length < 2 || fullName.length > 80) errors.push("Escribe tu nombre (entre 2 y 80 caracteres).");
-    if (!email || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push("Escribe un correo válido.");
-    if (password.length < 8 || password.length > 72) errors.push("La contraseña debe tener entre 8 y 72 caracteres.");
-    if (password !== passwordConfirmation) errors.push("Las contraseñas no coinciden.");
+    const values = {
+        rut,
+        primerNombre,
+        apellidoPaterno,
+        apellidoMaterno,
+        telefono,
+        email,
+        avatarUrl
+    };
 
-    if (avatarUrl) {
+    const validacion = validarDatosRegistroVecino(
+        {
+            rut,
+            primerNombre,
+            apellidoPaterno,
+            apellidoMaterno,
+            telefono,
+            email,
+            password,
+            passwordConfirmation,
+            avatarUrl
+        },
+        { exigirPassword: true }
+    );
+
+    const errors = [...validacion.errores];
+
+    if (!errors.length) {
         try {
-            const avatar = new URL(avatarUrl);
-            if (avatar.protocol !== "https:" || avatar.username || avatar.password || avatarUrl.length > 1000) {
-                errors.push("La foto de perfil debe tener una URL HTTPS válida.");
+            const disponibilidad = await verificarDisponibilidadVecino(req, {
+                email: validacion.datos.email,
+                rut: validacion.datos.rut
+            });
+            if (!disponibilidad.disponible) {
+                errors.push(...disponibilidad.errores);
             }
-        } catch {
-            errors.push("La foto de perfil debe tener una URL HTTPS válida.");
+        } catch (error) {
+            console.error("Error verificando disponibilidad de cuenta vecinal:", error.message || error);
         }
     }
 
@@ -473,26 +514,142 @@ router.post("/register", validarCsrf, async (req, res, next) => {
     }
 
     try {
-        const result = await registrarVecino(req, { fullName, email, password, avatarUrl });
+        const desafio = crearDesafioVerificacionCorreo({
+            ...validacion.datos,
+            password
+        });
+
+        await enviarCodigoVerificacionCorreo({
+            email: validacion.datos.email,
+            primerNombre: validacion.datos.primerNombre,
+            codigo: desafio.codigo
+        });
+
+        req.session.pendingResidentRegistration = desafio;
+        const query = new URLSearchParams();
+        if (destination !== "/") query.set("next", destination);
+        const sufijo = query.size ? `?${query.toString()}` : "";
+        return res.redirect(303, `/register/verificar${sufijo}`);
+    } catch (error) {
+        console.error("Error enviando el código de verificación por correo:", error.message || error);
+        return res.status(503).render("register.ejs", {
+            title: "Crear cuenta vecinal - Muni Sport",
+            csrfToken: csrfTokenPara(req),
+            next: destination,
+            errors: ["No pudimos enviar el código de verificación a tu correo. Verifica la configuración SMTP_USER y SMTP_PASS en el archivo .env."],
+            values
+        });
+    }
+});
+
+router.get("/register/verificar", (req, res) => {
+    if (req.session?.residentSession) return res.redirect("/");
+    const desafio = req.session?.pendingResidentRegistration;
+    const destination = destinoVecinalSeguro(req.query.next);
+
+    if (!desafio?.datos?.email) {
+        return res.redirect("/register");
+    }
+
+    res.set("Cache-Control", "no-store");
+    return res.render("register-verify.ejs", {
+        title: "Verificar correo electrónico - Muni Sport",
+        csrfToken: csrfTokenPara(req),
+        next: destination,
+        email: desafio.datos.email,
+        notice: req.query.reenviado === "1"
+            ? "Te enviamos un nuevo código de verificación de 4 dígitos a tu correo."
+            : null,
+        errors: []
+    });
+});
+
+router.post("/register/reenviar-codigo", validarCsrf, async (req, res, next) => {
+    const desafioActual = req.session?.pendingResidentRegistration;
+    const destination = destinoVecinalSeguro(req.body.next);
+
+    if (!desafioActual?.datos?.email) {
+        return res.redirect(303, "/register");
+    }
+
+    try {
+        const nuevoDesafio = crearDesafioVerificacionCorreo(desafioActual.datos);
+        await enviarCodigoVerificacionCorreo({
+            email: nuevoDesafio.datos.email,
+            primerNombre: nuevoDesafio.datos.primerNombre,
+            codigo: nuevoDesafio.codigo
+        });
+
+        req.session.pendingResidentRegistration = nuevoDesafio;
+        const query = new URLSearchParams({ reenviado: "1" });
+        if (destination !== "/") query.set("next", destination);
+        return res.redirect(303, `/register/verificar?${query.toString()}`);
+    } catch (error) {
+        next(error);
+    }
+});
+
+router.post("/register/verificar", validarCsrf, async (req, res, next) => {
+    const desafio = req.session?.pendingResidentRegistration;
+    const destination = destinoVecinalSeguro(req.body.next);
+
+    if (!desafio?.datos?.email) {
+        return res.redirect(303, "/register");
+    }
+
+    const verificacion = verificarCodigoCorreo(desafio, req.body.codigo);
+    if (!verificacion.valido) {
+        return res.status(422).render("register-verify.ejs", {
+            title: "Verificar correo electrónico - Muni Sport",
+            csrfToken: csrfTokenPara(req),
+            next: destination,
+            email: desafio.datos.email,
+            notice: null,
+            errors: [verificacion.error]
+        });
+    }
+
+    try {
+        const result = await registrarVecino(req, {
+            ...desafio.datos,
+            emailVerified: true
+        });
+
         if (result.configuracion === false) {
-            return res.status(503).render("register.ejs", {
+            return res.status(503).render("register-verify.ejs", {
+                title: "Verificar correo electrónico - Muni Sport",
+                csrfToken: csrfTokenPara(req),
+                next: destination,
+                email: desafio.datos.email,
+                notice: null,
+                errors: ["Supabase no está configurado en este proyecto."]
+            });
+        }
+
+        if (result.duplicado) {
+            delete req.session.pendingResidentRegistration;
+            return res.status(409).render("register.ejs", {
                 title: "Crear cuenta vecinal - Muni Sport",
                 csrfToken: csrfTokenPara(req),
                 next: destination,
-                errors: ["Supabase no está configurado en este proyecto."],
-                values
+                errors: [result.error?.message || "El correo electrónico ya se encuentra registrado por otro usuario."],
+                values: desafio.datos
             });
         }
+
         if (result.error || !result.user) {
             console.error("No se pudo registrar la cuenta vecinal:", result.error?.message || "Respuesta sin usuario");
-            return res.status(400).render("register.ejs", {
-                title: "Crear cuenta vecinal - Muni Sport",
+            return res.status(400).render("register-verify.ejs", {
+                title: "Verificar correo electrónico - Muni Sport",
                 csrfToken: csrfTokenPara(req),
                 next: destination,
-                errors: ["No pudimos crear la cuenta. Revisa los datos e inténtalo nuevamente o inicia sesión si ya tienes una cuenta."],
-                values
+                email: desafio.datos.email,
+                notice: null,
+                errors: ["No pudimos crear la cuenta. Revisa los datos e inténtalo nuevamente o inicia sesión si ya tienes una cuenta."]
             });
         }
+
+        delete req.session.pendingResidentRegistration;
 
         if (!result.session) {
             const query = new URLSearchParams({ registro: "pendiente" });
