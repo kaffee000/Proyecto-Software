@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { createClient } from "@supabase/supabase-js";
+import { createHash } from "crypto";
 import {
     csrfTokenPara,
     iniciarSesionOrganizador,
@@ -35,6 +36,7 @@ const categorias = new Map([
 const categoriasPermitidas = new Set(["Deportes", "Salud", "Sociales"]);
 const estadosPermitidos = new Set(["activo", "pausado", "finalizado", "cancelado"]);
 const idValido = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const tokenAsistenciaValido = /^[A-Za-z0-9_-]{43}$/;
 
 async function obtenerActividades(supabase, categoria) {
     if (!supabase) {
@@ -356,6 +358,17 @@ function renderFormularioNuevaPassword(req, res, {
         error,
         resetReady,
         resetTokens,
+        csrfToken: csrfTokenPara(req)
+    });
+}
+
+function renderPaginaAsistencia(req, res, { actividad = null, estado = "invalida", status = 200 } = {}) {
+    res.set("Cache-Control", "no-store");
+    return res.status(status).render("asistencia.ejs", {
+        title: "Confirmar asistencia - Muni Sport",
+        actividad,
+        estado,
+        token: req.params.token || "",
         csrfToken: csrfTokenPara(req)
     });
 }
@@ -1193,6 +1206,87 @@ router.post("/inscripciones/:id/cancelar", requireResident, validarCsrf, async (
     } catch (error) {
         console.error("No se pudo cancelar la inscripción:", error.message || error);
         res.redirect(303, `/inscripciones/${req.params.id}?estado=error_cancelar`);
+    }
+});
+
+router.get("/asistencia/:token", async (req, res) => {
+    const token = typeof req.params.token === "string" ? req.params.token : "";
+    if (!tokenAsistenciaValido.test(token)) {
+        return renderPaginaAsistencia(req, res, { estado: "invalida", status: 400 });
+    }
+
+    const estadosDeResultado = {
+        confirmada: "confirmada",
+        liberado: "liberada",
+        vencido: "vencida",
+        ya_confirmada: "ya_confirmada"
+    };
+    const estadoDeResultado = estadosDeResultado[req.query.resultado];
+    if (estadoDeResultado) return renderPaginaAsistencia(req, res, { estado: estadoDeResultado });
+
+    const supabase = req.supabaseService;
+    if (!supabase) {
+        return renderPaginaAsistencia(req, res, { estado: "no_disponible", status: 503 });
+    }
+
+    try {
+        const tokenHash = createHash("sha256").update(token).digest("hex");
+        const { data, error } = await supabase
+            .from("inscripciones")
+            .select("asistencia_estado,asistencia_token_expira_at,actividades!inner(nombre,fecha,lugar)")
+            .eq("asistencia_token_hash", tokenHash)
+            .maybeSingle();
+        if (error) throw error;
+        if (!data) return renderPaginaAsistencia(req, res, { estado: "invalida", status: 404 });
+
+        const actividad = data.actividades;
+        if (data.asistencia_estado === "confirmada") {
+            return renderPaginaAsistencia(req, res, { actividad, estado: "confirmada" });
+        }
+
+        if (!data.asistencia_token_expira_at || new Date(data.asistencia_token_expira_at) <= new Date()) {
+            return renderPaginaAsistencia(req, res, { actividad, estado: "vencida" });
+        }
+
+        return renderPaginaAsistencia(req, res, { actividad, estado: "pendiente" });
+    } catch (error) {
+        console.error("No se pudo abrir el enlace de asistencia:", error.message || error);
+        return renderPaginaAsistencia(req, res, { estado: "no_disponible", status: 503 });
+    }
+});
+
+router.post("/asistencia/:token", validarCsrf, async (req, res) => {
+    const token = typeof req.params.token === "string" ? req.params.token : "";
+    const respuesta = typeof req.body.respuesta === "string" ? req.body.respuesta : "";
+    if (!tokenAsistenciaValido.test(token) || !["si", "no"].includes(respuesta)) {
+        return renderPaginaAsistencia(req, res, { estado: "invalida", status: 400 });
+    }
+
+    const supabase = req.supabaseService;
+    if (!supabase) {
+        return renderPaginaAsistencia(req, res, { estado: "no_disponible", status: 503 });
+    }
+
+    try {
+        const tokenHash = createHash("sha256").update(token).digest("hex");
+        const { data, error } = await supabase.rpc("responder_confirmacion_asistencia", {
+            p_token_hash: tokenHash,
+            p_respuesta: respuesta
+        });
+        if (error) throw error;
+
+        const resultados = {
+            asistencia_confirmada: "confirmada",
+            cupo_liberado: "liberado",
+            enlace_vencido: "vencido",
+            ya_confirmada: "ya_confirmada"
+        };
+        const resultado = resultados[data?.status];
+        if (!resultado) return renderPaginaAsistencia(req, res, { estado: "invalida", status: 400 });
+        return res.redirect(303, "/asistencia/" + encodeURIComponent(token) + "?resultado=" + resultado);
+    } catch (error) {
+        console.error("No se pudo guardar la respuesta de asistencia:", error.message || error);
+        return renderPaginaAsistencia(req, res, { estado: "no_disponible", status: 503 });
     }
 });
 

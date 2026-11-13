@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <%- include('partials/head') %>
+    <title><%= title %></title>
+</head>
+<body class="min-h-screen bg-white font-sans text-muni-ink antialiased">
+    <%- include('partials/navigation') %>
+
+    <main id="contenido-principal" class="flex flex-1 items-center px-4 py-12 md:px-7 md:py-16">
+        <section class="mx-auto w-full max-w-[620px] rounded-3xl border border-black/10 bg-white p-6 sm:p-10 lg:p-12" aria-labelledby="attendance-heading">
+            <nav class="mb-7 flex items-center gap-2 text-xs font-medium text-muni-muted" aria-label="Ruta de navegación">
+                <a href="/" class="hover:text-muni-red-dark">Inicio</a>
+                <span aria-hidden="true">/</span>
+                <span aria-current="page" class="text-muni-ink">Asistencia</span>
+            </nav>
+
+            <p class="text-xs font-semibold uppercase tracking-[0.12em] text-muni-red-dark">Muni Sport · Talca</p>
+            <h1 id="attendance-heading" class="mt-3 text-3xl font-semibold leading-[1.03] tracking-[-0.04em] sm:text-4xl">
+                <% if (estado === "liberada") { %>Cupo liberado.<% }
+                else if (estado === "confirmada" || estado === "ya_confirmada") { %>Asistencia confirmada.<% }
+                else if (estado === "vencida") { %>El plazo venció.<% }
+                else if (estado === "pendiente") { %>¿Asistirás a la actividad?<% }
+                else if (estado === "no_disponible") { %>No pudimos consultar tu respuesta.<% }
+                else { %>Este enlace no está disponible.<% } %>
+            </h1>
+
+            <% if (estado === "pendiente" && actividad) { %>
+                <p class="mt-3 text-sm leading-6 text-muni-muted">Confirma tu asistencia. Si eliges que no, liberaremos tu cupo para que otro vecino pueda inscribirse. Si no respondes, tu inscripción seguirá reservada.</p>
+                <dl class="mt-6 space-y-3 border-y border-black/10 py-5 text-sm">
+                    <div>
+                        <dt class="font-semibold text-muni-ink">Actividad</dt>
+                        <dd class="mt-1 text-muni-muted"><%= actividad.nombre %></dd>
+                    </div>
+                    <div>
+                        <dt class="font-semibold text-muni-ink">Fecha y hora</dt>
+                        <dd class="mt-1 text-muni-muted"><%= new Intl.DateTimeFormat("es-CL", { dateStyle: "long", timeStyle: "short", timeZone: "America/Santiago" }).format(new Date(actividad.fecha)) %></dd>
+                    </div>
+                    <div>
+                        <dt class="font-semibold text-muni-ink">Lugar</dt>
+                        <dd class="mt-1 text-muni-muted"><%= actividad.lugar %></dd>
+                    </div>
+                </dl>
+                <form action="/asistencia/<%= encodeURIComponent(token) %>" method="post" class="mt-7 grid gap-3 sm:grid-cols-2">
+                    <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
+                    <button type="submit" name="respuesta" value="si" class="inline-flex min-h-12 items-center justify-center rounded-full bg-muni-red-dark px-5 text-sm font-semibold text-white transition-colors hover:bg-red-800">Sí, asistiré</button>
+                    <button type="submit" name="respuesta" value="no" class="inline-flex min-h-12 items-center justify-center rounded-full border border-black/20 px-5 text-sm font-semibold text-muni-ink transition-colors hover:border-muni-red hover:bg-red-50 hover:text-muni-red-dark">No podré asistir; liberar cupo</button>
+                </form>
+            <% } else if (estado === "liberada") { %>
+                <p class="mt-3 text-sm leading-6 text-muni-muted">Liberamos el cupo para que otro vecino pueda inscribirse. Gracias por avisar.</p>
+            <% } else if (estado === "confirmada" || estado === "ya_confirmada") { %>
+                <p class="mt-3 text-sm leading-6 text-muni-muted">Tu lugar sigue reservado. Te esperamos en la actividad.</p>
+            <% } else if (estado === "vencida") { %>
+                <p class="mt-3 text-sm leading-6 text-muni-muted">El plazo para responder terminó. Si aún puedes asistir, revisa el estado de tu inscripción desde tu cuenta vecinal.</p>
+            <% } else if (estado === "no_disponible") { %>
+                <p class="mt-3 text-sm leading-6 text-muni-muted">Inténtalo de nuevo más tarde. Tu inscripción se mantiene mientras no confirmes que no asistirás.</p>
+            <% } else { %>
+                <p class="mt-3 text-sm leading-6 text-muni-muted">El enlace pudo vencer, ya fue utilizado o la inscripción se canceló.</p>
+            <% } %>
+
+            <p class="mt-7 border-t border-black/10 pt-5 text-center text-sm text-muni-muted"><a href="/event" class="font-semibold text-muni-ink underline decoration-muni-red underline-offset-4 hover:text-muni-red-dark">Volver a la cartelera</a></p>
+        </section>
+    </main>
+
+    <%- include('partials/footer') %>
+</body>
+</html>
