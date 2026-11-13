@@ -7,6 +7,7 @@ import { fileURLToPath } from "url";
 
 import indexRoutes from "./routes/index.js";
 import { csrfTokenPara } from "./middleware/organizador.js";
+import { iniciarTrabajadorNotificaciones } from "./services/notificaciones.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -24,6 +25,7 @@ if (typeof process.loadEnvFile === "function") {
 const app = express();
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY;
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const appUrlConfigurada = typeof process.env.APP_URL === "string" ? process.env.APP_URL.trim() : "";
 let publicUrl = null;
 if (appUrlConfigurada) {
@@ -75,6 +77,16 @@ if (supabaseUrl && supabaseKey) {
     console.warn("Supabase no está configurado. Completa SUPABASE_URL y SUPABASE_PUBLISHABLE_KEY en .env.");
 }
 
+const supabaseService = supabaseUrl && supabaseServiceRoleKey
+    ? createClient(supabaseUrl, supabaseServiceRoleKey, {
+        auth: {
+            autoRefreshToken: false,
+            persistSession: false,
+            detectSessionInUrl: false
+        }
+    })
+    : null;
+
 app.locals.supabaseConfig = supabaseUrl && supabaseKey
     ? { url: supabaseUrl, key: supabaseKey }
     : null;
@@ -90,6 +102,7 @@ app.use("/images", (req, res, next) => {
 });
 app.use(express.static(join(__dirname, "public")));
 app.use(async (req, res, next) => {
+    req.supabaseService = supabaseService;
     if (req.session?.residentSession?.userId && !req.session?.supabaseSession && req.session.organizerChecked !== true) {
         req.session.organizerChecked = true;
         try {
@@ -148,4 +161,5 @@ app.use((error, req, res, next) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server on port ${PORT}`);
+    iniciarTrabajadorNotificaciones({ supabase: supabaseService, appUrl: publicUrl });
 });
