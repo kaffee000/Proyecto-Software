@@ -13,7 +13,7 @@
 
     function crearMapa(elemento, centro, zoom) {
         const mapa = L.map(elemento, {
-            scrollWheelZoom: false,
+            scrollWheelZoom: true,
             keyboard: true
         }).setView(centro, zoom);
 
