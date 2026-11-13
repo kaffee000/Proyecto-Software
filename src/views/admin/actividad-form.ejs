@@ -76,6 +76,23 @@
                         <input id="lugar" name="lugar" class="form-control" type="text" maxlength="180" value="<%= activity.lugar || '' %>" placeholder="Ej.: Polideportivo Municipal de Talca" required>
                     </div>
 
+                    <div class="md:col-span-2">
+                        <h2 class="text-lg font-semibold tracking-[-0.025em] text-muni-ink">Marca el recinto en el mapa</h2>
+                        <p id="activity-location-map-status" class="mt-1 text-sm leading-6 text-muni-muted" role="status">Haz clic en el mapa o arrastra el marcador para fijar la ubicación.</p>
+                        <div id="activity-location-map" class="mt-4 h-[22rem] overflow-hidden rounded-2xl border border-black/10 bg-muni-soft" role="application" aria-label="Mapa para elegir la ubicación de la actividad"></div>
+                        <p class="mt-2 text-xs leading-5 text-muni-muted">Mapa de referencia de Talca. Puedes mover el punto y ajustar sus coordenadas; los mapas usan OpenStreetMap.</p>
+                    </div>
+
+                    <div>
+                        <label for="latitud" class="form-label">Latitud</label>
+                        <input id="latitud" name="latitud" class="form-control tabular-nums" type="number" min="-90" max="90" step="any" value="<%= activity.latitud ?? '' %>" placeholder="-35.426400" required>
+                    </div>
+
+                    <div>
+                        <label for="longitud" class="form-label">Longitud</label>
+                        <input id="longitud" name="longitud" class="form-control tabular-nums" type="number" min="-180" max="180" step="any" value="<%= activity.longitud ?? '' %>" placeholder="-71.655400" required>
+                    </div>
+
                     <div>
                         <label for="cuposTotales" class="form-label">Capacidad total</label>
                         <input id="cuposTotales" name="cuposTotales" class="form-control" type="number" min="0" max="1000000" step="1" value="<%= activity.cupos_totales ?? '' %>" required>

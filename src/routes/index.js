@@ -43,7 +43,7 @@ async function obtenerActividades(supabase, categoria) {
 
     let consulta = supabase
         .from("actividades")
-        .select("id,nombre,descripcion,categoria,fecha,lugar,cupos_totales,cupos_ocupados,estado,imagen")
+        .select("id,nombre,descripcion,categoria,fecha,lugar,latitud,longitud,cupos_totales,cupos_ocupados,estado,imagen")
         .order("fecha", { ascending: true });
 
     const categoriaNormalizada = categorias.get(categoria.toLowerCase());
@@ -170,6 +170,7 @@ async function renderizarCatalogo(req, res, vista, title) {
             currentPath: req.originalUrl,
             favoritoError: req.query.error === "guardar",
             reintentarUrl: req.originalUrl,
+            mapaLeaflet: true,
             catalogoError: false
         });
     } catch (error) {
@@ -185,6 +186,7 @@ async function renderizarCatalogo(req, res, vista, title) {
             currentPath: req.originalUrl,
             favoritoError: req.query.error === "guardar",
             reintentarUrl: req.originalUrl,
+            mapaLeaflet: true,
             catalogoError: true
         });
     }
@@ -249,6 +251,10 @@ function actividadDesdeFormulario(body) {
     const cuposTotales = /^\d+$/.test(cuposTotalesTexto) ? Number(cuposTotalesTexto) : NaN;
     const estado = typeof body.estado === "string" ? body.estado : "";
     const imagen = typeof body.imagen === "string" ? body.imagen.trim() : "";
+    const latitudTexto = typeof body.latitud === "string" ? body.latitud.trim() : "";
+    const longitudTexto = typeof body.longitud === "string" ? body.longitud.trim() : "";
+    const latitud = latitudTexto === "" ? NaN : Number(latitudTexto);
+    const longitud = longitudTexto === "" ? NaN : Number(longitudTexto);
     const errores = [];
 
     if (!nombre || nombre.length > 120) errores.push("El nombre es obligatorio y debe tener hasta 120 caracteres.");
@@ -256,6 +262,12 @@ function actividadDesdeFormulario(body) {
     if (!categoriasPermitidas.has(categoria)) errores.push("Elige una categoría válida.");
     if (!fecha) errores.push("Indica una fecha y hora válidas para Talca.");
     if (!lugar || lugar.length > 180) errores.push("El lugar es obligatorio y debe tener hasta 180 caracteres.");
+    if (!Number.isFinite(latitud) || latitud < -90 || latitud > 90) {
+        errores.push("Selecciona un punto válido en el mapa para la latitud.");
+    }
+    if (!Number.isFinite(longitud) || longitud < -180 || longitud > 180) {
+        errores.push("Selecciona un punto válido en el mapa para la longitud.");
+    }
     if (!Number.isSafeInteger(cuposTotales) || cuposTotales < 0 || cuposTotales > 1000000) {
         errores.push("Indica una capacidad total entre 0 y 1.000.000 cupos.");
     }
@@ -286,6 +298,8 @@ function actividadDesdeFormulario(body) {
             categoria,
             fecha,
             lugar,
+            latitud,
+            longitud,
             cupos_totales: cuposTotales,
             estado,
             imagen: imagenSegura
@@ -298,6 +312,8 @@ function valoresDeFormulario(body = {}) {
         ...body,
         fechaLocal: typeof body.fechaLocal === "string" ? body.fechaLocal : "",
         cuposTotales: typeof body.cuposTotales === "string" ? body.cuposTotales : "",
+        latitud: typeof body.latitud === "string" ? body.latitud : "",
+        longitud: typeof body.longitud === "string" ? body.longitud : "",
         imagen: typeof body.imagen === "string" ? body.imagen : ""
     };
 }
@@ -1025,7 +1041,7 @@ router.get("/inscripciones/:id", requireResident, async (req, res, next) => {
     try {
         const { data: actividad, error: actividadError } = await req.supabaseResident
             .from("actividades")
-            .select("id,nombre,descripcion,categoria,fecha,lugar,cupos_totales,cupos_ocupados,estado,imagen")
+            .select("id,nombre,descripcion,categoria,fecha,lugar,latitud,longitud,cupos_totales,cupos_ocupados,estado,imagen")
             .eq("id", req.params.id)
             .maybeSingle();
         if (actividadError) throw actividadError;
@@ -1336,7 +1352,7 @@ router.get("/admin/actividades/:id/editar", requireOrganizer, async (req, res, n
     try {
         const { data, error } = await req.supabaseOrganizer
             .from("actividades")
-            .select("id,nombre,descripcion,categoria,fecha,lugar,cupos_totales,cupos_ocupados,estado,imagen")
+            .select("id,nombre,descripcion,categoria,fecha,lugar,latitud,longitud,cupos_totales,cupos_ocupados,estado,imagen")
             .eq("id", req.params.id)
             .maybeSingle();
         if (error) throw error;

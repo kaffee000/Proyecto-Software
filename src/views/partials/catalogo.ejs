@@ -63,6 +63,37 @@
             </div>
         <% } %>
 
+        <% if (!esListaPersonal && !catalogoError && actividadesVisibles.length > 0) { %>
+            <%
+                const puntosMapa = actividadesVisibles
+                    .filter((actividad) => actividad.latitud !== null && actividad.latitud !== undefined
+                        && actividad.latitud !== ""
+                        && actividad.longitud !== null && actividad.longitud !== undefined
+                        && actividad.longitud !== ""
+                        && Number.isFinite(Number(actividad.latitud)) && Number.isFinite(Number(actividad.longitud)))
+                    .map((actividad) => ({
+                        id: actividad.id,
+                        nombre: actividad.nombre,
+                        categoria: actividad.categoria,
+                        lugar: actividad.lugar,
+                        latitud: Number(actividad.latitud),
+                        longitud: Number(actividad.longitud)
+                    }));
+            %>
+            <section class="mb-9 border-y border-black/10 py-6 sm:mb-12 sm:py-8" aria-labelledby="activity-map-heading">
+                <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                        <h2 id="activity-map-heading" class="text-xl font-semibold tracking-[-0.03em] text-muni-ink sm:text-2xl">Encuentra tu actividad en Talca</h2>
+                        <p class="mt-1 max-w-xl text-sm leading-6 text-muni-muted">Selecciona un marcador para ver el recinto y volver a su actividad. Los puntos son referenciales.</p>
+                    </div>
+                    <span class="text-xs font-medium text-muni-muted"><%= puntosMapa.length %> <%= puntosMapa.length === 1 ? "ubicación marcada" : "ubicaciones marcadas" %></span>
+                </div>
+                <div id="activity-map" class="h-[22rem] overflow-hidden rounded-2xl border border-black/10 bg-muni-soft sm:h-[28rem]" role="application" aria-label="Mapa interactivo de actividades municipales en Talca"></div>
+                <p id="activity-map-status" class="mt-3 text-xs leading-5 text-muni-muted" role="status">Selecciona un marcador para consultar la actividad.</p>
+                <script id="activity-map-data" type="application/json"><%- JSON.stringify(puntosMapa).replace(/</g, "\\u003c") %></script>
+            </section>
+        <% } %>
+
         <% if (typeof favoritoError !== "undefined" && favoritoError) { %>
             <div class="mb-5 border-y border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900" role="alert">No se pudo actualizar el favorito. Revisa que la migración de favoritos esté aplicada en Supabase e inténtalo otra vez.</div>
         <% } %>
@@ -138,6 +169,9 @@
                                 </svg>
                                 <span><%= actividad.lugar || "Recinto por confirmar" %></span>
                             </div>
+                            <% if (!esListaPersonal && actividad.latitud !== null && actividad.latitud !== undefined && actividad.longitud !== null && actividad.longitud !== undefined) { %>
+                                <a href="https://www.openstreetmap.org/?mlat=<%= actividad.latitud %>&mlon=<%= actividad.longitud %>#map=16/<%= actividad.latitud %>/<%= actividad.longitud %>" target="_blank" rel="noopener" data-map-focus="<%= actividad.id %>" class="ml-6 mt-1 inline-flex border-b border-muni-red/70 pb-0.5 text-xs font-semibold text-muni-ink hover:text-muni-red-dark">Ubicar en mapa</a>
+                            <% } %>
                             <p class="mt-1 pl-6 text-xs <%= cuposDisponibles > 0 ? 'text-muni-muted' : 'font-medium text-red-800' %>"><%= cuposDisponibles === 1 ? "1 cupo disponible" : `${cuposDisponibles} cupos disponibles` %></p>
                         </div>
 
@@ -197,6 +231,7 @@
             catalogoSection.dataset.mode = catalogoActualizado.dataset.mode;
         }
         catalogoSection.innerHTML = catalogoActualizado.innerHTML;
+        window.MuniSportMaps?.renderActivityMap();
     }
 
     async function manejarFavorito(form) {
