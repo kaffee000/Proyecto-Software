@@ -156,6 +156,8 @@
     }
 
     .leaflet-container {
+        isolation: isolate;
+        z-index: 0;
         font-family: var(--font-sans);
     }
 
