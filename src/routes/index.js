@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { createClient } from "@supabase/supabase-js";
 import {
     csrfTokenPara,
     iniciarSesionOrganizador,
@@ -13,6 +14,7 @@ import {
     registrarVecino,
     requireResident,
     validarDatosRegistroVecino,
+    validarCorreoReal,
     verificarCodigoCorreo,
     verificarDisponibilidadVecino
 } from "../middleware/vecino.js";
@@ -309,6 +311,34 @@ async function renderFormularioActividad(req, res, { activity = {}, editing = fa
         },
         editing,
         errors,
+        csrfToken: csrfTokenPara(req),
+        mapaLeaflet: true
+    });
+}
+
+function renderFormularioRecuperacion(req, res, { email = "", notice = null, error = null, status = 200 } = {}) {
+    res.set("Cache-Control", "no-store");
+    return res.status(status).render("password-recover.ejs", {
+        title: "Recuperar contraseña - Muni Sport",
+        email,
+        notice,
+        error,
+        csrfToken: csrfTokenPara(req)
+    });
+}
+
+function renderFormularioNuevaPassword(req, res, {
+    error = null,
+    resetReady = false,
+    resetTokens = {},
+    status = 200
+} = {}) {
+    res.set("Cache-Control", "no-store");
+    return res.status(status).render("password-reset.ejs", {
+        title: "Crear nueva contraseña - Muni Sport",
+        error,
+        resetReady,
+        resetTokens,
         csrfToken: csrfTokenPara(req)
     });
 }
@@ -386,7 +416,9 @@ router.get("/login", (req, res) => {
         csrfToken: csrfTokenPara(req),
         next: destinoVecinalSeguro(req.query.next),
         error: null,
-        notice: req.query.registro === "pendiente"
+        notice: req.query.password === "actualizada"
+            ? "Tu contraseña se actualizó. Ya puedes iniciar sesión."
+            : req.query.registro === "pendiente"
             ? "Te enviamos un correo para confirmar tu cuenta. Después podrás iniciar sesión."
             : req.query.expired === "1"
                 ? "Tu sesión venció. Inicia sesión nuevamente para continuar."
@@ -426,6 +458,149 @@ router.post("/login", validarCsrf, async (req, res, next) => {
         guardarSesionVecinal(req, res, next, result.session, destination, result.organizerSession);
     } catch (error) {
         next(error);
+    }
+});
+
+router.get("/password/recuperar", (req, res) => {
+    renderFormularioRecuperacion(req, res);
+});
+
+router.post("/password/recuperar", validarCsrf, async (req, res) => {
+    const emailIngresado = typeof req.body.email === "string" ? req.body.email : "";
+    const validacion = validarCorreoReal(emailIngresado);
+    if (!validacion.valido) {
+        return renderFormularioRecuperacion(req, res, {
+            email: emailIngresado.trim(),
+            error: validacion.error,
+            status: 422
+        });
+    }
+
+    const supabase = req.app.locals.supabase;
+    const appUrl = req.app.locals.publicUrl;
+    if (!supabase || !appUrl) {
+        return renderFormularioRecuperacion(req, res, {
+            email: validacion.correoNormalizado,
+            error: "No está disponible la recuperación de contraseña. Revisa la configuración de Supabase y APP_URL.",
+            status: 503
+        });
+    }
+
+    try {
+        const { error } = await supabase.auth.resetPasswordForEmail(validacion.correoNormalizado, {
+            redirectTo: appUrl + "/password/restablecer"
+        });
+        if (error) {
+            return renderFormularioRecuperacion(req, res, {
+                email: validacion.correoNormalizado,
+                error: "No pudimos solicitar el correo ahora. Espera un momento y vuelve a intentarlo.",
+                status: 503
+            });
+        }
+
+        return renderFormularioRecuperacion(req, res, {
+            email: validacion.correoNormalizado,
+            notice: "Si el correo corresponde a una cuenta vecinal, recibirás un enlace para crear una contraseña nueva."
+        });
+    } catch {
+        return renderFormularioRecuperacion(req, res, {
+            email: validacion.correoNormalizado,
+            error: "No pudimos solicitar el correo ahora. Espera un momento y vuelve a intentarlo.",
+            status: 503
+        });
+    }
+});
+
+router.get("/password/restablecer", (req, res) => {
+    renderFormularioNuevaPassword(req, res, {
+        error: req.query.error === "access_denied"
+            ? "El enlace venció o ya fue utilizado. Solicita uno nuevo."
+            : null
+    });
+});
+
+router.post("/password/restablecer", validarCsrf, async (req, res) => {
+    const accessToken = typeof req.body.accessToken === "string" ? req.body.accessToken : "";
+    const refreshToken = typeof req.body.refreshToken === "string" ? req.body.refreshToken : "";
+    const recoveryType = typeof req.body.recoveryType === "string" ? req.body.recoveryType : "";
+    const password = typeof req.body.password === "string" ? req.body.password : "";
+    const confirmation = typeof req.body.passwordConfirmation === "string" ? req.body.passwordConfirmation : "";
+
+    if (password.length < 8 || password.length > 72) {
+        return renderFormularioNuevaPassword(req, res, {
+            error: "La contraseña debe tener entre 8 y 72 caracteres.",
+            resetReady: true,
+            resetTokens: { accessToken, refreshToken },
+            status: 422
+        });
+    }
+    if (password !== confirmation) {
+        return renderFormularioNuevaPassword(req, res, {
+            error: "Las contraseñas no coinciden.",
+            resetReady: true,
+            resetTokens: { accessToken, refreshToken },
+            status: 422
+        });
+    }
+    if (
+        recoveryType !== "recovery"
+        || accessToken.length < 20
+        || accessToken.length > 8192
+        || refreshToken.length < 20
+        || refreshToken.length > 8192
+    ) {
+        return renderFormularioNuevaPassword(req, res, {
+            error: "El enlace de recuperación no es válido o venció. Solicita uno nuevo.",
+            status: 400
+        });
+    }
+
+    const config = req.app.locals.supabaseConfig;
+    if (!config) {
+        return renderFormularioNuevaPassword(req, res, {
+            error: "No está disponible la recuperación de contraseña. Revisa la configuración de Supabase.",
+            status: 503
+        });
+    }
+
+    try {
+        const cliente = createClient(config.url, config.key, {
+            auth: {
+                autoRefreshToken: false,
+                persistSession: false,
+                detectSessionInUrl: false
+            }
+        });
+        const { data: sessionData, error: sessionError } = await cliente.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+        });
+        if (sessionError || !sessionData.session) {
+            return renderFormularioNuevaPassword(req, res, {
+                error: "El enlace de recuperación no es válido o venció. Solicita uno nuevo.",
+                status: 400
+            });
+        }
+
+        const { error } = await cliente.auth.updateUser({ password });
+        if (error) {
+            return renderFormularioNuevaPassword(req, res, {
+                error: "No pudimos guardar esa contraseña. Prueba con otra de al menos 8 caracteres.",
+                resetReady: true,
+                resetTokens: {
+                    accessToken: sessionData.session.access_token,
+                    refreshToken: sessionData.session.refresh_token
+                },
+                status: 422
+            });
+        }
+
+        return res.redirect(303, "/login?password=actualizada");
+    } catch {
+        return renderFormularioNuevaPassword(req, res, {
+            error: "No pudimos actualizar la contraseña. Solicita un enlace nuevo e inténtalo otra vez.",
+            status: 503
+        });
     }
 });
 

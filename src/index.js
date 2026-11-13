@@ -24,6 +24,23 @@ if (typeof process.loadEnvFile === "function") {
 const app = express();
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY;
+const appUrlConfigurada = typeof process.env.APP_URL === "string" ? process.env.APP_URL.trim() : "";
+let publicUrl = null;
+if (appUrlConfigurada) {
+    try {
+        const url = new URL(appUrlConfigurada);
+        const protocoloValido = process.env.NODE_ENV === "production"
+            ? url.protocol === "https:"
+            : ["http:", "https:"].includes(url.protocol);
+        if (protocoloValido && !url.username && !url.password) {
+            publicUrl = url.origin;
+        }
+    } catch {
+        // Una URL pública inválida deja desactivado el flujo de recuperación.
+    }
+} else if (process.env.NODE_ENV !== "production") {
+    publicUrl = "http://localhost:" + (process.env.PORT || 3000);
+}
 const sessionSecret = process.env.SESSION_SECRET || (
     process.env.NODE_ENV === "production" ? null : randomBytes(32).toString("hex")
 );
@@ -61,6 +78,7 @@ if (supabaseUrl && supabaseKey) {
 app.locals.supabaseConfig = supabaseUrl && supabaseKey
     ? { url: supabaseUrl, key: supabaseKey }
     : null;
+app.locals.publicUrl = publicUrl;
 
 app.set("view engine", "ejs");
 app.set("views", join(__dirname, "views"));
