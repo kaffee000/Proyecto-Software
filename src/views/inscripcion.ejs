@@ -18,6 +18,13 @@
             <% if (estadoInscripcion) { %>
                 <div class="mb-6 border-y px-4 py-4 text-sm leading-6 <%= estadoInscripcion.tipo === 'success' ? 'border-emerald-300 bg-emerald-50 text-emerald-950' : estadoInscripcion.tipo === 'error' ? 'border-red-200 bg-red-50 text-red-900' : 'border-sky-200 bg-sky-50 text-sky-950' %>" role="<%= estadoInscripcion.tipo === 'error' ? 'alert' : 'status' %>"><%= estadoInscripcion.mensaje %></div>
             <% } %>
+            <% if (estadoInscripcion && estadoInscripcion.tipo === "success" && correoInscripcion) { %>
+                <% if (correoInscripcion === "enviado") { %>
+                    <p class="mb-6 border-y border-emerald-300 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-950" role="status">Enviamos la confirmación de tu inscripción a tu correo electrónico.</p>
+                <% } else { %>
+                    <p class="mb-6 border-y border-amber-300 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950" role="status">Tu cupo está reservado, pero no pudimos enviar el correo de confirmación. Revisa la configuración del correo saliente.</p>
+                <% } %>
+            <% } %>
 
             <article class="grid gap-8 border-y border-black/15 py-9 sm:grid-cols-[minmax(0,1fr)_15rem] sm:py-12">
                 <div>

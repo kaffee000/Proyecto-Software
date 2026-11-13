@@ -549,7 +549,7 @@ export async function enviarCodigoVerificacionCorreo(
     bandejaCodigosEnviados.set(registroEnvio.destinatario, registroEnvio);
     if (process.env.NODE_ENV !== "test") {
         console.warn(
-            `[Muni Sport Correo] Configura SMTP_USER y SMTP_PASS en .env para enviar correos reales. Código generado para ${registroEnvio.destinatario}: ${codigoTexto}`
+            "[Muni Sport Correo] SMTP_USER y SMTP_PASS no están configurados; el código no se envió por correo."
         );
     }
 

@@ -23,6 +23,7 @@ import {
     normalizarRutaImagenWebp,
     procesarSubidaImagen
 } from "../middleware/imagenes.js";
+import { enviarConfirmacionInscripcion } from "../services/correos.js";
 
 const router = Router();
 
@@ -1060,7 +1061,13 @@ router.get("/inscripciones/:id", requireResident, async (req, res, next) => {
             inscripcion,
             cuposDisponibles: Math.max(0, actividad.cupos_totales - actividad.cupos_ocupados),
             estadoInscripcion: estados[req.query.estado] || null,
-            csrfToken: csrfTokenPara(req)
+            correoInscripcion: ({
+                enviado: "enviado",
+                sin_configurar: "sin_configurar",
+                error: "error"
+            })[req.query.correo] || null,
+            csrfToken: csrfTokenPara(req),
+            mapaLeaflet: true
         });
     } catch (error) {
         next(error);
@@ -1102,7 +1109,35 @@ router.post("/inscripciones/:id", requireResident, validarCsrf, async (req, res,
             });
         }
 
-        res.redirect(303, `/inscripciones/${req.params.id}${estado ? `?estado=${estado}` : ""}`);
+        let correoEstado = "";
+        if (estado === "confirmada") {
+            try {
+                const { data: actividad, error: actividadError } = await req.supabaseResident
+                    .from("actividades")
+                    .select("id,nombre,fecha,lugar")
+                    .eq("id", req.params.id)
+                    .maybeSingle();
+                if (actividadError || !actividad) throw actividadError || new Error("Actividad no disponible.");
+
+                const sesionVecinal = req.session?.residentSession;
+                const resultadoCorreo = await enviarConfirmacionInscripcion({
+                    email: sesionVecinal?.email,
+                    primerNombre: sesionVecinal?.profile?.primerNombre,
+                    actividad
+                });
+                correoEstado = resultadoCorreo.enviado ? "enviado" : "sin_configurar";
+            } catch {
+                console.error("No se pudo enviar el correo de confirmación de inscripción.");
+                correoEstado = "error";
+            }
+        }
+
+        const parametros = new URLSearchParams();
+        if (estado) parametros.set("estado", estado);
+        if (correoEstado) parametros.set("correo", correoEstado);
+        const query = parametros.toString();
+        const destino = "/inscripciones/" + req.params.id + (query ? "?" + query : "");
+        res.redirect(303, destino);
     } catch (error) {
         console.error("No se pudo procesar la inscripción:", error.message || error);
         res.redirect(303, `/inscripciones/${req.params.id}?estado=error`);
