@@ -30,7 +30,8 @@ Los vecinos exploran la cartelera y se inscriben en actividades con cupos dispon
 - El usuario eligió destacar la exploración de la cartelera como acción principal.
 - Las inscripciones vecinales están incluidas en el incremento: cada cuenta puede reservar una vez por actividad y la base de datos protege la capacidad frente a solicitudes simultáneas.
 - La inscripción usa la cuenta vecinal existente y no captura datos financieros ni depende de pasarelas de pago.
-- Las pruebas académicas deben usar cuentas y actividades simuladas; los pagos reales y las notificaciones automáticas quedan fuera del alcance.
+- Los vecinos pueden solicitar por correo un enlace para recuperar su contraseña y reciben una confirmación por correo al reservar un cupo. No se envían recordatorios de actividad ni se procesan pagos.
+- Las actividades guardan coordenadas para mostrar sus recintos en un mapa demostrativo de Talca; los organizadores pueden ajustar el marcador al editar cada actividad.
 - La guía académica adjunta también pide documentación de arquitectura, criterios de aceptación y evidencia del trabajo en equipo.
 
 ## Brand Commitments

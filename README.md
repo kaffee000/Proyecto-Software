@@ -6,6 +6,8 @@ Muni Sport centraliza el descubrimiento de actividades deportivas, recreativas y
 
 - Catálogo de actividades en `/` y `/event`, filtrable por Deportes, Salud y Sociales.
 - Registro e inicio de sesión vecinal con Supabase Auth, búsqueda, favoritos e inscripción por actividad.
+- Recuperación de contraseña por correo y confirmación por correo al reservar un cupo.
+- Mapa de muestra con OpenStreetMap para explorar recintos; los organizadores pueden fijar o mover el marcador de cada actividad.
 - Estructura de usuario **vecino** (sin permisos para crear ni editar actividades) con registro validado mediante RUT chileno, primer nombre, apellido paterno, apellido materno, teléfono móvil de 9 dígitos (`9XXXXXXXX`), correo electrónico único y confirmación previa mediante un código de verificación de 4 dígitos enviado al correo.
 - Acceso separado para organizadores en `/admin/login` y gestión CRUD de la cartelera.
 - Vista `/personal` para el directorio profesional.
@@ -14,6 +16,8 @@ Muni Sport centraliza el descubrimiento de actividades deportivas, recreativas y
 
 ## Preparar Supabase
 
+Después de ejecutar las migraciones 001 a 007 enumeradas abajo, ejecuta también [20261014000800_ubicaciones_actividades.sql](supabase/migrations/20261014000800_ubicaciones_actividades.sql) para agregar las coordenadas del mapa. Para el código de registro y las confirmaciones de inscripción, completa SMTP_HOST, SMTP_PORT, SMTP_USER y SMTP_PASS del archivo .env; SMTP_FROM permite personalizar el remitente. La recuperación usa el correo transaccional de Supabase Auth. En **Authentication → URL Configuration**, agrega APP_URL/password/restablecer a las URL de redirección permitidas y configura SMTP en Supabase para entregar esos correos fuera del entorno de prueba.
+
 1. Crea un proyecto en [Supabase](https://supabase.com/dashboard). Espera a que la base de datos termine de inicializarse.
 2. En el proyecto, abre **SQL Editor**, crea una consulta y ejecuta estas migraciones en orden: [`supabase/migrations/20261014000100_inicial.sql`](supabase/migrations/20261014000100_inicial.sql), [`supabase/migrations/20261014000200_crud_actividades_organizadores.sql`](supabase/migrations/20261014000200_crud_actividades_organizadores.sql), [`supabase/migrations/20261014000300_favoritos_vecinales.sql`](supabase/migrations/20261014000300_favoritos_vecinales.sql), [`supabase/migrations/20261014000400_inscripciones_cupos.sql`](supabase/migrations/20261014000400_inscripciones_cupos.sql), [`supabase/migrations/20261014000500_cancelar_inscripcion.sql`](supabase/migrations/20261014000500_cancelar_inscripcion.sql), [`supabase/migrations/20261014000600_imagenes_webp.sql`](supabase/migrations/20261014000600_imagenes_webp.sql) y [`supabase/migrations/20261014000700_estructura_vecinos.sql`](supabase/migrations/20261014000700_estructura_vecinos.sql). Las migraciones 004 y 005 agregan reservas y cancelaciones con control de cupos; la 006 actualiza a `.webp` las rutas locales de imágenes existentes; la 007 crea la tabla `public.vecinos`, sus políticas RLS y la verificación de disponibilidad de correo/RUT.
 3. En **Connect** o **Settings → API Keys**, copia el **Project URL** y la **Publishable key** (`sb_publishable_...`). Para proyectos antiguos, se puede usar la clave `anon` en su lugar.
@@ -21,6 +25,7 @@ Muni Sport centraliza el descubrimiento de actividades deportivas, recreativas y
 
    ```env
    PORT=3000
+   APP_URL=http://localhost:3000
    SUPABASE_URL=https://<project-ref>.supabase.co
    SUPABASE_PUBLISHABLE_KEY=sb_publishable_<tu-clave>
    ```
