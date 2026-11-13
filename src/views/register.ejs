@@ -73,9 +73,27 @@
                 </div>
 
                 <div class="sm:col-span-2">
-                    <label for="avatarUrl" class="form-label">Foto de perfil <span class="font-normal text-muni-muted">(opcional)</span></label>
-                    <input id="avatarUrl" name="avatarUrl" type="url" class="form-control" value="<%= values.avatarUrl || '' %>" placeholder="https://..." autocomplete="url">
-                    <p class="form-hint">Agrega una URL segura (HTTPS) de una foto. Si la dejas vacía, mostraremos tus iniciales.</p>
+                    <span class="form-label">Ícono de perfil <span class="font-normal text-muni-muted">(opcional)</span></span>
+                    <% const avatarSeleccionado = values.avatarUrl || ''; %>
+                    <div class="mt-2 grid grid-cols-3 gap-3 sm:grid-cols-5" role="radiogroup" aria-label="Selecciona un ícono de perfil">
+                        <label class="group cursor-pointer">
+                            <input type="radio" name="avatarUrl" value="" class="peer sr-only" <%= !avatarSeleccionado ? 'checked' : '' %>>
+                            <span class="flex flex-col items-center gap-1.5 rounded-2xl border border-black/10 bg-muni-soft/50 p-2.5 text-center transition-all hover:border-muni-red/50 hover:bg-white peer-checked:border-muni-red-dark peer-checked:bg-red-50/70 peer-checked:ring-2 peer-checked:ring-muni-red-dark peer-focus-visible:ring-2 peer-focus-visible:ring-muni-ink">
+                                <span class="flex h-14 w-14 items-center justify-center rounded-xl bg-muni-soft text-sm font-semibold text-muni-red-dark ring-1 ring-black/10">AB</span>
+                                <span class="text-xs font-medium text-muni-ink">Iniciales</span>
+                            </span>
+                        </label>
+                        <% (avataresDisponibles || []).forEach((avatar) => { %>
+                            <label class="group cursor-pointer">
+                                <input type="radio" name="avatarUrl" value="<%= avatar.url %>" class="peer sr-only" <%= avatarSeleccionado === avatar.url ? 'checked' : '' %>>
+                                <span class="flex flex-col items-center gap-1.5 rounded-2xl border border-black/10 bg-muni-soft/50 p-2.5 text-center transition-all hover:border-muni-red/50 hover:bg-white peer-checked:border-muni-red-dark peer-checked:bg-red-50/70 peer-checked:ring-2 peer-checked:ring-muni-red-dark peer-focus-visible:ring-2 peer-focus-visible:ring-muni-ink">
+                                    <img src="<%= avatar.url %>" alt="<%= avatar.nombre %>" class="h-14 w-14 rounded-xl object-cover shadow-sm transition-transform group-hover:scale-105" width="56" height="56">
+                                    <span class="text-xs font-medium text-muni-ink"><%= avatar.nombre %></span>
+                                </span>
+                            </label>
+                        <% }) %>
+                    </div>
+                    <p class="form-hint">Elige un ícono para tu perfil o deja tus iniciales por defecto.</p>
                 </div>
 
                 <div class="sm:col-span-2">

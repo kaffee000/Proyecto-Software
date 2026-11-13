@@ -8,6 +8,7 @@ import {
     validarCsrf
 } from "../middleware/organizador.js";
 import {
+    AVATARES_VECINO_PREESTABLECIDOS,
     clienteVecinalDeSesion,
     crearDesafioVerificacionCorreo,
     enviarCodigoVerificacionCorreo,
@@ -643,6 +644,7 @@ router.get("/register", (req, res) => {
         csrfToken: csrfTokenPara(req),
         next: destinoVecinalSeguro(req.query.next),
         errors: [],
+        avataresDisponibles: AVATARES_VECINO_PREESTABLECIDOS,
         values: {
             rut: pendiente?.rut || "",
             primerNombre: pendiente?.primerNombre || "",
@@ -714,6 +716,7 @@ router.post("/register", validarCsrf, async (req, res, next) => {
             csrfToken: csrfTokenPara(req),
             next: destination,
             errors,
+            avataresDisponibles: AVATARES_VECINO_PREESTABLECIDOS,
             values
         });
     }
@@ -742,6 +745,7 @@ router.post("/register", validarCsrf, async (req, res, next) => {
             csrfToken: csrfTokenPara(req),
             next: destination,
             errors: ["No pudimos enviar el código de verificación a tu correo. Verifica la configuración SMTP_USER y SMTP_PASS en el archivo .env."],
+            avataresDisponibles: AVATARES_VECINO_PREESTABLECIDOS,
             values
         });
     }

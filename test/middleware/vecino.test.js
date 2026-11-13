@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+    AVATARES_VECINO_PREESTABLECIDOS,
     PERMISOS_VECINO,
     crearDesafioVerificacionCorreo,
     crearEstructuraVecino,
@@ -248,4 +249,36 @@ test("genera, envía y verifica el código de verificación de 4 dígitos por co
     assert.equal(resultadoCorrecto.valido, true);
     assert.equal(desafio.verificado, true);
     limpiarRegistroVecinosEnMemoria();
+});
+
+
+test("acepta íconos de perfil preestablecidos y rechaza selecciones externas", () => {
+    const base = {
+        rut: "12.345.678-5",
+        primerNombre: "Camila",
+        apellidoPaterno: "González",
+        apellidoMaterno: "Rojas",
+        telefono: "987654321",
+        email: "camila@talca.cl",
+        password: "password123",
+        passwordConfirmation: "password123"
+    };
+
+    const iconoValido = validarDatosRegistroVecino({
+        ...base,
+        avatarUrl: AVATARES_VECINO_PREESTABLECIDOS[0].url
+    });
+    assert.equal(iconoValido.valido, true);
+    assert.equal(iconoValido.datos.avatarUrl, AVATARES_VECINO_PREESTABLECIDOS[0].url);
+
+    const sinIcono = validarDatosRegistroVecino({ ...base, avatarUrl: "" });
+    assert.equal(sinIcono.valido, true);
+    assert.equal(sinIcono.datos.avatarUrl, "");
+
+    const iconoExterno = validarDatosRegistroVecino({
+        ...base,
+        avatarUrl: "https://ejemplo.cl/foto.png"
+    });
+    assert.equal(iconoExterno.valido, false);
+    assert.ok(iconoExterno.errores.includes("Selecciona uno de los íconos de perfil disponibles."));
 });

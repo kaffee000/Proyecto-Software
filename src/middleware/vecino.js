@@ -11,6 +11,19 @@ export const PERMISOS_VECINO = Object.freeze({
     guardarFavoritos: true
 });
 
+export const AVATARES_VECINO_PREESTABLECIDOS = Object.freeze([
+    { id: "atleta", nombre: "Atleta", url: "/images/avatars/atleta.svg" },
+    { id: "futbol", nombre: "Fútbol", url: "/images/avatars/futbol.svg" },
+    { id: "basquet", nombre: "Básquetbol", url: "/images/avatars/basquet.svg" },
+    { id: "ciclismo", nombre: "Ciclismo", url: "/images/avatars/ciclismo.svg" },
+    { id: "natacion", nombre: "Natación", url: "/images/avatars/natacion.svg" },
+    { id: "yoga", nombre: "Bienestar", url: "/images/avatars/yoga.svg" },
+    { id: "tenis", nombre: "Tenis", url: "/images/avatars/tenis.svg" },
+    { id: "comunidad", nombre: "Comunidad", url: "/images/avatars/comunidad.svg" }
+]);
+
+const URLS_AVATAR_PREESTABLECIDOS = new Set(AVATARES_VECINO_PREESTABLECIDOS.map((avatar) => avatar.url));
+
 const correosRegistradosEnMemoria = new Set();
 const rutsRegistradosEnMemoria = new Set();
 const bandejaCodigosEnviados = new Map();
@@ -281,15 +294,8 @@ export function validarDatosRegistroVecino(
     }
 
     const avatarUrl = typeof entrada.avatarUrl === "string" ? entrada.avatarUrl.trim() : "";
-    if (avatarUrl) {
-        try {
-            const avatar = new URL(avatarUrl);
-            if (avatar.protocol !== "https:" || avatar.username || avatar.password || avatarUrl.length > 1000) {
-                errores.push("La foto de perfil debe tener una URL HTTPS válida.");
-            }
-        } catch {
-            errores.push("La foto de perfil debe tener una URL HTTPS válida.");
-        }
+    if (avatarUrl && !URLS_AVATAR_PREESTABLECIDOS.has(avatarUrl)) {
+        errores.push('Selecciona uno de los íconos de perfil disponibles.');
     }
 
     const fullName = [
@@ -625,9 +631,11 @@ function perfilDesdeUsuario(user) {
                 : (user.email || "Vecina o vecino").split("@")[0]));
 
     const candidataAvatar = metadatos.avatar_url || metadatos.picture || "";
-    let avatarUrl = "";
+    let avatarUrl = URLS_AVATAR_PREESTABLECIDOS.has(String(candidataAvatar).trim())
+        ? String(candidataAvatar).trim()
+        : "";
 
-    if (typeof candidataAvatar === "string" && candidataAvatar.length <= 1000) {
+    if (!avatarUrl && typeof candidataAvatar === "string" && candidataAvatar.length <= 1000) {
         try {
             const url = new URL(candidataAvatar);
             if (url.protocol === "https:" && !url.username && !url.password) {
