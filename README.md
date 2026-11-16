@@ -70,6 +70,8 @@ Requisitos: Node.js 20.6 o posterior y npm. `npm run dev` inicia Express y Tailw
 
 El archivo `.env` está excluido de Git. Para conectar otro entorno, configura `SUPABASE_URL` y `SUPABASE_PUBLISHABLE_KEY` en las variables de entorno de ese servicio. Nunca uses una clave secreta o `service_role` en código cliente o en un repositorio.
 
+Las evidencias de las pruebas de rendimiento y concurrencia (JMeter) ejecutadas para la validación de atributos de calidad se encuentran en la carpeta `pruebasJmeter/`
+
 ## Estructura
 
 ```text
@@ -89,4 +91,5 @@ supabase/
 └── migrations/              # Esquema, RLS, datos, vecinos y roles de organizador
 test/
 └── middleware/               # Pruebas unitarias de rutas de imagen y usuario vecino
+pruebasJmeter/                # Evidencias de pruebas de carga y concurrencia 
 ```
