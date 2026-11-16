@@ -14,3 +14,5 @@ Pasos
 3. Presionar botón de start
 
 Los resultados o respuestas se encuentran en "View Results Tree"
+
+Prueba registro utiliza los datos del csv terminado en 2
